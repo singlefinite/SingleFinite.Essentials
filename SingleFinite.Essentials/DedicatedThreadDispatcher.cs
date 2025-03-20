@@ -35,6 +35,11 @@ public sealed class DedicatedThreadDispatcher : IDispatcher
     #region Fields
 
     /// <summary>
+    /// Holds the exception handler for the dispatcher.
+    /// </summary>
+    private readonly Action<Exception>? _onError;
+
+    /// <summary>
     /// The single thread that dispatched functions will be run on.
     /// </summary>
     private readonly Thread _thread;
@@ -51,8 +56,14 @@ public sealed class DedicatedThreadDispatcher : IDispatcher
     /// <summary>
     /// Constructor.
     /// </summary>
-    public DedicatedThreadDispatcher()
+    /// <param name="onError">
+    /// Optional exception handler that is invoked when the OnError method is
+    /// invoked.
+    /// </param>
+    public DedicatedThreadDispatcher(Action<Exception>? onError = default)
     {
+        _onError = onError;
+
         DisposeState = new(
             owner: this,
             onDispose: OnDispose
@@ -139,6 +150,9 @@ public sealed class DedicatedThreadDispatcher : IDispatcher
 
         return taskCompletionSource.Task;
     }
+
+    /// <inheritdoc/>
+    public void OnError(Exception ex) => _onError?.Invoke(ex);
 
     /// <summary>
     /// Mark the queue as complete when disposed and wait for the dedicated 

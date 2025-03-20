@@ -1,5 +1,5 @@
 ﻿// MIT License
-// Copyright (c) 2024 Single Finite
+// Copyright (c) 2025 Single Finite
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy 
 // of this software and associated documentation files (the "Software"), to deal
@@ -133,7 +133,6 @@ public class DedicatedThreadDispatcherTests
     public void Exceptions_Are_Reported_On_Calling_Thread()
     {
         using var mainDispatcher = new DedicatedThreadDispatcher();
-        using var backgroundDispatcher = new ThreadPoolDispatcher();
 
         var mainThreadId = -1;
         var backgroundThreadId = -1;
@@ -174,6 +173,42 @@ public class DedicatedThreadDispatcherTests
         Assert.AreNotEqual(mainThreadId, backgroundThreadId);
         Assert.AreNotEqual(mainThreadId, onErrorThreadId);
 
+        Assert.IsInstanceOfType<InvalidOperationException>(observedException);
+        Assert.AreEqual("Test Exception", observedException.Message);
+    }
+
+    [TestMethod]
+    public void Exceptions_Are_Reported_On_Dispatcher()
+    {
+        var eventWaitHandle = new EventWaitHandle(
+            initialState: false,
+            mode: EventResetMode.ManualReset
+        );
+
+        var observedExceptions = new List<Exception>();
+
+        using var mainDispatcher = new DedicatedThreadDispatcher(
+            onError: ex =>
+            {
+                observedExceptions.Add(ex);
+                eventWaitHandle.Set();
+            }
+        );
+
+        mainDispatcher.Run(
+            func: async () =>
+            {
+                await Task.Run(() =>
+                {
+                    throw new InvalidOperationException("Test Exception");
+                });
+            }
+        );
+
+        eventWaitHandle.WaitOne();
+
+        Assert.AreEqual(1, observedExceptions.Count);
+        var observedException = observedExceptions.First();
         Assert.IsInstanceOfType<InvalidOperationException>(observedException);
         Assert.AreEqual("Test Exception", observedException.Message);
     }
