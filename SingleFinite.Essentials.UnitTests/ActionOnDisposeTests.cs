@@ -19,7 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace SingleFinite.Essentials;
+namespace SingleFinite.Essentials.UnitTests;
 
 [TestClass]
 public class ActionOnDisposeTests

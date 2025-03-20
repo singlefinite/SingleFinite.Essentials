@@ -128,4 +128,53 @@ public class DedicatedThreadDispatcherTests
 
         Assert.AreEqual(1, count);
     }
+
+    [TestMethod]
+    public void Exceptions_Are_Reported_On_Calling_Thread()
+    {
+        using var mainDispatcher = new DedicatedThreadDispatcher();
+        using var backgroundDispatcher = new ThreadPoolDispatcher();
+
+        var mainThreadId = -1;
+        var backgroundThreadId = -1;
+        var onErrorThreadId = -1;
+
+        var eventWaitHandle = new EventWaitHandle(
+            initialState: false,
+            mode: EventResetMode.ManualReset
+        );
+
+        Exception? observedException = null;
+
+        mainDispatcher.Run(
+            func: async () =>
+            {
+                mainThreadId = Environment.CurrentManagedThreadId;
+                await Task.Run(() =>
+                {
+                    backgroundThreadId = Environment.CurrentManagedThreadId;
+                    Thread.Sleep(100);
+                    throw new InvalidOperationException("Test Exception");
+                });
+            },
+            onError: ex =>
+            {
+                onErrorThreadId = Environment.CurrentManagedThreadId;
+                observedException = ex;
+                eventWaitHandle.Set();
+            }
+        );
+
+        eventWaitHandle.WaitOne();
+
+        Assert.AreNotEqual(-1, mainThreadId);
+        Assert.AreNotEqual(-1, backgroundThreadId);
+        Assert.AreNotEqual(-1, onErrorThreadId);
+
+        Assert.AreNotEqual(mainThreadId, backgroundThreadId);
+        Assert.AreNotEqual(mainThreadId, onErrorThreadId);
+
+        Assert.IsInstanceOfType<InvalidOperationException>(observedException);
+        Assert.AreEqual("Test Exception", observedException.Message);
+    }
 }

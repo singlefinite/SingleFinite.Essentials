@@ -1,4 +1,7 @@
-﻿namespace SingleFinite.Essentials;
+﻿using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Threading.Tasks;
+
+namespace SingleFinite.Essentials;
 
 /// <summary>
 /// Functions that extend the <seealso cref="IDispatcher"/> interface.
@@ -74,21 +77,15 @@ public static class IDispatcherExtensions
         Action<Exception>? onError = default
     )
     {
-        _ = dispatcher.RunAsync(
-            () =>
-            {
-                try
+        dispatcher
+            .RunAsync(
+                () =>
                 {
                     action();
+                    return Task.FromResult(0);
                 }
-                catch (Exception ex)
-                {
-                    onError?.Invoke(ex);
-                }
-
-                return Task.FromResult(0);
-            }
-        );
+            )
+            .ContinueOnError(onError);
     }
 
     /// <summary>
@@ -107,21 +104,15 @@ public static class IDispatcherExtensions
         Action<Exception>? onError = default
     )
     {
-        _ = dispatcher.RunAsync(
-            async () =>
-            {
-                try
+        dispatcher
+            .RunAsync(
+                async () =>
                 {
                     await func();
+                    return Task.FromResult(0);
                 }
-                catch (Exception ex)
-                {
-                    onError?.Invoke(ex);
-                }
-
-                return Task.FromResult(0);
-            }
-        );
+            )
+            .ContinueOnError(onError);
     }
 
     /// <summary>
@@ -277,22 +268,16 @@ public static class IDispatcherExtensions
         params IEnumerable<CancellationToken> cancellationTokens
     )
     {
-        _ = dispatcher.RunAsync(
-            func: cancellationToken =>
-            {
-                try
+        dispatcher
+            .RunAsync(
+                func: cancellationToken =>
                 {
                     action(cancellationToken);
-                }
-                catch (Exception ex)
-                {
-                    onError?.Invoke(ex);
-                }
-
-                return Task.CompletedTask;
-            },
-            cancellationTokens: cancellationTokens
-        );
+                    return Task.CompletedTask;
+                },
+                cancellationTokens: cancellationTokens
+            )
+            .ContinueOnError(onError);
     }
 
     /// <summary>
@@ -338,21 +323,48 @@ public static class IDispatcherExtensions
         params IEnumerable<CancellationToken> cancellationTokens
     )
     {
-        _ = dispatcher.RunAsync(
-            func: async cancellationToken =>
-            {
-                try
+        dispatcher
+            .RunAsync(
+                func: async cancellationToken =>
                 {
                     await func(cancellationToken);
-                }
-                catch (Exception ex)
-                {
-                    onError?.Invoke(ex);
-                }
+                    return Task.CompletedTask;
+                },
+                cancellationTokens: cancellationTokens
+            )
+            .ContinueOnError(onError);
+    }
 
-                return Task.CompletedTask;
+    /// <summary>
+    /// Helper function used to handle errors thrown from within actions and
+    /// functions invoked through the dispatcher.
+    /// </summary>
+    /// <param name="task">The task to handle a thrown error from.</param>
+    /// <param name="onError">The error handler.</param>
+    private static void ContinueOnError(
+        this Task task,
+        Action<Exception>? onError
+    )
+    {
+        if (onError is null)
+            return;
+
+        task.ContinueWith(
+            continuationAction: result =>
+            {
+                if (
+                    result.Exception is AggregateException aggregate &&
+                    aggregate.InnerException is Exception inner
+                )
+                {
+                    onError(inner);
+                }
+                else if (result.Exception is Exception ex)
+                {
+                    onError(ex);
+                }
             },
-            cancellationTokens: cancellationTokens
+            continuationOptions: TaskContinuationOptions.OnlyOnFaulted
         );
     }
 }
