@@ -55,7 +55,7 @@ public sealed class ObservableSource
     /// <summary>
     /// Raise the event for the observable.
     /// </summary>
-    public void RaiseEvent() => Event?.Invoke();
+    public void Emit() => Event?.Invoke();
 
     #endregion
 
@@ -107,7 +107,7 @@ public sealed class ObservableSource<TArgs>
     /// Raise the event for the observable.
     /// </summary>
     /// <param name="args">The arguments to pass with the event.</param>
-    public void RaiseEvent(TArgs args) => Event?.Invoke(args);
+    public void Emit(TArgs args) => Event?.Invoke(args);
 
     #endregion
 

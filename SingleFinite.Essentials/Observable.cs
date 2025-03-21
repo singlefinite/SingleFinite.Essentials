@@ -42,7 +42,7 @@ public sealed class Observable
     /// </param>
     internal Observable(ObservableSource source)
     {
-        source.Event += RaiseEvent;
+        source.Event += Emit;
     }
 
     #endregion
@@ -60,7 +60,7 @@ public sealed class Observable
     /// <summary>
     /// Raise the event for this observable.
     /// </summary>
-    private void RaiseEvent() => Event?.Invoke();
+    private void Emit() => Event?.Invoke();
 
     /// <summary>
     /// Create an observer for a generic event.
@@ -119,7 +119,7 @@ public sealed class Observable<TArgs>
     /// </param>
     internal Observable(ObservableSource<TArgs> source)
     {
-        source.Event += RaiseEvent;
+        source.Event += Emit;
     }
 
     #endregion
@@ -138,7 +138,7 @@ public sealed class Observable<TArgs>
     /// Raise the event for this observable.
     /// </summary>
     /// <param name="args">The args included with the event.</param>
-    private void RaiseEvent(TArgs args) => Event?.Invoke(args);
+    private void Emit(TArgs args) => Event?.Invoke(args);
 
     /// <summary>
     /// Create an observer for a generic event.

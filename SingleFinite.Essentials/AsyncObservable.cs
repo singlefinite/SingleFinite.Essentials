@@ -42,7 +42,7 @@ public sealed class AsyncObservable
     /// </param>
     internal AsyncObservable(AsyncObservableSource source)
     {
-        source.Event += RaiseEventAsync;
+        source.Event += EmitAsync;
     }
 
     #endregion
@@ -61,7 +61,7 @@ public sealed class AsyncObservable
     /// Raise the event for this observable.
     /// </summary>
     /// <returns>The running task.</returns>
-    private Task RaiseEventAsync() => Event?.Invoke() ?? Task.CompletedTask;
+    private Task EmitAsync() => Event?.Invoke() ?? Task.CompletedTask;
 
     /// <summary>
     /// Create an observer for a generic event.
@@ -120,7 +120,7 @@ public sealed class AsyncObservable<TArgs>
     /// </param>
     internal AsyncObservable(AsyncObservableSource<TArgs> source)
     {
-        source.Event += RaiseEventAsync;
+        source.Event += EmitAsync;
     }
 
     #endregion
@@ -141,7 +141,7 @@ public sealed class AsyncObservable<TArgs>
     /// </summary>
     /// <param name="args">The args included with the event.</param>
     /// <returns>The running task.</returns>
-    private Task RaiseEventAsync(TArgs args) =>
+    private Task EmitAsync(TArgs args) =>
         Event?.Invoke(args) ?? Task.CompletedTask;
 
     /// <summary>

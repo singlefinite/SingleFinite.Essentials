@@ -35,7 +35,7 @@ public class ObservableTests
 
         Assert.AreEqual(0, observedNumber);
 
-        observableSource.RaiseEvent(81);
+        observableSource.Emit(81);
 
         Assert.AreEqual(81, observedNumber);
     }
@@ -51,13 +51,13 @@ public class ObservableTests
 
         Assert.AreEqual(0, observedNumber);
 
-        observableSource.RaiseEvent(81);
+        observableSource.Emit(81);
 
         Assert.AreEqual(81, observedNumber);
 
         observer.Dispose();
 
-        observableSource.RaiseEvent(99);
+        observableSource.Emit(99);
 
         Assert.AreEqual(81, observedNumber);
     }
@@ -71,7 +71,7 @@ public class ObservableTests
 
         Assert.AreEqual(0, observedNumber);
 
-        observableSource.RaiseEvent(81);
+        observableSource.Emit(81);
 
         Assert.AreEqual(81, observedNumber);
     }

@@ -38,7 +38,7 @@ public class AsyncObservableTests
 
         Assert.AreEqual(0, observedNumber);
 
-        await observableSource.RaiseEventAsync(81);
+        await observableSource.EmitAsync(81);
 
         Assert.AreEqual(81, observedNumber);
     }
@@ -57,13 +57,13 @@ public class AsyncObservableTests
 
         Assert.AreEqual(0, observedNumber);
 
-        await observableSource.RaiseEventAsync(81);
+        await observableSource.EmitAsync(81);
 
         Assert.AreEqual(81, observedNumber);
 
         observer.Dispose();
 
-        await observableSource.RaiseEventAsync(99);
+        await observableSource.EmitAsync(99);
 
         Assert.AreEqual(81, observedNumber);
     }
@@ -80,7 +80,7 @@ public class AsyncObservableTests
 
         Assert.AreEqual(0, observedNumber);
 
-        await observableSource.RaiseEventAsync(81);
+        await observableSource.EmitAsync(81);
 
         Assert.AreEqual(81, observedNumber);
     }
@@ -105,9 +105,9 @@ public class AsyncObservableTests
 
         Assert.AreEqual(0, observedNames.Count);
 
-        await observableSource.RaiseEventAsync(new("One", 0));
-        await observableSource.RaiseEventAsync(new("Two", 0));
-        await observableSource.RaiseEventAsync(new("Three", 0));
+        await observableSource.EmitAsync(new("One", 0));
+        await observableSource.EmitAsync(new("Two", 0));
+        await observableSource.EmitAsync(new("Three", 0));
 
         Assert.AreEqual(0, observedNames.Count);
 

@@ -53,11 +53,11 @@ public class Transaction
 
             field = value;
 
-            _isOpenChangedSource.RaiseEvent(field);
+            _isOpenChangedSource.Emit(field);
             if (field)
-                _openedSource.RaiseEvent();
+                _openedSource.Emit();
             else
-                _closedSource.RaiseEvent();
+                _closedSource.Emit();
         }
     }
 

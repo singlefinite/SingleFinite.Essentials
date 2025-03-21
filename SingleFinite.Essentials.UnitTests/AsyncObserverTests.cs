@@ -41,7 +41,7 @@ public class AsyncObserverTests
 
         Assert.AreEqual(0, observedCount);
 
-        await observableSource.RaiseEventAsync();
+        await observableSource.EmitAsync();
 
         Assert.AreEqual(1, observedCount);
         observedCount = 0;
@@ -53,14 +53,14 @@ public class AsyncObserverTests
 
         Assert.AreEqual(0, observedCount);
 
-        await observableSource.RaiseEventAsync();
+        await observableSource.EmitAsync();
 
         Assert.AreEqual(2, observedCount);
         observedCount = 0;
 
         observer.Dispose();
 
-        await observableSource.RaiseEventAsync();
+        await observableSource.EmitAsync();
 
         Assert.AreEqual(0, observedCount);
     }
@@ -83,20 +83,20 @@ public class AsyncObserverTests
 
         Assert.AreEqual(0, observedNames.Count);
 
-        await observableSource.RaiseEventAsync(new("Hello", 0));
+        await observableSource.EmitAsync(new("Hello", 0));
 
         Assert.AreEqual(1, observedNames.Count);
         Assert.AreEqual("Hello", observedNames[0]);
         observedNames.Clear();
 
-        await observableSource.RaiseEventAsync(new("World", 0));
+        await observableSource.EmitAsync(new("World", 0));
 
         Assert.AreEqual(1, observedNames.Count);
         Assert.AreEqual("World", observedNames[0]);
         observedNames.Clear();
 
         observer.Dispose();
-        await observableSource.RaiseEventAsync(new("Again", 0));
+        await observableSource.EmitAsync(new("Again", 0));
 
         Assert.AreEqual(0, observedNames.Count);
     }
@@ -119,19 +119,19 @@ public class AsyncObserverTests
 
         Assert.AreEqual(0, observedNames.Count);
 
-        await observableSource.RaiseEventAsync(new("Hello", 0));
+        await observableSource.EmitAsync(new("Hello", 0));
 
         Assert.AreEqual(1, observedNames.Count);
         Assert.AreEqual("Hello", observedNames[0]);
         observedNames.Clear();
 
-        await observableSource.RaiseEventAsync(new("Hi", 0));
+        await observableSource.EmitAsync(new("Hi", 0));
 
         Assert.AreEqual(0, observedNames.Count);
 
         observer.Dispose();
 
-        await observableSource.RaiseEventAsync(new("Howdy", 0));
+        await observableSource.EmitAsync(new("Howdy", 0));
 
         Assert.AreEqual(0, observedNames.Count);
     }
@@ -158,20 +158,20 @@ public class AsyncObserverTests
 
         Assert.AreEqual(0, observedNames.Count);
 
-        await observableSource.RaiseEventAsync(new("Hello", 0));
+        await observableSource.EmitAsync(new("Hello", 0));
 
         Assert.AreEqual(2, observedNames.Count);
         Assert.AreEqual("Hello", observedNames[0]);
         Assert.AreEqual("Hello", observedNames[1]);
         observedNames.Clear();
 
-        await observableSource.RaiseEventAsync(new("stop", 0));
+        await observableSource.EmitAsync(new("stop", 0));
 
         Assert.AreEqual(1, observedNames.Count);
         Assert.AreEqual("stop", observedNames[0]);
         observedNames.Clear();
 
-        await observableSource.RaiseEventAsync(new("World", 0));
+        await observableSource.EmitAsync(new("World", 0));
 
         Assert.AreEqual(0, observedNames.Count);
     }
@@ -193,7 +193,7 @@ public class AsyncObserverTests
 
         Assert.AreEqual(0, observedNames.Count);
 
-        await observableSource.RaiseEventAsync(new("Hello", 0));
+        await observableSource.EmitAsync(new("Hello", 0));
 
         Assert.AreEqual(1, observedNames.Count);
         Assert.AreEqual("Hello", observedNames[0]);
@@ -201,7 +201,7 @@ public class AsyncObserverTests
 
         disposable.DisposeState.Dispose();
 
-        await observableSource.RaiseEventAsync(new("World", 0));
+        await observableSource.EmitAsync(new("World", 0));
 
         Assert.AreEqual(0, observedNames.Count);
     }
@@ -223,7 +223,7 @@ public class AsyncObserverTests
 
         Assert.AreEqual(0, observedNames.Count);
 
-        await observableSource.RaiseEventAsync(new("Hello", 0));
+        await observableSource.EmitAsync(new("Hello", 0));
 
         Assert.AreEqual(1, observedNames.Count);
         Assert.AreEqual("Hello", observedNames[0]);
@@ -231,7 +231,7 @@ public class AsyncObserverTests
 
         cancellationTokenSource.Cancel();
 
-        await observableSource.RaiseEventAsync(new("World", 0));
+        await observableSource.EmitAsync(new("World", 0));
 
         Assert.AreEqual(0, observedNames.Count);
     }
@@ -261,21 +261,21 @@ public class AsyncObserverTests
 
         Assert.AreEqual(0, observedNames.Count);
 
-        await observableSource.RaiseEventAsync(new("Hello", 0));
+        await observableSource.EmitAsync(new("Hello", 0));
 
         Assert.AreEqual(2, observedNames.Count);
         Assert.AreEqual("Hello", observedNames[0]);
         Assert.AreEqual("Hello!", observedNames[1]);
         observedNames.Clear();
 
-        await observableSource.RaiseEventAsync(new("stop", 0));
+        await observableSource.EmitAsync(new("stop", 0));
 
         Assert.AreEqual(2, observedNames.Count);
         Assert.AreEqual("stop", observedNames[0]);
         Assert.AreEqual("stop!", observedNames[1]);
         observedNames.Clear();
 
-        await observableSource.RaiseEventAsync(new("World", 0));
+        await observableSource.EmitAsync(new("World", 0));
 
         Assert.AreEqual(0, observedNames.Count);
     }
@@ -298,11 +298,11 @@ public class AsyncObserverTests
 
         Assert.AreEqual(0, observedNames.Count);
 
-        await observableSource.RaiseEventAsync(new("Hello", 0));
+        await observableSource.EmitAsync(new("Hello", 0));
 
         Assert.AreEqual(0, observedNames.Count);
 
-        await observableSource.RaiseEventAsync(new SubExampleArgs(SubName: "Hi"));
+        await observableSource.EmitAsync(new SubExampleArgs(SubName: "Hi"));
 
         Assert.AreEqual(1, observedNames.Count);
         Assert.AreEqual("Hi", observedNames[0]);
@@ -330,14 +330,14 @@ public class AsyncObserverTests
 
         Assert.AreEqual(0, observedNames.Count);
 
-        await observableSource.RaiseEventAsync(new("Hello", 0));
+        await observableSource.EmitAsync(new("Hello", 0));
 
         Assert.AreEqual(2, observedNames.Count);
         Assert.AreEqual("Hello", observedNames[0]);
         Assert.AreEqual("Hello!", observedNames[1]);
         observedNames.Clear();
 
-        await observableSource.RaiseEventAsync(new("World", 0));
+        await observableSource.EmitAsync(new("World", 0));
 
         Assert.AreEqual(0, observedNames.Count);
     }
@@ -366,9 +366,9 @@ public class AsyncObserverTests
 
         Assert.AreEqual(0, observedNames.Count);
 
-        await observableSource.RaiseEventAsync(new("One", 0));
-        await observableSource.RaiseEventAsync(new("Two", 0));
-        await observableSource.RaiseEventAsync(new("Three", 0));
+        await observableSource.EmitAsync(new("One", 0));
+        await observableSource.EmitAsync(new("Two", 0));
+        await observableSource.EmitAsync(new("Three", 0));
 
         Assert.AreEqual(0, observedNames.Count);
 
@@ -407,7 +407,7 @@ public class AsyncObserverTests
                 await Task.Run(() => observedNames.Add(args.Name));
             });
 
-        await observableSource.RaiseEventAsync(new ExampleArgs("Hello", 99));
+        await observableSource.EmitAsync(new ExampleArgs("Hello", 99));
 
         Assert.AreEqual(1, observedExceptions.Count);
         Assert.IsInstanceOfType<InvalidOperationException>(observedExceptions[0]);
@@ -416,7 +416,7 @@ public class AsyncObserverTests
         observedExceptions.Clear();
         observedNames.Clear();
 
-        await observableSource.RaiseEventAsync(new ExampleArgs("Hi", 10));
+        await observableSource.EmitAsync(new ExampleArgs("Hi", 10));
 
         Assert.AreEqual(0, observedExceptions.Count);
         Assert.AreEqual(1, observedNames.Count);
@@ -461,7 +461,7 @@ public class AsyncObserverTests
                 await Task.Run(() => observedNames.Add(args.Name));
             });
 
-        await observableSource.RaiseEventAsync(new ExampleArgs("Hello", 99));
+        await observableSource.EmitAsync(new ExampleArgs("Hello", 99));
 
         Assert.AreEqual(0, observedUnhandledExceptions.Count);
         Assert.AreEqual(1, observedExceptions.Count);
@@ -472,7 +472,7 @@ public class AsyncObserverTests
         observedExceptions.Clear();
         observedNames.Clear();
 
-        await observableSource.RaiseEventAsync(new ExampleArgs("World", 11));
+        await observableSource.EmitAsync(new ExampleArgs("World", 11));
 
         Assert.AreEqual(1, observedUnhandledExceptions.Count);
         Assert.IsInstanceOfType<InvalidOperationException>(observedUnhandledExceptions[0]);
@@ -484,7 +484,7 @@ public class AsyncObserverTests
         observedExceptions.Clear();
         observedNames.Clear();
 
-        await observableSource.RaiseEventAsync(new ExampleArgs("Hi", 10));
+        await observableSource.EmitAsync(new ExampleArgs("Hi", 10));
 
         Assert.AreEqual(0, observedUnhandledExceptions.Count);
         Assert.AreEqual(0, observedExceptions.Count);
@@ -514,8 +514,8 @@ public class AsyncObserverTests
 
         Assert.AreEqual(0, observedNames.Count);
 
-        var firstEventTask = observableSource.RaiseEventAsync(new("Hello", 0));
-        var secondEventTask = observableSource.RaiseEventAsync(new("World", 0));
+        var firstEventTask = observableSource.EmitAsync(new("Hello", 0));
+        var secondEventTask = observableSource.EmitAsync(new("World", 0));
 
         await firstEventTask;
         await secondEventTask;

@@ -82,7 +82,7 @@ public sealed class DisposeState(
 
         onDispose?.Invoke();
         IsDisposed = true;
-        _disposedSource.RaiseEvent();
+        _disposedSource.Emit();
         _cancellationTokenSource.Cancel();
     }
 

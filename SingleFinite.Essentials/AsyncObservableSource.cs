@@ -56,7 +56,7 @@ public sealed class AsyncObservableSource
     /// Raise the event for the observable.
     /// </summary>
     /// <returns>The running task.</returns>
-    public Task RaiseEventAsync() => Event?.Invoke() ?? Task.CompletedTask;
+    public Task EmitAsync() => Event?.Invoke() ?? Task.CompletedTask;
 
     /// <summary>
     /// Raise the event and return immediately without waiting for the event
@@ -67,11 +67,11 @@ public sealed class AsyncObservableSource
     /// Optional action that will be invoked if the event generates an
     /// exception.
     /// </param>
-    public void RaiseEvent(
+    public void EmitEvent(
         IDispatcher dispatcher,
         Action<Exception>? onError = default
     ) => dispatcher.Run(
-        func: RaiseEventAsync,
+        func: EmitAsync,
         onError: onError
     );
 
@@ -126,7 +126,7 @@ public sealed class AsyncObservableSource<TArgs>
     /// </summary>
     /// <param name="args">The arguments to pass with the event.</param>
     /// <returns>The running task.</returns>
-    public Task RaiseEventAsync(TArgs args) =>
+    public Task EmitAsync(TArgs args) =>
         Event?.Invoke(args) ?? Task.CompletedTask;
 
     /// <summary>
@@ -139,12 +139,12 @@ public sealed class AsyncObservableSource<TArgs>
     /// Optional action that will be invoked if the event generates an
     /// exception.
     /// </param>
-    public void RaiseEvent(
+    public void Emit(
         TArgs args,
         IDispatcher dispatcher,
         Action<Exception>? onError = default
     ) => dispatcher.Run(
-        func: async () => await RaiseEventAsync(args),
+        func: async () => await EmitAsync(args),
         onError: onError
     );
 
