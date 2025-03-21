@@ -24,7 +24,7 @@ namespace SingleFinite.Essentials;
 /// <summary>
 /// A debouncer service that uses a timer.
 /// </summary>
-public sealed class Debouncer : IDisposeObservable
+public class Debouncer : IDisposeObservable
 {
     #region Fields
 

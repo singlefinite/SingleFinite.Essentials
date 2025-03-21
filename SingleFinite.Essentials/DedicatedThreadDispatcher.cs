@@ -30,7 +30,7 @@ namespace SingleFinite.Essentials;
 /// useful for unit testing when there is no UI thread provided by the unit 
 /// testing framework.
 /// </summary>
-public sealed class DedicatedThreadDispatcher : IDispatcher
+public class DedicatedThreadDispatcher : IDispatcher
 {
     #region Fields
 
