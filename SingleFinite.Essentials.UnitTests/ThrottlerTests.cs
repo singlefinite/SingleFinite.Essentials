@@ -25,11 +25,11 @@ namespace SingleFinite.Essentials.UnitTests;
 public class ThrottlerTests
 {
     [TestMethod]
-    public async Task Throttle_Limits_Calls_Made_Async()
+    public async Task Throttle_Limits_Calls_Made()
     {
         var observedItems = new List<string>();
         var throttler = new Throttler();
-        var limit = TimeSpan.FromMicroseconds(100);
+        var limit = TimeSpan.FromMilliseconds(500);
 
         throttler.Throttle(
             action: () => observedItems.Add("one"),
@@ -46,12 +46,12 @@ public class ThrottlerTests
             limit: limit
         );
 
+        await Task.Delay(1000);
+
         throttler.Throttle(
             action: () => observedItems.Add("four"),
             limit: limit
         );
-
-        await Task.Delay(100);
 
         throttler.Throttle(
             action: () => observedItems.Add("five"),
@@ -63,18 +63,8 @@ public class ThrottlerTests
             limit: limit
         );
 
-        throttler.Throttle(
-            action: () => observedItems.Add("seven"),
-            limit: limit
-        );
-
-        throttler.Throttle(
-            action: () => observedItems.Add("eight"),
-            limit: limit
-        );
-
         Assert.AreEqual(2, observedItems.Count);
         Assert.AreEqual("one", observedItems[0]);
-        Assert.AreEqual("five", observedItems[1]);
+        Assert.AreEqual("four", observedItems[1]);
     }
 }

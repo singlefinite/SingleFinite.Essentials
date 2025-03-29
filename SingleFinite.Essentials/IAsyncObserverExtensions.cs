@@ -560,6 +560,41 @@ public static class IAsyncObserverExtensions
     );
 
     /// <summary>
+    /// Observer that throttles events.
+    /// </summary>
+    /// <param name="observer">The observer to extend.</param>
+    /// <param name="limit">The limit for throttling.</param>
+    /// <returns>
+    /// A new observer that has been added to the chain of observers.
+    /// </returns>
+    public static IAsyncObserver Throttle(
+        this IAsyncObserver observer,
+        TimeSpan limit
+    ) => new AsyncObserverThrottle(
+        observer,
+        limit
+    );
+
+    /// <summary>
+    /// Observer that throttles events.
+    /// </summary>
+    /// <typeparam name="TArgs">
+    /// The type of arguments passed with observed events.
+    /// </typeparam>
+    /// <param name="observer">The observer to extend.</param>
+    /// <param name="limit">The limit for throttling.</param>
+    /// <returns>
+    /// A new observer that has been added to the chain of observers.
+    /// </returns>
+    public static IAsyncObserver<TArgs> Throttle<TArgs>(
+        this IAsyncObserver<TArgs> observer,
+        TimeSpan limit
+    ) => new AsyncObserverThrottle<TArgs>(
+        observer,
+        limit
+    );
+
+    /// <summary>
     /// Invoke the given callback whenever an exception thrown below this
     /// observer in the chain is thrown.
     /// </summary>
