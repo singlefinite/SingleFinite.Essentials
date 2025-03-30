@@ -153,6 +153,18 @@ public class Debouncer : IDisposeObservable
     }
 
     /// <summary>
+    /// Cancel a pending debounce if there is one.
+    /// </summary>
+    public void Cancel()
+    {
+        lock (_timerLock)
+        {
+            _timer?.Dispose();
+            _timer = null;
+        }
+    }
+
+    /// <summary>
     /// The method invoked when a debounce delay has passed.
     /// </summary>
     /// <param name="state">The debounce info to process.</param>
@@ -161,26 +173,14 @@ public class Debouncer : IDisposeObservable
         if (state is not Action action)
             return;
 
-        lock (_timerLock)
-        {
-            _timer?.Dispose();
-            _timer = null;
-        }
-
+        Cancel();
         action();
     }
 
     /// <summary>
     /// Cancel any pending debounce and dispose of this object.
     /// </summary>
-    private void OnDispose()
-    {
-        lock (_timerLock)
-        {
-            _timer?.Dispose();
-            _timer = null;
-        }
-    }
+    private void OnDispose() => Cancel();
 
     #endregion
 }

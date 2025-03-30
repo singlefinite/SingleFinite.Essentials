@@ -56,7 +56,9 @@ public class Throttler
     )
     {
         var now = DateTimeOffset.UtcNow;
-        if ((now - _lastAction) < limit)
+        var elapsed = now - _lastAction;
+
+        if (elapsed < limit)
             return true;
 
         _lastAction = now;
