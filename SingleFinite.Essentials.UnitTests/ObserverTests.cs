@@ -19,6 +19,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using System.Diagnostics;
+
 namespace SingleFinite.Essentials.UnitTests;
 
 [TestClass]
@@ -372,6 +374,40 @@ public class ObserverTests
         Assert.AreEqual(2, observedNames.Count);
         Assert.AreEqual("One", observedNames[0]);
         Assert.AreEqual("Four", observedNames[1]);
+    }
+
+    [TestMethod]
+    public async Task ThrottleBuffer_Runs_AsExpected()
+    {
+        var observedNames = new List<string>();
+
+        var observableSource = new ObservableSource<ExampleArgs>();
+        var observable = observableSource.Observable;
+        var dispatcher = new DedicatedThreadDispatcher();
+
+        var observer = observable
+            .Observe()
+            .ThrottleBuffer(
+                limit: TimeSpan.FromMilliseconds(500),
+                dispatcher: dispatcher
+            )
+            .OnEach(args => observedNames.Add(args.Name)
+            );
+
+        Assert.AreEqual(0, observedNames.Count);
+
+        observableSource.Emit(new("One", 0));
+        observableSource.Emit(new("Two", 0));
+        observableSource.Emit(new("Three", 0));
+
+        Assert.AreEqual(1, observedNames.Count);
+        Assert.AreEqual("One", observedNames[0]);
+
+        await Task.Delay(TimeSpan.FromSeconds(1));
+
+        Assert.AreEqual(2, observedNames.Count);
+        Assert.AreEqual("One", observedNames[0]);
+        Assert.AreEqual("Three", observedNames[1]);
     }
 
     [TestMethod]

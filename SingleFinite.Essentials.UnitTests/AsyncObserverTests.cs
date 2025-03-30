@@ -411,6 +411,39 @@ public class AsyncObserverTests
     }
 
     [TestMethod]
+    public async Task ThrottleBuffer_Runs_AsExpected()
+    {
+        var observedNames = new List<string>();
+
+        var observableSource = new AsyncObservableSource<ExampleArgs>();
+        var observable = observableSource.Observable;
+        var dispatcher = new DedicatedThreadDispatcher();
+
+        var observer = observable
+            .Observe()
+            .ThrottleBuffer(
+                limit: TimeSpan.FromMilliseconds(500),
+                dispatcher: dispatcher
+            )
+            .OnEach(args => observedNames.Add(args.Name));
+
+        Assert.AreEqual(0, observedNames.Count);
+
+        await observableSource.EmitAsync(new("One", 0));
+        await observableSource.EmitAsync(new("Two", 0));
+        await observableSource.EmitAsync(new("Three", 0));
+
+        Assert.AreEqual(1, observedNames.Count);
+        Assert.AreEqual("One", observedNames[0]);
+
+        await Task.Delay(TimeSpan.FromSeconds(1));
+
+        Assert.AreEqual(2, observedNames.Count);
+        Assert.AreEqual("One", observedNames[0]);
+        Assert.AreEqual("Three", observedNames[1]);
+    }
+
+    [TestMethod]
     public async Task Catch_Catches_Exceptions_Async()
     {
         var observedExceptions = new List<Exception>();

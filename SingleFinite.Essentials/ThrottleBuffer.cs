@@ -24,17 +24,31 @@ using System.Diagnostics;
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// A throttling service.
+/// This class is similiar to the <see cref="Throttler"/> class but it differs
+/// in that it will invoke the last throttled action after the limit time
+/// elapses and a new call has not been made in that time.  This can be thought
+/// off as a throttler that has a buffer size of 1.
 /// </summary>
-public class Throttler
+public class ThrottleBuffer : IDisposeObservable
 {
     #region Fields
 
     /// <summary>
-    /// Holds the date and time of the last action that was invoked through the
-    /// throttle method.
+    /// Used for throttling.
     /// </summary>
-    private DateTimeOffset _lastAction = DateTimeOffset.UtcNow.AddSeconds(-1);
+    private readonly Throttler _throttler = new();
+
+    /// <summary>
+    /// Use for debouncing.
+    /// </summary>
+    private readonly Debouncer _debouncer = new();
+
+    #endregion
+
+    #region Properties
+
+    /// <inheritdoc/>
+    public DisposeState DisposeState => _debouncer.DisposeState;
 
     #endregion
 
@@ -48,23 +62,38 @@ public class Throttler
     /// If the time since the last action invoked through this method is less
     /// than this timespan the action will not be invoked.
     /// </param>
+    /// <param name="dispatcher">
+    /// The dispatcher to use to potentially invoke the action in the future if
+    /// it was throttled.
+    /// </param>
+    /// <param name="onError">
+    /// Optional handler for any exceptions that are thrown by the action when
+    /// it is invoked through the dispatcher.
+    /// </param>
     /// <returns>
     /// true if the action was not invoked.
     /// false if the action was invoked.
     /// </returns>
     public bool Throttle(
         Action action,
-        TimeSpan limit
+        TimeSpan limit,
+        IDispatcher dispatcher,
+        Action<Exception>? onError = default
     )
     {
-        var now = DateTimeOffset.UtcNow;
-        var elapsed = now - _lastAction;
+        _debouncer.Cancel();
 
-        if (elapsed < limit)
+        if (_throttler.Throttle(action, limit))
+        {
+            _debouncer.Debounce(
+                action: () => Throttle(action, limit, dispatcher, onError),
+                delay: limit,
+                dispatcher: dispatcher,
+                onError: onError
+            );
+
             return true;
-
-        _lastAction = now;
-        action();
+        }
 
         return false;
     }

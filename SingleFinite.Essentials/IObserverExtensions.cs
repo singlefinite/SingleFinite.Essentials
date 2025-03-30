@@ -393,6 +393,65 @@ public static class IObserverExtensions
     );
 
     /// <summary>
+    /// Observer that throttles events.
+    /// </summary>
+    /// <param name="observer">The observer to extend.</param>
+    /// <param name="limit">The limit for throttling.</param>
+    /// <param name="dispatcher">
+    /// The dispatcher to use to potentially invoke the action in the future if
+    /// it was throttled.
+    /// </param>
+    /// <param name="onError">
+    /// Optional handler for any exceptions that are thrown by the action when
+    /// it is invoked through the dispatcher.
+    /// </param>
+    /// <returns>
+    /// A new observer that has been added to the chain of observers.
+    /// </returns>
+    public static IObserver ThrottleBuffer(
+        this IObserver observer,
+        TimeSpan limit,
+        IDispatcher dispatcher,
+        Action<Exception>? onError = default
+    ) => new ObserverThrottleBuffer(
+        observer,
+        limit,
+        dispatcher,
+        onError
+    );
+
+    /// <summary>
+    /// Observer that throttles events.
+    /// </summary>
+    /// <typeparam name="TArgs">
+    /// The type of arguments passed with observed events.
+    /// </typeparam>
+    /// <param name="observer">The observer to extend.</param>
+    /// <param name="limit">The limit for throttling.</param>
+    /// <param name="dispatcher">
+    /// The dispatcher to use to potentially invoke the action in the future if
+    /// it was throttled.
+    /// </param>
+    /// <param name="onError">
+    /// Optional handler for any exceptions that are thrown by the action when
+    /// it is invoked through the dispatcher.
+    /// </param>
+    /// <returns>
+    /// A new observer that has been added to the chain of observers.
+    /// </returns>
+    public static IObserver<TArgs> ThrottleBuffer<TArgs>(
+        this IObserver<TArgs> observer,
+        TimeSpan limit,
+        IDispatcher dispatcher,
+        Action<Exception>? onError = default
+    ) => new ObserverThrottleBuffer<TArgs>(
+        observer,
+        limit,
+        dispatcher,
+        onError
+    );
+
+    /// <summary>
     /// Invoke the given callback whenever an exception thrown below this
     /// observer in the chain is thrown.  Caught exceptions will not move past
     /// this observer.
