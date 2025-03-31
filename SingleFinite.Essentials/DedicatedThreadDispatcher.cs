@@ -56,11 +56,18 @@ public class DedicatedThreadDispatcher : IDispatcher
     /// <summary>
     /// Constructor.
     /// </summary>
+    /// <param name="thread">
+    /// The thread the dispatcher will run actions and functions on.  If not set
+    /// a new Thread will be created and used.
+    /// </param>
     /// <param name="onError">
     /// Optional exception handler that is invoked when the OnError method is
     /// invoked.
     /// </param>
-    public DedicatedThreadDispatcher(Action<Exception>? onError = default)
+    public DedicatedThreadDispatcher(
+        Thread? thread = default,
+        Action<Exception>? onError = default
+    )
     {
         _onError = onError;
 
@@ -69,7 +76,7 @@ public class DedicatedThreadDispatcher : IDispatcher
             onDispose: OnDispose
         );
 
-        _thread = new(ThreadStart)
+        _thread = thread ?? new(ThreadStart)
         {
             Name = GetType().FullName
         };
