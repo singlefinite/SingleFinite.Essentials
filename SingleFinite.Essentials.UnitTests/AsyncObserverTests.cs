@@ -623,6 +623,72 @@ public class AsyncObserverTests
         Assert.AreEqual("Hello", observedNames[0]);
     }
 
+    [TestMethod]
+    public async Task ToObservable_Observes()
+    {
+        var observed1Count = 0;
+        var observed2Count = 0;
+
+        var observableSource = new AsyncObservableSource();
+
+        var observable1 = observableSource.Observable;
+        var observer1 = observable1
+            .Observe()
+            .OnEach(() => observed1Count++);
+
+        var observable2 = observer1.ToObservable();
+        var observer2 = observable2
+            .Observe()
+            .OnEach(() => observed2Count++);
+
+        Assert.AreEqual(0, observed1Count);
+        Assert.AreEqual(0, observed2Count);
+
+        await observableSource.EmitAsync();
+
+        Assert.AreEqual(1, observed1Count);
+        Assert.AreEqual(1, observed2Count);
+
+        observer2.Dispose();
+        await observableSource.EmitAsync();
+
+        Assert.AreEqual(2, observed1Count);
+        Assert.AreEqual(1, observed2Count);
+    }
+
+    [TestMethod]
+    public async Task ToObservable_Stops_Observing_When_Parent_Is_Disposed()
+    {
+        var observed1Count = 0;
+        var observed2Count = 0;
+
+        var observableSource = new AsyncObservableSource();
+
+        var observable1 = observableSource.Observable;
+        var observer1 = observable1
+            .Observe()
+            .OnEach(() => observed1Count++);
+
+        var observable2 = observer1.ToObservable();
+        var observer2 = observable2
+            .Observe()
+            .OnEach(() => observed2Count++);
+
+        Assert.AreEqual(0, observed1Count);
+        Assert.AreEqual(0, observed2Count);
+
+        await observableSource.EmitAsync();
+
+        Assert.AreEqual(1, observed1Count);
+        Assert.AreEqual(1, observed2Count);
+
+        observer1.Dispose();
+        await observableSource.EmitAsync();
+
+        Assert.AreEqual(1, observed1Count);
+        Assert.AreEqual(1, observed2Count);
+    }
+
     #region Types
 
     private record ExampleArgs(

@@ -840,4 +840,31 @@ public static class IAsyncObserverExtensions
         maxConcurrent,
         maxBuffer
     );
+
+    /// <summary>
+    /// Create an observable that will emit when the parent observer observes
+    /// an event.
+    /// </summary>
+    /// <param name="observer">The observer to extend.</param>
+    /// <returns>
+    /// A new observable.
+    /// </returns>
+    public static AsyncObservable ToObservable(
+        this IAsyncObserver observer
+    ) => new AsyncObserverObservable(observer).Observable;
+
+    /// <summary>
+    /// Create an observable that will emit when the parent observer observes
+    /// an event.
+    /// </summary>
+    /// <typeparam name="TArgs">
+    /// The type of arguments passed with observed events.
+    /// </typeparam>
+    /// <param name="observer">The observer to extend.</param>
+    /// <returns>
+    /// A new observable.
+    /// </returns>
+    public static AsyncObservable<TArgs> ToObservable<TArgs>(
+        this IAsyncObserver<TArgs> observer
+    ) => new AsyncObserverObservable<TArgs>(observer).Observable;
 }

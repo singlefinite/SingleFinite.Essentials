@@ -578,4 +578,31 @@ public static class IObserverExtensions
         IDispatcher dispatcher,
         Action<Exception>? onError = default
     ) => new ObserverToAsync<TArgs>(observer, dispatcher, onError);
+
+    /// <summary>
+    /// Create an observable that will emit when the parent observer observes
+    /// an event.
+    /// </summary>
+    /// <param name="observer">The observer to extend.</param>
+    /// <returns>
+    /// A new observable.
+    /// </returns>
+    public static Observable ToObservable(
+        this IObserver observer
+    ) => new ObserverObservable(observer).Observable;
+
+    /// <summary>
+    /// Create an observable that will emit when the parent observer observes
+    /// an event.
+    /// </summary>
+    /// <typeparam name="TArgs">
+    /// The type of arguments passed with observed events.
+    /// </typeparam>
+    /// <param name="observer">The observer to extend.</param>
+    /// <returns>
+    /// A new observable.
+    /// </returns>
+    public static Observable<TArgs> ToObservable<TArgs>(
+        this IObserver<TArgs> observer
+    ) => new ObserverObservable<TArgs>(observer).Observable;
 }
