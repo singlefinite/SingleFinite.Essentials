@@ -19,6 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace SingleFinite.Essentials;
@@ -40,15 +41,17 @@ public static class ObjectExtensions
     /// The name used in the exception messsage if the item is null.
     /// Leave unset to use the argument expression passed into this method.
     /// </param>
-    /// <returns>The given item if it's not null.</returns>
     /// <exception cref="NullReferenceException">
     /// Thrown if the given item is null.
     /// </exception>
-    public static TType ThrowIfNull<TType>(
-        this TType? item,
+    public static void ThrowIfNull<TType>(
+        [NotNull] this TType? item,
         [CallerArgumentExpression(nameof(item))] string? name = default
-    ) =>
-        item ?? throw new NullReferenceException($"{name} is null.");
+    )
+    {
+        if (item is null)
+            throw new NullReferenceException($"{name} is null.");
+    }
 
     #endregion
 }

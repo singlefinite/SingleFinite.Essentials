@@ -19,7 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using SingleFinite.Essentials;
+using System.Diagnostics;
 
 namespace SingleFinite.Essentials.UnitTests;
 
@@ -27,13 +27,18 @@ namespace SingleFinite.Essentials.UnitTests;
 public class ObjectExtensionsTests
 {
     [TestMethod]
-    public void RequireNotNull_Throws_With_Variable_Name_When_Null()
+    public void ThrowIfNull_Throws_With_Variable_Name_When_Null()
     {
         string? testItem = null;
 
         try
         {
             testItem.ThrowIfNull();
+
+            // Make sure the compiler doesn't warn about null reference.
+            //
+            Debug.WriteLine($"{testItem.Length}");
+
             Assert.Fail("Exception not thrown.");
         }
         catch (NullReferenceException ex)
