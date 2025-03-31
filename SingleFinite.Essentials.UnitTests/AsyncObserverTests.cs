@@ -343,6 +343,40 @@ public class AsyncObserverTests
     }
 
     [TestMethod]
+    public async Task Dispatch_Runs_As_Expected()
+    {
+        var dispatcherThreadId = -1;
+        var dispatcher = new DedicatedThreadDispatcher();
+        await dispatcher.RunAsync(
+            action: () => dispatcherThreadId = Environment.CurrentManagedThreadId
+        );
+
+        var currentThreadId = Environment.CurrentManagedThreadId;
+
+        var observedThreadIdsBeforeDispatch = new List<int>();
+        var observedThreadIdsAfterDispatch = new List<int>();
+
+        var observableSource = new AsyncObservableSource<ExampleArgs>();
+        var observable = observableSource.Observable;
+
+        var observer = observable
+            .Observe()
+            .OnEach(_ => observedThreadIdsBeforeDispatch.Add(Environment.CurrentManagedThreadId))
+            .Dispatch(dispatcher)
+            .OnEach(_ => observedThreadIdsAfterDispatch.Add(Environment.CurrentManagedThreadId));
+
+        Assert.AreEqual(0, observedThreadIdsAfterDispatch.Count);
+
+        await observableSource.EmitAsync(new("Hello", 0));
+
+        Assert.AreEqual(1, observedThreadIdsBeforeDispatch.Count);
+        Assert.AreEqual(currentThreadId, observedThreadIdsBeforeDispatch[0]);
+
+        Assert.AreEqual(1, observedThreadIdsAfterDispatch.Count);
+        Assert.AreEqual(dispatcherThreadId, observedThreadIdsAfterDispatch[0]);
+    }
+
+    [TestMethod]
     public async Task Debounce_Runs_AsExpected()
     {
         var observedNames = new List<string>();

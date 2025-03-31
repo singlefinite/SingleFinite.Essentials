@@ -39,6 +39,11 @@ internal class ObserverSourceObservable : IObserver
     /// </summary>
     private readonly Observable _observable;
 
+    /// <summary>
+    /// Used to make Dispose method thread safe.
+    /// </summary>
+    private readonly Lock _disposeLock = new();
+
     #endregion
 
     #region Constructors
@@ -69,11 +74,14 @@ internal class ObserverSourceObservable : IObserver
     /// </summary>
     public void Dispose()
     {
-        if (_isDisposed)
-            return;
+        lock (_disposeLock)
+        {
+            if (_isDisposed)
+                return;
 
-        _isDisposed = true;
-        _observable.Event -= OnEvent;
+            _isDisposed = true;
+            _observable.Event -= OnEvent;
+        }
     }
 
     #endregion
@@ -106,6 +114,11 @@ internal class ObserverSourceObservable<TArgs> : IObserver<TArgs>
     /// </summary>
     private readonly Observable<TArgs> _observable;
 
+    /// <summary>
+    /// Used to make Dispose method thread safe.
+    /// </summary>
+    private readonly Lock _disposeLock = new();
+
     #endregion
 
     #region Constructors
@@ -136,11 +149,14 @@ internal class ObserverSourceObservable<TArgs> : IObserver<TArgs>
     /// </summary>
     public void Dispose()
     {
-        if (_isDisposed)
-            return;
+        lock (_disposeLock)
+        {
+            if (_isDisposed)
+                return;
 
-        _isDisposed = true;
-        _observable.Event -= OnEvent;
+            _isDisposed = true;
+            _observable.Event -= OnEvent;
+        }
     }
 
     #endregion

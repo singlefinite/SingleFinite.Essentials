@@ -39,6 +39,11 @@ internal class AsyncObserverSourceObservable : IAsyncObserver
     /// </summary>
     private readonly AsyncObservable _observable;
 
+    /// <summary>
+    /// Used to make Dispose method thread safe.
+    /// </summary>
+    private readonly Lock _disposeLock = new();
+
     #endregion
 
     #region Constructors
@@ -69,11 +74,14 @@ internal class AsyncObserverSourceObservable : IAsyncObserver
     /// </summary>
     public void Dispose()
     {
-        if (_isDisposed)
-            return;
+        lock (_disposeLock)
+        {
+            if (_isDisposed)
+                return;
 
-        _isDisposed = true;
-        _observable.Event -= OnEventAsync;
+            _isDisposed = true;
+            _observable.Event -= OnEventAsync;
+        }
     }
 
     #endregion
@@ -106,6 +114,11 @@ internal class AsyncObserverSource<TArgs> : IAsyncObserver<TArgs>
     /// </summary>
     private readonly AsyncObservable<TArgs> _observable;
 
+    /// <summary>
+    /// Used to make Dispose method thread safe.
+    /// </summary>
+    private readonly Lock _disposeLock = new();
+
     #endregion
 
     #region Constructors
@@ -137,11 +150,14 @@ internal class AsyncObserverSource<TArgs> : IAsyncObserver<TArgs>
     /// </summary>
     public void Dispose()
     {
-        if (_isDisposed)
-            return;
+        lock (_disposeLock)
+        {
+            if (_isDisposed)
+                return;
 
-        _isDisposed = true;
-        _observable.Event -= OnEventAsync;
+            _isDisposed = true;
+            _observable.Event -= OnEventAsync;
+        }
     }
 
     #endregion

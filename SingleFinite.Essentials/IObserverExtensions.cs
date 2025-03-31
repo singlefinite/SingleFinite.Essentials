@@ -221,6 +221,44 @@ public static class IObserverExtensions
     );
 
     /// <summary>
+    /// Invoke the next observers using the provided dispatcher.
+    /// </summary>
+    /// <param name="observer">The observer to extend.</param>
+    /// <param name="dispatcher">
+    /// The dispatcher to invoke the next observers with.
+    /// </param>
+    /// <param name="onError">
+    /// Optional action invoked if the next observers throw an exception.
+    /// </param>
+    /// <returns>
+    /// A new observer that has been added to the chain of observers.
+    /// </returns>
+    public static IObserver Dispatch(
+        this IObserver observer,
+        IDispatcher dispatcher,
+        Action<Exception>? onError = default
+    ) => new ObserverDispatch(observer, dispatcher, onError);
+
+    /// <summary>
+    /// Invoke the next observers using the provided dispatcher.
+    /// </summary>
+    /// <param name="observer">The observer to extend.</param>
+    /// <param name="dispatcher">
+    /// The dispatcher to invoke the next observers with.
+    /// </param>
+    /// <param name="onError">
+    /// Optional action invoked if the next observers throw an exception.
+    /// </param>
+    /// <returns>
+    /// A new observer that has been added to the chain of observers.
+    /// </returns>
+    public static IObserver<TArgs> Dispatch<TArgs>(
+        this IObserver<TArgs> observer,
+        IDispatcher dispatcher,
+        Action<Exception>? onError = default
+    ) => new ObserverDispatch<TArgs>(observer, dispatcher, onError);
+
+    /// <summary>
     /// Dispose of the observer chain when the given object is disposed.
     /// </summary>
     /// <param name="observer">The observer to extend.</param>

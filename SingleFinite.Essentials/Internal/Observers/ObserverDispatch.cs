@@ -22,84 +22,75 @@
 namespace SingleFinite.Essentials.Internal.Observers;
 
 /// <summary>
-/// Observer that listens for when the observer is disposed.
-/// This class will only listen for dispose from observers further down the
-/// chain of observers and will not listen for dispose from observers that
-/// preceed it in the chain of observers.
+/// Invoke the next observers using the provided dispatcher.
 /// </summary>
 /// <param name="parent">The parent to this observer.</param>
-internal class ObserverDisposeListener(
-    IObserver parent
+/// <param name="dispatcher">
+/// The dispatcher to invoke the next observers with.
+/// </param>
+/// <param name="onError">
+/// Optional action invoked if the next observers throw an exception.
+/// </param>
+internal class ObserverDispatch(
+    IObserver parent,
+    IDispatcher dispatcher,
+    Action<Exception>? onError
 ) : ObserverBase(parent)
 {
     #region Methods
 
     /// <summary>
-    /// This method doesn't have any logic.
+    /// Raise next event using dispatcher.
     /// </summary>
-    /// <returns>This method always returns true.</returns>
-    protected override bool OnEvent() => true;
-
-    /// <summary>
-    /// Invoke the onDispose method that was provided.
-    /// </summary>
-    public override void Dispose()
+    /// <returns>Always return false.</returns>
+    protected override bool OnEvent()
     {
-        base.Dispose();
-        Disposed?.Invoke();
+        dispatcher.Run(
+            action: RaiseNextEvent,
+            onError: onError
+        );
+
+        return false;
     }
-
-    #endregion
-
-    #region Events
-
-    /// <summary>
-    /// Event that is raised when the observer has been disposed.
-    /// </summary>
-    public event Action? Disposed;
 
     #endregion
 }
 
 /// <summary>
-/// Observer that listens for when the observer is disposed.
-/// This class will only listen for dispose from observers further down the
-/// chain of observers and will not listen for dispose from observers that
-/// preceed it in the chain of observers.
+/// Invoke the next observers using the provided dispatcher.
 /// </summary>
 /// <typeparam name="TArgs">
 /// The type of arguments passed with observed events.
 /// </typeparam>
 /// <param name="parent">The parent to this observer.</param>
-internal class ObserverDisposeListener<TArgs>(
-    IObserver<TArgs> parent
+/// <param name="dispatcher">
+/// The dispatcher to invoke the next observers with.
+/// </param>
+/// <param name="onError">
+/// Optional action invoked if the next observers throw an exception.
+/// </param>
+internal class ObserverDispatch<TArgs>(
+    IObserver<TArgs> parent,
+    IDispatcher dispatcher,
+    Action<Exception>? onError
 ) : ObserverBase<TArgs>(parent)
 {
     #region Methods
 
     /// <summary>
-    /// This method doesn't have any logic.
+    /// Raise next event using dispatcher.
     /// </summary>
-    /// <returns>This method always returns true.</returns>
-    protected override bool OnEvent(TArgs args) => true;
-
-    /// <summary>
-    /// Invoke the onDispose method that was provided.
-    /// </summary>
-    public override void Dispose()
+    /// <param name="args">Arguments passed with the observed event.</param>
+    /// <returns>Always return false.</returns>
+    protected override bool OnEvent(TArgs args)
     {
-        base.Dispose();
-        Disposed?.Invoke();
+        dispatcher.Run(
+            action: () => RaiseNextEvent(args),
+            onError: onError
+        );
+
+        return false;
     }
-
-    #endregion
-
-    #region Events
-
-    /// <summary>
-    /// Event that is raised when the observer has been disposed.
-    /// </summary>
-    public event Action? Disposed;
 
     #endregion
 }

@@ -423,6 +423,36 @@ public static class IAsyncObserverExtensions
     );
 
     /// <summary>
+    /// Invoke the next observers using the provided dispatcher.
+    /// </summary>
+    /// <param name="observer">The observer to extend.</param>
+    /// <param name="dispatcher">
+    /// The dispatcher to invoke the next observers with.
+    /// </param>
+    /// <returns>
+    /// A new observer that has been added to the chain of observers.
+    /// </returns>
+    public static IAsyncObserver Dispatch(
+        this IAsyncObserver observer,
+        IDispatcher dispatcher
+    ) => new AsyncObserverDispatch(observer, dispatcher);
+
+    /// <summary>
+    /// Invoke the next observers using the provided dispatcher.
+    /// </summary>
+    /// <param name="observer">The observer to extend.</param>
+    /// <param name="dispatcher">
+    /// The dispatcher to invoke the next observers with.
+    /// </param>
+    /// <returns>
+    /// A new observer that has been added to the chain of observers.
+    /// </returns>
+    public static IAsyncObserver<TArgs> Dispatch<TArgs>(
+        this IAsyncObserver<TArgs> observer,
+        IDispatcher dispatcher
+    ) => new AsyncObserverDispatch<TArgs>(observer, dispatcher);
+
+    /// <summary>
     /// Dispose of the observer chain when the given object is disposed.
     /// </summary>
     /// <param name="observer">The observer to extend.</param>
