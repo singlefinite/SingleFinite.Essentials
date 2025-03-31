@@ -19,8 +19,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System.Diagnostics;
-
 namespace SingleFinite.Essentials.Internal.Observers;
 
 /// <summary>
@@ -30,7 +28,8 @@ namespace SingleFinite.Essentials.Internal.Observers;
 /// <param name="limit">The limit for throttling.</param>
 /// <param name="dispatcher">
 /// The dispatcher to use to potentially invoke the action in the future if
-/// it was throttled.
+/// it was throttled.  If not set the action will be run on the calling
+/// thread.
 /// </param>
 /// <param name="onError">
 /// Optional handler for any exceptions that are thrown by the action when
@@ -39,8 +38,8 @@ namespace SingleFinite.Essentials.Internal.Observers;
 internal class ObserverThrottleBuffer(
     IObserver parent,
     TimeSpan limit,
-    IDispatcher dispatcher,
-    Action<Exception>? onError = default
+    IDispatcher? dispatcher,
+    Action<Exception>? onError
 ) : ObserverBase(parent)
 {
     #region Fields
@@ -88,7 +87,8 @@ internal class ObserverThrottleBuffer(
 /// <param name="limit">The limit for throttling.</param>
 /// <param name="dispatcher">
 /// The dispatcher to use to potentially invoke the action in the future if
-/// it was throttled.
+/// it was throttled.  If not set the action will be run on the calling
+/// thread.
 /// </param>
 /// <param name="onError">
 /// Optional handler for any exceptions that are thrown by the action when
@@ -97,8 +97,8 @@ internal class ObserverThrottleBuffer(
 internal class ObserverThrottleBuffer<TArgs>(
     IObserver<TArgs> parent,
     TimeSpan limit,
-    IDispatcher dispatcher,
-    Action<Exception>? onError = default
+    IDispatcher? dispatcher,
+    Action<Exception>? onError
 ) : ObserverBase<TArgs>(parent)
 {
     #region Fields

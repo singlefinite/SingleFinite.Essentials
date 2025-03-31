@@ -65,4 +65,36 @@ public class ThrottleBufferTests
 
         Assert.AreEqual(0, observedErrors);
     }
+
+    [TestMethod]
+    public async Task Throttle_With_Default_Dispatcher_Invokes_Last_Action()
+    {
+        var observedItems = new List<string>();
+        var throttleBuffer = new ThrottleBuffer();
+        var limit = TimeSpan.FromMilliseconds(250);
+
+        throttleBuffer.Throttle(
+            action: () => observedItems.Add("one"),
+            limit: limit
+        );
+
+        throttleBuffer.Throttle(
+            action: () => observedItems.Add("two"),
+            limit: limit
+        );
+
+        throttleBuffer.Throttle(
+            action: () => observedItems.Add("three"),
+            limit: limit
+        );
+
+        Assert.AreEqual(1, observedItems.Count);
+        Assert.AreEqual("one", observedItems[0]);
+
+        await Task.Delay(1000);
+
+        Assert.AreEqual(2, observedItems.Count);
+        Assert.AreEqual("one", observedItems[0]);
+        Assert.AreEqual("three", observedItems[1]);
+    }
 }

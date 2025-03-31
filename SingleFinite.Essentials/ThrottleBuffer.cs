@@ -19,8 +19,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System.Diagnostics;
-
 namespace SingleFinite.Essentials;
 
 /// <summary>
@@ -64,7 +62,8 @@ public class ThrottleBuffer : IDisposeObservable
     /// </param>
     /// <param name="dispatcher">
     /// The dispatcher to use to potentially invoke the action in the future if
-    /// it was throttled.
+    /// it was throttled.  If not set the action will be run on the calling
+    /// thread.
     /// </param>
     /// <param name="onError">
     /// Optional handler for any exceptions that are thrown by the action when
@@ -77,7 +76,7 @@ public class ThrottleBuffer : IDisposeObservable
     public bool Throttle(
         Action action,
         TimeSpan limit,
-        IDispatcher dispatcher,
+        IDispatcher? dispatcher = default,
         Action<Exception>? onError = default
     )
     {

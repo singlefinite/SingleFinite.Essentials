@@ -28,7 +28,8 @@ namespace SingleFinite.Essentials.Internal.Observers;
 /// <param name="limit">The limit for throttling.</param>
 /// <param name="dispatcher">
 /// The dispatcher to use to potentially invoke the action in the future if
-/// it was throttled.
+/// it was throttled.  If not set the action will be run on the calling
+/// thread.
 /// </param>
 /// <param name="onError">
 /// Optional handler for any exceptions that are thrown by the action when
@@ -37,8 +38,8 @@ namespace SingleFinite.Essentials.Internal.Observers;
 internal class AsyncObserverThrottleBuffer(
     IAsyncObserver parent,
     TimeSpan limit,
-    IDispatcher dispatcher,
-    Action<Exception>? onError = default
+    IDispatcher? dispatcher,
+    Action<Exception>? onError
 ) : AsyncObserverBase(parent)
 {
     #region Fields
@@ -86,7 +87,8 @@ internal class AsyncObserverThrottleBuffer(
 /// <param name="limit">The limit for throttling.</param>
 /// <param name="dispatcher">
 /// The dispatcher to use to potentially invoke the action in the future if
-/// it was throttled.
+/// it was throttled.  If not set the action will be run on the calling
+/// thread.
 /// </param>
 /// <param name="onError">
 /// Optional handler for any exceptions that are thrown by the action when
@@ -95,8 +97,8 @@ internal class AsyncObserverThrottleBuffer(
 internal class AsyncObserverThrottleBuffer<TArgs>(
     IAsyncObserver<TArgs> parent,
     TimeSpan limit,
-    IDispatcher dispatcher,
-    Action<Exception>? onError = default
+    IDispatcher? dispatcher,
+    Action<Exception>? onError
 ) : AsyncObserverBase<TArgs>(parent)
 {
     #region Fields

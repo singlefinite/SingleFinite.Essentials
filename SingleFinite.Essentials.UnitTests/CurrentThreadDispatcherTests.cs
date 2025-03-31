@@ -19,53 +19,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace SingleFinite.Essentials;
+namespace SingleFinite.Essentials.UnitTests;
 
-/// <summary>
-/// A throttling service.
-/// </summary>
-public class Throttler
+[TestClass]
+public class CurrentThreadDispatcherTests
 {
-    #region Fields
-
-    /// <summary>
-    /// Holds the date and time of the last action that was invoked through the
-    /// throttle method.
-    /// </summary>
-    private DateTimeOffset _lastAction = DateTimeOffset.UtcNow.AddSeconds(-1);
-
-    #endregion
-
-    #region Methods
-
-    /// <summary>
-    /// Throttle the given action.
-    /// </summary>
-    /// <param name="action">The action to invoke.</param>
-    /// <param name="limit">
-    /// If the time since the last action invoked through this method is less
-    /// than this timespan the action will not be invoked.
-    /// </param>
-    /// <returns>
-    /// true if the action was not invoked.
-    /// false if the action was invoked.
-    /// </returns>
-    public bool Throttle(
-        Action action,
-        TimeSpan limit
-    )
+    [TestMethod]
+    public async Task RunAsync_Invokes_On_Calling_Thread()
     {
-        var now = DateTimeOffset.UtcNow;
-        var elapsed = now - _lastAction;
+        var dispatcher = new CurrentThreadDispatcher();
 
-        if (elapsed < limit)
-            return true;
+        var threadId1 = Environment.CurrentManagedThreadId;
+        var observedThreadId1 = -1;
+        await dispatcher.RunAsync(
+            func: () =>
+            {
+                observedThreadId1 = Environment.CurrentManagedThreadId;
+                return Task.FromResult(0);
+            }
+        );
+        Assert.AreEqual(threadId1, observedThreadId1);
 
-        _lastAction = now;
-        action();
-
-        return false;
+        await Task.Run(
+            async () =>
+            {
+                var threadId2 = Environment.CurrentManagedThreadId;
+                var observedThreadId2 = -1;
+                await dispatcher.RunAsync(
+                    func: () =>
+                    {
+                        observedThreadId2 = Environment.CurrentManagedThreadId;
+                        return Task.FromResult(0);
+                    }
+                );
+                Assert.AreEqual(threadId2, observedThreadId2);
+            }
+        );
     }
-
-    #endregion
 }

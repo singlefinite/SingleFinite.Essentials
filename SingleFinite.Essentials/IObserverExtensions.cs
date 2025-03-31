@@ -309,6 +309,7 @@ public static class IObserverExtensions
     /// <param name="delay">The delay period for debouncing.</param>
     /// <param name="dispatcher">
     /// The dispatcher to run on after the delay has passed.
+    /// If not set the debounce will be run on the calling thread.
     /// </param>
     /// <param name="onError">
     /// Optional action invoked if the debounced action throws an exception.
@@ -319,7 +320,7 @@ public static class IObserverExtensions
     public static IObserver Debounce(
         this IObserver observer,
         TimeSpan delay,
-        IDispatcher dispatcher,
+        IDispatcher? dispatcher = default,
         Action<Exception>? onError = default
     ) => new ObserverDebounce(
         observer,
@@ -338,6 +339,7 @@ public static class IObserverExtensions
     /// <param name="delay">The delay period for debouncing.</param>
     /// <param name="dispatcher">
     /// The dispatcher to run on after the delay has passed.
+    /// If not set the debounce will be run on the calling thread.
     /// </param>
     /// <param name="onError">
     /// Optional action invoked if the debounced action throws an exception.
@@ -348,7 +350,7 @@ public static class IObserverExtensions
     public static IObserver<TArgs> Debounce<TArgs>(
         this IObserver<TArgs> observer,
         TimeSpan delay,
-        IDispatcher dispatcher,
+        IDispatcher? dispatcher = default,
         Action<Exception>? onError = default
     ) => new ObserverDebounce<TArgs>(
         observer,
@@ -399,7 +401,8 @@ public static class IObserverExtensions
     /// <param name="limit">The limit for throttling.</param>
     /// <param name="dispatcher">
     /// The dispatcher to use to potentially invoke the action in the future if
-    /// it was throttled.
+    /// it was throttled.  If not set the action will be run on the calling
+    /// thread.
     /// </param>
     /// <param name="onError">
     /// Optional handler for any exceptions that are thrown by the action when
@@ -411,7 +414,7 @@ public static class IObserverExtensions
     public static IObserver ThrottleBuffer(
         this IObserver observer,
         TimeSpan limit,
-        IDispatcher dispatcher,
+        IDispatcher? dispatcher = default,
         Action<Exception>? onError = default
     ) => new ObserverThrottleBuffer(
         observer,
@@ -430,7 +433,8 @@ public static class IObserverExtensions
     /// <param name="limit">The limit for throttling.</param>
     /// <param name="dispatcher">
     /// The dispatcher to use to potentially invoke the action in the future if
-    /// it was throttled.
+    /// it was throttled.  If not set the action will be run on the calling
+    /// thread.
     /// </param>
     /// <param name="onError">
     /// Optional handler for any exceptions that are thrown by the action when
@@ -442,7 +446,7 @@ public static class IObserverExtensions
     public static IObserver<TArgs> ThrottleBuffer<TArgs>(
         this IObserver<TArgs> observer,
         TimeSpan limit,
-        IDispatcher dispatcher,
+        IDispatcher? dispatcher = default,
         Action<Exception>? onError = default
     ) => new ObserverThrottleBuffer<TArgs>(
         observer,

@@ -76,6 +76,7 @@ public class Debouncer : IDisposeObservable
     /// </param>
     /// <param name="dispatcher">
     /// The dispatcher that will run the action after the delay has passed.
+    /// If not set the debounce will be run on the calling thread.
     /// </param>
     /// <param name="onError">
     /// Optional handler for any exceptions that are thrown by the action when
@@ -84,11 +85,13 @@ public class Debouncer : IDisposeObservable
     public void Debounce(
         Action action,
         TimeSpan delay,
-        IDispatcher dispatcher,
+        IDispatcher? dispatcher = default,
         Action<Exception>? onError = default
     )
     {
         DisposeState.ThrowIfDisposed();
+
+        var resolvedDispatcher = dispatcher ?? new CurrentThreadDispatcher();
 
         lock (_timerLock)
         {
@@ -97,7 +100,7 @@ public class Debouncer : IDisposeObservable
                 callback: OnTimeout,
                 state: () =>
                 {
-                    dispatcher.Run(
+                    resolvedDispatcher.Run(
                         action: action,
                         onError: onError
                     );
@@ -120,6 +123,7 @@ public class Debouncer : IDisposeObservable
     /// </param>
     /// <param name="dispatcher">
     /// The dispatcher that will run the func after the delay has passed.
+    /// If not set the debounce will be run on the calling thread.
     /// </param>
     /// <param name="onError">
     /// Optional handler for any exceptions that are thrown by the func when it
@@ -128,11 +132,13 @@ public class Debouncer : IDisposeObservable
     public void Debounce(
         Func<Task> func,
         TimeSpan delay,
-        IDispatcher dispatcher,
+        IDispatcher? dispatcher = default,
         Action<Exception>? onError = default
     )
     {
         DisposeState.ThrowIfDisposed();
+
+        var resolvedDispatcher = dispatcher ?? new CurrentThreadDispatcher();
 
         lock (_timerLock)
         {
@@ -141,7 +147,7 @@ public class Debouncer : IDisposeObservable
                 callback: OnTimeout,
                 state: () =>
                 {
-                    dispatcher.Run(
+                    resolvedDispatcher.Run(
                         func: func,
                         onError: onError
                     );

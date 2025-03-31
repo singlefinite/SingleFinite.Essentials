@@ -64,6 +64,36 @@ public class DebouncerTests
     }
 
     [TestMethod]
+    public async Task Debounce_With_Default_Dispatcher()
+    {
+        var observedNames = new List<string>();
+        var dispatcher = new DedicatedThreadDispatcher();
+        var debouncer = new Debouncer();
+
+        debouncer.Debounce(
+            action: () => observedNames.Add("One"),
+            delay: TimeSpan.FromMilliseconds(100)
+        );
+
+        debouncer.Debounce(
+            action: () => observedNames.Add("Two"),
+            delay: TimeSpan.FromMilliseconds(100)
+        );
+
+        debouncer.Debounce(
+            action: () => observedNames.Add("Three"),
+            delay: TimeSpan.FromMilliseconds(100)
+        );
+
+        Assert.AreEqual(0, observedNames.Count);
+
+        await Task.Delay(TimeSpan.FromMilliseconds(200));
+
+        Assert.AreEqual(1, observedNames.Count);
+        Assert.AreEqual("Three", observedNames[0]);
+    }
+
+    [TestMethod]
     public async Task Cancel_Ends_Debounce()
     {
         var observedNames = new List<string>();
