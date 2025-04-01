@@ -146,7 +146,7 @@ public class DedicatedThreadDispatcher : IDispatcher
         {
             try
             {
-                var result = await func();
+                var result = await func().ConfigureAwait(false);
                 taskCompletionSource.SetResult(result);
             }
             catch (Exception ex)

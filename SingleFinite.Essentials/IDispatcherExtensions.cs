@@ -39,7 +39,7 @@ public static class IDispatcherExtensions
         dispatcher.RunAsync(
             async () =>
             {
-                await func();
+                await func().ConfigureAwait(false);
                 return 0;
             }
         );
@@ -126,7 +126,7 @@ public static class IDispatcherExtensions
             .RunAsync(
                 async () =>
                 {
-                    await func();
+                    await func().ConfigureAwait(false);
                     return Task.FromResult(0);
                 }
             )
@@ -146,7 +146,7 @@ public static class IDispatcherExtensions
     /// the dispatcher.
     /// </param>
     /// <returns>A task that runs until the function has completed.</returns>
-    public static async Task<TResult> RunAsync<TResult>(
+    public static Task<TResult> RunAsync<TResult>(
         this IDispatcher dispatcher,
         Func<CancellationToken, Task<TResult>> func,
         params IEnumerable<CancellationToken> cancellationTokens
@@ -167,7 +167,7 @@ public static class IDispatcherExtensions
                 .Token
         };
 
-        return await dispatcher.RunAsync(
+        return dispatcher.RunAsync(
             func: () => func(cancellationToken)
         );
     }
@@ -190,7 +190,7 @@ public static class IDispatcherExtensions
         dispatcher.RunAsync(
             func: async cancellationToken =>
             {
-                await func(cancellationToken);
+                await func(cancellationToken).ConfigureAwait(false);
                 return 0;
             },
             cancellationTokens: cancellationTokens
@@ -345,7 +345,7 @@ public static class IDispatcherExtensions
             .RunAsync(
                 func: async cancellationToken =>
                 {
-                    await func(cancellationToken);
+                    await func(cancellationToken).ConfigureAwait(false);
                     return Task.CompletedTask;
                 },
                 cancellationTokens: cancellationTokens

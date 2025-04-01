@@ -144,7 +144,7 @@ public sealed class AsyncObservableSource<TArgs>
         IDispatcher dispatcher,
         Action<Exception>? onError = default
     ) => dispatcher.Run(
-        func: async () => await EmitAsync(args),
+        func: () => EmitAsync(args),
         onError: onError
     );
 
