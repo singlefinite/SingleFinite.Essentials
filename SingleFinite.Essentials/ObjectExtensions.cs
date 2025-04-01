@@ -41,16 +41,19 @@ public static class ObjectExtensions
     /// The name used in the exception messsage if the item is null.
     /// Leave unset to use the argument expression passed into this method.
     /// </param>
+    /// <returns>The item that was checked.</returns>
     /// <exception cref="NullReferenceException">
     /// Thrown if the given item is null.
     /// </exception>
-    public static void ThrowIfNull<TType>(
+    public static TType ThrowIfNull<TType>(
         [NotNull] this TType? item,
         [CallerArgumentExpression(nameof(item))] string? name = default
     )
     {
         if (item is null)
             throw new NullReferenceException($"{name} is null.");
+
+        return item;
     }
 
     #endregion
