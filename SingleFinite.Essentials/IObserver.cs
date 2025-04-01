@@ -25,7 +25,7 @@ namespace SingleFinite.Essentials;
 
 /// <summary>
 /// Interface for an observer.  Observers are used to handle events raised by
-/// observables.  Observers can be chanined together using methods found in the
+/// observables.  Observers can be chained together using methods found in the
 /// <see cref="IObserverExtensions"/> class.  When an observer is disposed it
 /// will unregister all observers in the chain so any future observable events
 /// will not be observed.
@@ -41,7 +41,7 @@ public interface IObserver : IDisposable
 
 /// <summary>
 /// Interface for an observer.  Observers are used to handle events raised by
-/// observables.  Observers can be chanined together using methods found in the
+/// observables.  Observers can be chained together using methods found in the
 /// <see cref="IObserverExtensions"/> class.  When an observer is disposed it
 /// will unregister all observers in the chain so any future observable events
 /// will not be observed.
