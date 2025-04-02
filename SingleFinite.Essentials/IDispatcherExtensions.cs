@@ -155,7 +155,7 @@ public static class IDispatcherExtensions
         var allCancellationTokens =
             new List<CancellationToken>(cancellationTokens)
             {
-                dispatcher.DisposeState.CancellationToken
+                dispatcher.CancellationToken
             };
 
         var cancellationToken = allCancellationTokens.Count switch

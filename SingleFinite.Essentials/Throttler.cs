@@ -24,7 +24,7 @@ namespace SingleFinite.Essentials;
 /// <summary>
 /// A throttling service.
 /// </summary>
-public class Throttler
+public sealed class Throttler
 {
     #region Fields
 

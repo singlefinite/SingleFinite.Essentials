@@ -24,19 +24,15 @@ namespace SingleFinite.Essentials;
 /// <summary>
 /// An object whose dispose state can be observed.
 /// </summary>
-public interface IDisposeObservable : IDisposable
+public interface IDisposeObservable
 {
     /// <summary>
-    /// The dispose state for the object.
+    /// Indicates if this object is disposed.
     /// </summary>
-    DisposeState DisposeState { get; }
+    bool IsDisposed { get; }
 
     /// <summary>
-    /// Invoke the Dispose method on the DisposeState property.
+    /// Observable that will notify observers when this object is disposed.
     /// </summary>
-    void IDisposable.Dispose()
-    {
-        GC.SuppressFinalize(this);
-        DisposeState.Dispose();
-    }
+    Observable Disposed { get; }
 }

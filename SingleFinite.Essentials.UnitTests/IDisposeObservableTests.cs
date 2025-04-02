@@ -8,11 +8,11 @@ public class IDisposeObservableTests
     {
         var exampleDisposable = new ExampleDisposable();
 
-        Assert.IsFalse(exampleDisposable.DisposeState.IsDisposed);
+        Assert.IsFalse(exampleDisposable.IsDisposed);
 
         ((IDisposable)exampleDisposable).Dispose();
 
-        Assert.IsTrue(exampleDisposable.DisposeState.IsDisposed);
+        Assert.IsTrue(exampleDisposable.IsDisposed);
     }
 
     [TestMethod]
@@ -22,20 +22,22 @@ public class IDisposeObservableTests
 
         Assert.AreEqual(0, exampleDisposable.ObservedDisposeCount);
 
-        ((IDisposable)exampleDisposable).Dispose();
+        exampleDisposable.Dispose();
 
         Assert.AreEqual(1, exampleDisposable.ObservedDisposeCount);
 
-        ((IDisposable)exampleDisposable).Dispose();
+        exampleDisposable.Dispose();
 
         Assert.AreEqual(1, exampleDisposable.ObservedDisposeCount);
     }
 
-    private sealed class ExampleDisposable : IDisposeObservable
+    private sealed class ExampleDisposable : IDisposable, IDisposeObservable
     {
+        private readonly DisposeState _disposeState;
+
         public ExampleDisposable()
         {
-            DisposeState = new(
+            _disposeState = new(
                 owner: this,
                 onDispose: OnDispose
             );
@@ -43,11 +45,15 @@ public class IDisposeObservableTests
 
         public int ObservedDisposeCount { get; private set; }
 
-        public DisposeState DisposeState { get; }
+        public bool IsDisposed => _disposeState.IsDisposed;
+
+        public void Dispose() => _disposeState.Dispose();
 
         private void OnDispose()
         {
             ObservedDisposeCount++;
         }
+
+        public Observable Disposed => _disposeState.Disposed;
     }
 }

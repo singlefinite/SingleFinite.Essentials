@@ -27,7 +27,7 @@ namespace SingleFinite.Essentials;
 /// elapses and a new call has not been made in that time.  This can be thought
 /// off as a throttler that has a buffer size of 1.
 /// </summary>
-public class ThrottleBuffer : IDisposeObservable
+public sealed class ThrottleBuffer : IDisposable, IDisposeObservable
 {
     #region Fields
 
@@ -46,7 +46,7 @@ public class ThrottleBuffer : IDisposeObservable
     #region Properties
 
     /// <inheritdoc/>
-    public DisposeState DisposeState => _debouncer.DisposeState;
+    public bool IsDisposed => _debouncer.IsDisposed;
 
     #endregion
 
@@ -96,6 +96,18 @@ public class ThrottleBuffer : IDisposeObservable
 
         return false;
     }
+
+    /// <summary>
+    /// Cancel any pending action and dispose of this object.
+    /// </summary>
+    public void Dispose() => _debouncer.Dispose();
+
+    #endregion
+
+    #region Events
+
+    /// <inheritdoc/>
+    public Observable Disposed => _debouncer.Disposed;
 
     #endregion
 }

@@ -25,7 +25,7 @@ namespace SingleFinite.Essentials;
 /// An abstraction of a platform specific dispatcher that is used to execute
 /// code on a different thread.
 /// </summary>
-public interface IDispatcher : IDisposeObservable
+public interface IDispatcher : ICancelObservable
 {
     /// <summary>
     /// Execute the given async function.

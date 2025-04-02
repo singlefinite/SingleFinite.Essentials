@@ -24,9 +24,14 @@ namespace SingleFinite.Essentials;
 /// <summary>
 /// A debouncer service that uses a timer.
 /// </summary>
-public class Debouncer : IDisposeObservable
+public sealed class Debouncer : IDisposable, IDisposeObservable
 {
     #region Fields
+
+    /// <summary>
+    /// Holds the dispose state for this object.
+    /// </summary>
+    private readonly DisposeState _disposeState;
 
     /// <summary>
     /// Used to synchronize access to the timer.
@@ -47,9 +52,9 @@ public class Debouncer : IDisposeObservable
     /// </summary>
     public Debouncer()
     {
-        DisposeState = new(
+        _disposeState = new(
             owner: this,
-            onDispose: OnDispose
+            onDispose: Cancel
         );
     }
 
@@ -58,7 +63,7 @@ public class Debouncer : IDisposeObservable
     #region Properties
 
     /// <inheritdoc/>
-    public DisposeState DisposeState { get; }
+    public bool IsDisposed => _disposeState.IsDisposed;
 
     #endregion
 
@@ -89,7 +94,7 @@ public class Debouncer : IDisposeObservable
         Action<Exception>? onError = default
     )
     {
-        DisposeState.ThrowIfDisposed();
+        _disposeState.ThrowIfDisposed();
 
         var resolvedDispatcher = dispatcher ?? new CurrentThreadDispatcher();
 
@@ -136,7 +141,7 @@ public class Debouncer : IDisposeObservable
         Action<Exception>? onError = default
     )
     {
-        DisposeState.ThrowIfDisposed();
+        _disposeState.ThrowIfDisposed();
 
         var resolvedDispatcher = dispatcher ?? new CurrentThreadDispatcher();
 
@@ -186,7 +191,14 @@ public class Debouncer : IDisposeObservable
     /// <summary>
     /// Cancel any pending debounce and dispose of this object.
     /// </summary>
-    private void OnDispose() => Cancel();
+    public void Dispose() => _disposeState.Dispose();
+
+    #endregion
+
+    #region Events
+
+    /// <inheritdoc/>
+    public Observable Disposed => _disposeState.Disposed;
 
     #endregion
 }

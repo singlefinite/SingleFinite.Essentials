@@ -41,13 +41,13 @@ internal class ObserverOn : ObserverBase
         IDisposeObservable disposeObservable
     ) : base(parent)
     {
-        if (disposeObservable.DisposeState.IsDisposed)
+        if (disposeObservable.IsDisposed)
         {
             Dispose();
             return;
         }
 
-        disposeObservable.DisposeState.Disposed
+        disposeObservable.Disposed
             .Observe()
             .OnEach(Dispose)
             .Once();
@@ -110,13 +110,13 @@ internal class ObserverOn<TArgs> : ObserverBase<TArgs>
         IDisposeObservable disposeObservable
     ) : base(parent)
     {
-        if (disposeObservable.DisposeState.IsDisposed)
+        if (disposeObservable.IsDisposed)
         {
             Dispose();
             return;
         }
 
-        disposeObservable.DisposeState.Disposed
+        disposeObservable.Disposed
             .Observe()
             .OnEach(Dispose)
             .Once();

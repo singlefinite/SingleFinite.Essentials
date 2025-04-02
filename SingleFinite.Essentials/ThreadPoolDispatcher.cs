@@ -26,9 +26,17 @@ namespace SingleFinite.Essentials;
 /// functions and actions to the thread pool using 
 /// <see cref="Task.Run(Func{Task?})"/>.
 /// </summary>
-public class ThreadPoolDispatcher : IDispatcher
+public sealed class ThreadPoolDispatcher :
+    IDispatcher,
+    IDisposable,
+    IDisposeObservable
 {
     #region Fields
+
+    /// <summary>
+    /// Holds the dispose state for this object.
+    /// </summary>
+    private readonly DisposeState _disposeState;
 
     /// <summary>
     /// Holds the exception handler for the dispatcher.
@@ -49,7 +57,7 @@ public class ThreadPoolDispatcher : IDispatcher
     public ThreadPoolDispatcher(Action<Exception>? onError = default)
     {
         _onError = onError;
-        DisposeState = new(this);
+        _disposeState = new(this);
     }
 
     #endregion
@@ -57,7 +65,11 @@ public class ThreadPoolDispatcher : IDispatcher
     #region Properties
 
     /// <inheritdoc/>
-    public DisposeState DisposeState { get; }
+    public bool IsDisposed => _disposeState.IsDisposed;
+
+    /// <inheritdoc/>
+    public CancellationToken CancellationToken =>
+        _disposeState.CancellationToken;
 
     #endregion
 
@@ -76,12 +88,22 @@ public class ThreadPoolDispatcher : IDispatcher
     /// </exception>
     public Task<TResult> RunAsync<TResult>(Func<Task<TResult>> func)
     {
-        DisposeState.ThrowIfDisposed();
+        _disposeState.ThrowIfDisposed();
         return Task.Run(func);
     }
 
     /// <inheritdoc/>
     public void OnError(Exception ex) => _onError?.Invoke(ex);
+
+    /// <inheritdoc/>
+    public void Dispose() => _disposeState.Dispose();
+
+    #endregion
+
+    #region Events
+
+    /// <inheritdoc/>
+    public Observable Disposed => _disposeState.Disposed;
 
     #endregion
 }

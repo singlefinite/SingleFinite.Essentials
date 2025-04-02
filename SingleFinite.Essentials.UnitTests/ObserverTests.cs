@@ -216,7 +216,7 @@ public class ObserverTests
         Assert.AreEqual("Hello", observedNames[0]);
         observedNames.Clear();
 
-        disposable.DisposeState.Dispose();
+        disposable.Dispose();
 
         observableSource.Emit(new("World", 0));
 
@@ -735,14 +735,20 @@ public class ObserverTests
         Age: 0
     );
 
-    private class ExampleDisposable : IDisposeObservable
+    private class ExampleDisposable : IDisposable, IDisposeObservable
     {
+        private readonly DisposeState _disposeState;
+
         public ExampleDisposable()
         {
-            DisposeState = new(this);
+            _disposeState = new(this);
         }
 
-        public DisposeState DisposeState { get; }
+        public bool IsDisposed => _disposeState.IsDisposed;
+
+        public void Dispose() => _disposeState.Dispose();
+
+        public Observable Disposed => _disposeState.Disposed;
     }
 
     private class ExampleSender;

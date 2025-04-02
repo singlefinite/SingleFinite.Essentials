@@ -30,9 +30,17 @@ namespace SingleFinite.Essentials;
 /// useful for unit testing when there is no UI thread provided by the unit 
 /// testing framework.
 /// </summary>
-public class DedicatedThreadDispatcher : IDispatcher
+public sealed class DedicatedThreadDispatcher :
+    IDispatcher,
+    IDisposable,
+    IDisposeObservable
 {
     #region Fields
+
+    /// <summary>
+    /// Holds the dispose state for this object.
+    /// </summary>
+    private readonly DisposeState _disposeState;
 
     /// <summary>
     /// Holds the exception handler for the dispatcher.
@@ -71,7 +79,7 @@ public class DedicatedThreadDispatcher : IDispatcher
     {
         _onError = onError;
 
-        DisposeState = new(
+        _disposeState = new(
             owner: this,
             onDispose: OnDispose
         );
@@ -87,10 +95,12 @@ public class DedicatedThreadDispatcher : IDispatcher
 
     #region Properties
 
-    /// <summary>
-    /// The dispose state for this object.
-    /// </summary>
-    public DisposeState DisposeState { get; }
+    /// <inheritdoc/>
+    public bool IsDisposed => _disposeState.IsDisposed;
+
+    /// <inheritdoc/>
+    public CancellationToken CancellationToken =>
+        _disposeState.CancellationToken;
 
     #endregion
 
@@ -133,7 +143,7 @@ public class DedicatedThreadDispatcher : IDispatcher
     /// </exception>
     public Task<TResult> RunAsync<TResult>(Func<Task<TResult>> func)
     {
-        DisposeState.ThrowIfDisposed();
+        _disposeState.ThrowIfDisposed();
 
         if (Thread.CurrentThread == _thread)
             return func();
@@ -161,6 +171,9 @@ public class DedicatedThreadDispatcher : IDispatcher
     /// <inheritdoc/>
     public void OnError(Exception ex) => _onError?.Invoke(ex);
 
+    /// <inheritdoc/>
+    public void Dispose() => _disposeState.Dispose();
+
     /// <summary>
     /// Mark the queue as complete when disposed and wait for the dedicated 
     /// thread to stop.
@@ -170,6 +183,13 @@ public class DedicatedThreadDispatcher : IDispatcher
         _queue.CompleteAdding();
         _thread.Join();
     }
+
+    #endregion
+
+    #region Events
+
+    /// <inheritdoc/>
+    public Observable Disposed => _disposeState.Disposed;
 
     #endregion
 }

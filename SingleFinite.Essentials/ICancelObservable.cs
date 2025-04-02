@@ -19,39 +19,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace SingleFinite.Essentials.UnitTests;
+namespace SingleFinite.Essentials;
 
-[TestClass]
-public class ThreadPoolDispatcherTests
+/// <summary>
+/// An object whose cancel state can be observed.
+/// </summary>
+public interface ICancelObservable
 {
-    [TestMethod]
-    public void Cancel_Passed_In_Cancellation_Token_Cancels_Dispatcher_Provided_Cancellation_Token()
-    {
-        var counter = 0;
-        var waitHandle = new ManualResetEvent(false);
-        var startWaitHandle = new ManualResetEvent(false);
-        using var cancellationTokenSource = new CancellationTokenSource();
-
-        var dispatcher = new ThreadPoolDispatcher();
-
-        dispatcher.Run(
-            cancellationToken =>
-            {
-                startWaitHandle.Set();
-                cancellationToken.WaitHandle.WaitOne();
-                counter++;
-                waitHandle.Set();
-            },
-            cancellationTokenSource.Token
-        );
-
-        startWaitHandle.WaitOne();
-        cancellationTokenSource.Cancel();
-
-        waitHandle.WaitOne();
-
-        Assert.AreEqual(1, counter);
-        Assert.AreEqual(true, cancellationTokenSource.Token.IsCancellationRequested);
-        Assert.AreEqual(false, dispatcher.CancellationToken.IsCancellationRequested);
-    }
+    /// <summary>
+    /// A token that is canceled when this object is canceled.
+    /// </summary>
+    CancellationToken CancellationToken { get; }
 }
