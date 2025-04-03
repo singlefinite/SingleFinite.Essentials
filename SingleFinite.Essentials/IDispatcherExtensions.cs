@@ -39,7 +39,7 @@ public static class IDispatcherExtensions
         dispatcher.RunAsync(
             async () =>
             {
-                await func().ConfigureAwait(false);
+                await func();
                 return 0;
             }
         );
@@ -126,7 +126,7 @@ public static class IDispatcherExtensions
             .RunAsync(
                 async () =>
                 {
-                    await func().ConfigureAwait(false);
+                    await func();
                     return Task.FromResult(0);
                 }
             )
@@ -190,7 +190,7 @@ public static class IDispatcherExtensions
         dispatcher.RunAsync(
             func: async cancellationToken =>
             {
-                await func(cancellationToken).ConfigureAwait(false);
+                await func(cancellationToken);
                 return 0;
             },
             cancellationTokens: cancellationTokens
@@ -345,7 +345,7 @@ public static class IDispatcherExtensions
             .RunAsync(
                 func: async cancellationToken =>
                 {
-                    await func(cancellationToken).ConfigureAwait(false);
+                    await func(cancellationToken);
                     return Task.CompletedTask;
                 },
                 cancellationTokens: cancellationTokens

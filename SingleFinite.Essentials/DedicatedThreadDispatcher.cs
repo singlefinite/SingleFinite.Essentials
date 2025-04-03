@@ -156,7 +156,7 @@ public sealed class DedicatedThreadDispatcher :
         {
             try
             {
-                var result = await func().ConfigureAwait(false);
+                var result = await func();
                 taskCompletionSource.SetResult(result);
             }
             catch (Exception ex)
