@@ -536,7 +536,7 @@ public static class IObserverExtensions
 
     /// <summary>
     /// Create an observer that raises the next event in the observer chain as
-    /// async by using the provided dispatcher..
+    /// async by using the provided dispatcher.
     /// </summary>
     /// <param name="observer">The observer to extend.</param>
     /// <param name="dispatcher">
@@ -557,7 +557,7 @@ public static class IObserverExtensions
 
     /// <summary>
     /// Create an observer that raises the next event in the observer chain as
-    /// async by using the provided dispatcher..
+    /// async by using the provided dispatcher.
     /// </summary>
     /// <typeparam name="TArgs">
     /// The type of arguments passed with observed events.

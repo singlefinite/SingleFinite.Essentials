@@ -23,7 +23,7 @@ namespace SingleFinite.Essentials.Internal.Observers;
 
 /// <summary>
 /// An observer that raises the next event in the observer chain as async
-/// by using the provided dispatcher..
+/// by using the provided dispatcher.
 /// </summary>
 /// <param name="parent">The parent to this observer.</param>
 /// <param name="dispatcher">
