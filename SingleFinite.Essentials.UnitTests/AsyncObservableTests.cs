@@ -117,6 +117,31 @@ public class AsyncObservableTests
         Assert.AreEqual("Three", observedNames[0]);
     }
 
+    [TestMethod]
+    public async Task Combine_Emits_Through()
+    {
+        var observedNumbers = new List<int>();
+
+        var firstObservableSource = new AsyncObservableSource<int>();
+        var secondObservableSource = new AsyncObservableSource<int>();
+        var combinedObserver = AsyncObservable.Combine(
+            firstObservableSource.Observable,
+            secondObservableSource.Observable
+        );
+
+        combinedObserver.OnEach(observedNumbers.Add);
+
+        await firstObservableSource.EmitAsync(9);
+        Assert.AreEqual(1, observedNumbers.Count);
+        Assert.AreEqual(9, observedNumbers[0]);
+
+        observedNumbers.Clear();
+
+        await firstObservableSource.EmitAsync(11);
+        Assert.AreEqual(1, observedNumbers.Count);
+        Assert.AreEqual(11, observedNumbers[0]);
+    }
+
     #region Types
 
     private record ExampleArgs(

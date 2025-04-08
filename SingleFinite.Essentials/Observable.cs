@@ -85,6 +85,60 @@ public sealed class Observable
         handler
     );
 
+    /// <summary>
+    /// Combine the given observers into a single observer.
+    /// </summary>
+    /// <param name="observers">The observers to combine.</param>
+    /// <returns>
+    /// A new observer that emits when any of the provided observers emit.
+    /// </returns>
+    public static IObserver Combine(params IEnumerable<IObserver> observers) =>
+        new ObserverCombine(observers);
+
+    /// <summary>
+    /// Combine the given observables into a single observer.
+    /// </summary>
+    /// <param name="observables">The observables to combine.</param>
+    /// <returns>
+    /// A new observer that emits when any of the provided observables emit.
+    /// </returns>
+    public static IObserver Combine(
+        params IEnumerable<Observable> observables
+    ) =>
+        new ObserverCombine(
+            observables.Select(observable => observable.Observe())
+        );
+
+    /// <summary>
+    /// Combine the given observers into a single observer.
+    /// </summary>
+    /// <typeparam name="TArgs">
+    /// The type of arguments passed with the event.
+    /// </typeparam>
+    /// <param name="observers">The observers to combine.</param>
+    /// <returns>
+    /// A new observer that emits when any of the provided observers emit.
+    /// </returns>
+    public static IObserver<TArgs> Combine<TArgs>(params IEnumerable<IObserver<TArgs>> observers) =>
+        new ObserverCombine<TArgs>(observers);
+
+    /// <summary>
+    /// Combine the given observables into a single observer.
+    /// </summary>
+    /// <typeparam name="TArgs">
+    /// The type of arguments passed with the event.
+    /// </typeparam>
+    /// <param name="observables">The observables to combine.</param>
+    /// <returns>
+    /// A new observer that emits when any of the provided observables emit.
+    /// </returns>
+    public static IObserver<TArgs> Combine<TArgs>(
+        params IEnumerable<Observable<TArgs>> observables
+    ) =>
+        new ObserverCombine<TArgs>(
+            observables.Select(observable => observable.Observe())
+        );
+
     #endregion
 
     #region Events

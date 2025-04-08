@@ -75,4 +75,29 @@ public class ObservableTests
 
         Assert.AreEqual(81, observedNumber);
     }
+
+    [TestMethod]
+    public void Combine_Emits_Through()
+    {
+        var observedNumbers = new List<int>();
+
+        var firstObservableSource = new ObservableSource<int>();
+        var secondObservableSource = new ObservableSource<int>();
+        var combinedObserver = Observable.Combine(
+            firstObservableSource.Observable,
+            secondObservableSource.Observable
+        );
+
+        combinedObserver.OnEach(observedNumbers.Add);
+
+        firstObservableSource.Emit(9);
+        Assert.AreEqual(1, observedNumbers.Count);
+        Assert.AreEqual(9, observedNumbers[0]);
+
+        observedNumbers.Clear();
+
+        firstObservableSource.Emit(11);
+        Assert.AreEqual(1, observedNumbers.Count);
+        Assert.AreEqual(11, observedNumbers[0]);
+    }
 }

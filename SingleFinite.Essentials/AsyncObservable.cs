@@ -86,6 +86,60 @@ public sealed class AsyncObservable
         handler
     );
 
+    /// <summary>
+    /// Combine the given observers into a single observer.
+    /// </summary>
+    /// <param name="observers">The observers to combine.</param>
+    /// <returns>
+    /// A new observer that emits when any of the provided observers emit.
+    /// </returns>
+    public static IAsyncObserver Combine(params IEnumerable<IAsyncObserver> observers) =>
+        new AsyncObserverCombine(observers);
+
+    /// <summary>
+    /// Combine the given observables into a single observer.
+    /// </summary>
+    /// <param name="observables">The observables to combine.</param>
+    /// <returns>
+    /// A new observer that emits when any of the provided observables emit.
+    /// </returns>
+    public static IAsyncObserver Combine(
+        params IEnumerable<AsyncObservable> observables
+    ) =>
+        new AsyncObserverCombine(
+            observables.Select(observable => observable.Observe())
+        );
+
+    /// <summary>
+    /// Combine the given observers into a single observer.
+    /// </summary>
+    /// <typeparam name="TArgs">
+    /// The type of arguments passed with the event.
+    /// </typeparam>
+    /// <param name="observers">The observers to combine.</param>
+    /// <returns>
+    /// A new observer that emits when any of the provided observers emit.
+    /// </returns>
+    public static IAsyncObserver<TArgs> Combine<TArgs>(params IEnumerable<IAsyncObserver<TArgs>> observers) =>
+        new AsyncObserverCombine<TArgs>(observers);
+
+    /// <summary>
+    /// Combine the given observables into a single observer.
+    /// </summary>
+    /// <typeparam name="TArgs">
+    /// The type of arguments passed with the event.
+    /// </typeparam>
+    /// <param name="observables">The observables to combine.</param>
+    /// <returns>
+    /// A new observer that emits when any of the provided observables emit.
+    /// </returns>
+    public static IAsyncObserver<TArgs> Combine<TArgs>(
+        params IEnumerable<AsyncObservable<TArgs>> observables
+    ) =>
+        new AsyncObserverCombine<TArgs>(
+            observables.Select(observable => observable.Observe())
+        );
+
     #endregion
 
     #region Events
