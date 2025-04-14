@@ -19,6 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using System;
 using System.Collections;
 
 namespace SingleFinite.Essentials;
@@ -109,7 +110,7 @@ public class ObservableList<TItem> : IList<TItem>
         _changedSource.Emit(
             new(
                 ChangeType: ListChangeType.Add,
-                Item: item,
+                Items: [item],
                 OldIndex: -1,
                 NewIndex: index
             )
@@ -137,7 +138,7 @@ public class ObservableList<TItem> : IList<TItem>
         _changedSource.Emit(
             new(
                 ChangeType: ListChangeType.Move,
-                Item: item,
+                Items: [item],
                 OldIndex: oldIndex,
                 NewIndex: newIndex
             )
@@ -163,7 +164,7 @@ public class ObservableList<TItem> : IList<TItem>
         _changedSource.Emit(
             new(
                 ChangeType: ListChangeType.Remove,
-                Item: item,
+                Items: [item],
                 OldIndex: index,
                 NewIndex: -1
             )
@@ -175,7 +176,14 @@ public class ObservableList<TItem> : IList<TItem>
     {
         var items = _list.ToArray();
         _list.Clear();
-        _clearedSource.Emit(items);
+        _changedSource.Emit(
+            new(
+                ChangeType: ListChangeType.Remove,
+                Items: items,
+                OldIndex: 0,
+                NewIndex: -1
+            )
+        );
     }
 
     /// <inheritdoc/>
@@ -195,12 +203,6 @@ public class ObservableList<TItem> : IList<TItem>
     /// </summary>
     public Observable<ListChange<TItem>> Changed => _changedSource.Observable;
     private readonly ObservableSource<ListChange<TItem>> _changedSource = new();
-
-    /// <summary>
-    /// Observalbe taht emits when the list has been cleared.
-    /// </summary>
-    public Observable<IEnumerable<TItem>> Cleared => _clearedSource.Observable;
-    private readonly ObservableSource<IEnumerable<TItem>> _clearedSource = new();
 
     #endregion
 }

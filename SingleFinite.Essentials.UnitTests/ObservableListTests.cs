@@ -43,7 +43,8 @@ public class ObservableListTests
 
         Assert.AreEqual(1, observedChanges.Count);
         Assert.AreEqual(ListChangeType.Add, observedChanges[0].ChangeType);
-        Assert.AreEqual(1, observedChanges[0].Item);
+        Assert.AreEqual(1, observedChanges[0].Items.Count());
+        Assert.AreEqual(1, observedChanges[0].Items.First());
         Assert.AreEqual(-1, observedChanges[0].OldIndex);
         Assert.AreEqual(0, observedChanges[0].NewIndex);
 
@@ -57,7 +58,8 @@ public class ObservableListTests
 
         Assert.AreEqual(1, observedChanges.Count);
         Assert.AreEqual(ListChangeType.Add, observedChanges[0].ChangeType);
-        Assert.AreEqual(2, observedChanges[0].Item);
+        Assert.AreEqual(1, observedChanges[0].Items.Count());
+        Assert.AreEqual(2, observedChanges[0].Items.First());
         Assert.AreEqual(-1, observedChanges[0].OldIndex);
         Assert.AreEqual(1, observedChanges[0].NewIndex);
     }
@@ -85,7 +87,8 @@ public class ObservableListTests
 
         Assert.AreEqual(1, observedChanges.Count);
         Assert.AreEqual(ListChangeType.Move, observedChanges[0].ChangeType);
-        Assert.AreEqual(4, observedChanges[0].Item);
+        Assert.AreEqual(1, observedChanges[0].Items.Count());
+        Assert.AreEqual(4, observedChanges[0].Items.First());
         Assert.AreEqual(1, observedChanges[0].OldIndex);
         Assert.AreEqual(3, observedChanges[0].NewIndex);
     }
@@ -112,7 +115,8 @@ public class ObservableListTests
 
         Assert.AreEqual(1, observedChanges.Count);
         Assert.AreEqual(ListChangeType.Remove, observedChanges[0].ChangeType);
-        Assert.AreEqual(4, observedChanges[0].Item);
+        Assert.AreEqual(1, observedChanges[0].Items.Count());
+        Assert.AreEqual(4, observedChanges[0].Items.First());
         Assert.AreEqual(3, observedChanges[0].OldIndex);
         Assert.AreEqual(-1, observedChanges[0].NewIndex);
     }
@@ -139,7 +143,8 @@ public class ObservableListTests
 
         Assert.AreEqual(1, observedChanges.Count);
         Assert.AreEqual(ListChangeType.Remove, observedChanges[0].ChangeType);
-        Assert.AreEqual(4, observedChanges[0].Item);
+        Assert.AreEqual(1, observedChanges[0].Items.Count());
+        Assert.AreEqual(4, observedChanges[0].Items.First());
         Assert.AreEqual(3, observedChanges[0].OldIndex);
         Assert.AreEqual(-1, observedChanges[0].NewIndex);
     }
@@ -147,10 +152,10 @@ public class ObservableListTests
     [TestMethod]
     public void Clear_Is_Observed()
     {
-        var observedChanges = new List<IEnumerable<int>>();
+        var observedChanges = new List<ListChange<int>>();
 
         var list = new ObservableList<int>([1, 2, 3, 4, 5]);
-        list.Cleared
+        list.Changed
             .Observe()
             .OnEach(observedChanges.Add);
 
@@ -161,11 +166,13 @@ public class ObservableListTests
         Assert.AreEqual(0, list.Count);
 
         Assert.AreEqual(1, observedChanges.Count);
-        Assert.AreEqual(5, observedChanges[0].Count());
-        Assert.AreEqual(1, observedChanges[0].First());
-        Assert.AreEqual(2, observedChanges[0].Skip(1).First());
-        Assert.AreEqual(3, observedChanges[0].Skip(2).First());
-        Assert.AreEqual(4, observedChanges[0].Skip(3).First());
-        Assert.AreEqual(5, observedChanges[0].Skip(4).First());
+        Assert.AreEqual(5, observedChanges[0].Items.Count());
+        Assert.AreEqual(1, observedChanges[0].Items.First());
+        Assert.AreEqual(2, observedChanges[0].Items.Skip(1).First());
+        Assert.AreEqual(3, observedChanges[0].Items.Skip(2).First());
+        Assert.AreEqual(4, observedChanges[0].Items.Skip(3).First());
+        Assert.AreEqual(5, observedChanges[0].Items.Skip(4).First());
+        Assert.AreEqual(0, observedChanges[0].OldIndex);
+        Assert.AreEqual(-1, observedChanges[0].NewIndex);
     }
 }
