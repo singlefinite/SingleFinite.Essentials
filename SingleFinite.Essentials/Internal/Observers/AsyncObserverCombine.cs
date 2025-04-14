@@ -29,6 +29,11 @@ internal class AsyncObserverCombine : IAsyncObserver
     #region Fields
 
     /// <summary>
+    /// Holds the dispose state.
+    /// </summary>
+    private readonly ConcurrentDisposeState _disposeState;
+
+    /// <summary>
     /// Holds the observers that are combined.
     /// </summary>
     private readonly IEnumerable<IAsyncObserver> _observers;
@@ -46,7 +51,26 @@ internal class AsyncObserverCombine : IAsyncObserver
         _observers = observers;
         foreach (var observer in _observers)
             observer.OnEach(() => Next?.Invoke() ?? Task.CompletedTask);
+
+        _disposeState = new(
+            owner: this,
+            onDispose: () =>
+            {
+                foreach (var observer in _observers)
+                    observer.Dispose();
+            }
+        );
     }
+
+    #endregion
+
+    #region Properties
+
+    /// <inheritdoc/>
+    public bool IsDisposed => _disposeState.IsDisposed;
+
+    /// <inheritdoc/>
+    public Observable Disposed => _disposeState.Disposed;
 
     #endregion
 
@@ -55,11 +79,7 @@ internal class AsyncObserverCombine : IAsyncObserver
     /// <summary>
     /// Dispose of all of the observers that were combined.
     /// </summary>
-    public void Dispose()
-    {
-        foreach (var observer in _observers)
-            observer.Dispose();
-    }
+    public void Dispose() => _disposeState.Dispose();
 
     #endregion
 
@@ -84,6 +104,11 @@ internal class AsyncObserverCombine<TArgs> : IAsyncObserver<TArgs>
     #region Fields
 
     /// <summary>
+    /// Holds the dispose state.
+    /// </summary>
+    private readonly ConcurrentDisposeState _disposeState;
+
+    /// <summary>
     /// Holds the observers that are combined.
     /// </summary>
     private readonly IEnumerable<IAsyncObserver<TArgs>> _observers;
@@ -101,7 +126,26 @@ internal class AsyncObserverCombine<TArgs> : IAsyncObserver<TArgs>
         _observers = observers;
         foreach (var observer in _observers)
             observer.OnEach(args => Next?.Invoke(args) ?? Task.CompletedTask);
+
+        _disposeState = new(
+            owner: this,
+            onDispose: () =>
+            {
+                foreach (var observer in _observers)
+                    observer.Dispose();
+            }
+        );
     }
+
+    #endregion
+
+    #region Properties
+
+    /// <inheritdoc/>
+    public bool IsDisposed => _disposeState.IsDisposed;
+
+    /// <inheritdoc/>
+    public Observable Disposed => _disposeState.Disposed;
 
     #endregion
 
@@ -110,11 +154,7 @@ internal class AsyncObserverCombine<TArgs> : IAsyncObserver<TArgs>
     /// <summary>
     /// Dispose of all of the observers that were combined.
     /// </summary>
-    public void Dispose()
-    {
-        foreach (var observer in _observers)
-            observer.Dispose();
-    }
+    public void Dispose() => _disposeState.Dispose();
 
     #endregion
 

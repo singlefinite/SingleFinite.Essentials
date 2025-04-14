@@ -22,7 +22,8 @@
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// A convience class that can be used to manage the dispose state of an object.
+/// A convience class that can be used to manage the dispose state of an object
+/// and is thread safe.
 /// </summary>
 /// <param name="owner">
 /// The object whose dispose state is being managed by this object.
@@ -30,21 +31,33 @@ namespace SingleFinite.Essentials;
 /// <param name="onDispose">
 /// Optional action to invoke when this object is disposed.
 /// </param>
-public sealed class DisposeState(
+public sealed class ConcurrentDisposeState(
     object owner,
     Action? onDispose = default
 ) : DisposeStateBase(owner, onDispose)
 {
+    #region Fields
+
+    /// <summary>
+    /// Used to prevent concurrent execution of the StartDispose method.
+    /// </summary>
+    private readonly Lock _startDisposeLock = new();
+
+    #endregion
+
     #region Methods
 
     /// <inheritdoc/>
     protected override bool StartDispose()
     {
-        if (IsDisposed)
-            return false;
+        lock (_startDisposeLock)
+        {
+            if (IsDisposed)
+                return false;
 
-        IsDisposed = true;
-        return true;
+            IsDisposed = true;
+            return true;
+        }
     }
 
     #endregion

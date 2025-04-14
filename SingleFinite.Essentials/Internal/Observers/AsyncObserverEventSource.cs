@@ -31,9 +31,9 @@ internal class AsyncObserverEventSource<TEventDelegate> : IAsyncObserver
     #region Fields
 
     /// <summary>
-    /// Set to true when this object has been disposed.
+    /// Holds the dispose state.
     /// </summary>
-    private bool _isDisposed;
+    private readonly ConcurrentDisposeState _disposeState;
 
     /// <summary>
     /// Action used to unregister event handler.
@@ -44,11 +44,6 @@ internal class AsyncObserverEventSource<TEventDelegate> : IAsyncObserver
     /// Holds the event handler.
     /// </summary>
     private readonly TEventDelegate _handler;
-
-    /// <summary>
-    /// Used to make Dispose method thread safe.
-    /// </summary>
-    private readonly Lock _disposeLock = new();
 
     #endregion
 
@@ -74,7 +69,22 @@ internal class AsyncObserverEventSource<TEventDelegate> : IAsyncObserver
         _unregister = unregister;
         _handler = handler(RaiseNextAsync);
         register(_handler);
+
+        _disposeState = new(
+            owner: this,
+            onDispose: () => _unregister(_handler)
+        );
     }
+
+    #endregion
+
+    #region Properties
+
+    /// <inheritdoc/>
+    public bool IsDisposed => _disposeState.IsDisposed;
+
+    /// <inheritdoc/>
+    public Observable Disposed => _disposeState.Disposed;
 
     #endregion
 
@@ -83,17 +93,7 @@ internal class AsyncObserverEventSource<TEventDelegate> : IAsyncObserver
     /// <summary>
     /// Unregister event handler.
     /// </summary>
-    public void Dispose()
-    {
-        lock (_disposeLock)
-        {
-            if (_isDisposed)
-                return;
-
-            _isDisposed = true;
-            _unregister(_handler);
-        }
-    }
+    public void Dispose() => _disposeState.Dispose();
 
     /// <summary>
     /// Raise the Next event.
@@ -124,9 +124,9 @@ internal class AsyncObserverEventSource<TEventDelegate, TArgs> : IAsyncObserver<
     #region Fields
 
     /// <summary>
-    /// Set to true when this object has been disposed.
+    /// Holds the dispose state.
     /// </summary>
-    private bool _isDisposed;
+    private readonly ConcurrentDisposeState _disposeState;
 
     /// <summary>
     /// Action used to unregister event handler.
@@ -137,11 +137,6 @@ internal class AsyncObserverEventSource<TEventDelegate, TArgs> : IAsyncObserver<
     /// Holds the event handler.
     /// </summary>
     private readonly TEventDelegate _handler;
-
-    /// <summary>
-    /// Used to make Dispose method thread safe.
-    /// </summary>
-    private readonly Lock _disposeLock = new();
 
     #endregion
 
@@ -167,7 +162,22 @@ internal class AsyncObserverEventSource<TEventDelegate, TArgs> : IAsyncObserver<
         _unregister = unregister;
         _handler = handler(RaiseNextAsync);
         register(_handler);
+
+        _disposeState = new(
+            owner: this,
+            onDispose: () => _unregister(_handler)
+        );
     }
+
+    #endregion
+
+    #region Properties
+
+    /// <inheritdoc/>
+    public bool IsDisposed => _disposeState.IsDisposed;
+
+    /// <inheritdoc/>
+    public Observable Disposed => _disposeState.Disposed;
 
     #endregion
 
@@ -176,17 +186,7 @@ internal class AsyncObserverEventSource<TEventDelegate, TArgs> : IAsyncObserver<
     /// <summary>
     /// Unregister event handler.
     /// </summary>
-    public void Dispose()
-    {
-        lock (_disposeLock)
-        {
-            if (_isDisposed)
-                return;
-
-            _isDisposed = true;
-            _unregister(_handler);
-        }
-    }
+    public void Dispose() => _disposeState.Dispose();
 
     /// <summary>
     /// Raise the Next event.

@@ -30,7 +30,7 @@ namespace SingleFinite.Essentials;
 /// will unregister all observers in the chain so any future observable events
 /// will not be observed.
 /// </summary>
-public interface IObserver : IDisposable
+public interface IObserver : IDisposable, IDisposeObservable
 {
     /// <summary>
     /// An event that is raised when the next observer(s) in the chain should
@@ -49,7 +49,7 @@ public interface IObserver : IDisposable
 /// <typeparam name="TArgs">
 /// The type of event arguments passed with observed events.
 /// </typeparam>
-public interface IObserver<TArgs> : IDisposable
+public interface IObserver<TArgs> : IDisposable, IDisposeObservable
 {
     /// <summary>
     /// Create an observer that will filter out events that don't have arguments

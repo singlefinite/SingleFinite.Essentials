@@ -53,6 +53,16 @@ internal abstract class AsyncObserverBase : IAsyncObserver
 
     #endregion
 
+    #region Properties
+
+    /// <inheritdoc/>
+    public bool IsDisposed => _parent.IsDisposed;
+
+    /// <inheritdoc/>
+    public Observable Disposed => _parent.Disposed;
+
+    #endregion
+
     #region Methods
 
     /// <summary>
@@ -122,6 +132,16 @@ internal abstract class AsyncObserverBase<TArgs> : IAsyncObserver<TArgs>
                 await RaiseNextEventAsync(args);
         };
     }
+
+    #endregion
+
+    #region Properties
+
+    /// <inheritdoc/>
+    public bool IsDisposed => _parent.IsDisposed;
+
+    /// <inheritdoc/>
+    public Observable Disposed => _parent.Disposed;
 
     #endregion
 

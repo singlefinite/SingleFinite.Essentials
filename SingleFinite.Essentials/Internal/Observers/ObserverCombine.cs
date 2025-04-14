@@ -19,7 +19,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-
 namespace SingleFinite.Essentials.Internal.Observers;
 
 /// <summary>
@@ -28,6 +27,11 @@ namespace SingleFinite.Essentials.Internal.Observers;
 internal class ObserverCombine : IObserver
 {
     #region Fields
+
+    /// <summary>
+    /// Holds the dispose state.
+    /// </summary>
+    private readonly ConcurrentDisposeState _disposeState;
 
     /// <summary>
     /// Holds the observers that are combined.
@@ -47,7 +51,26 @@ internal class ObserverCombine : IObserver
         _observers = observers;
         foreach (var observer in _observers)
             observer.OnEach(() => Next?.Invoke());
+
+        _disposeState = new(
+            owner: this,
+            onDispose: () =>
+            {
+                foreach (var observer in _observers)
+                    observer.Dispose();
+            }
+        );
     }
+
+    #endregion
+
+    #region Properties
+
+    /// <inheritdoc/>
+    public bool IsDisposed => _disposeState.IsDisposed;
+
+    /// <inheritdoc/>
+    public Observable Disposed => _disposeState.Disposed;
 
     #endregion
 
@@ -56,11 +79,7 @@ internal class ObserverCombine : IObserver
     /// <summary>
     /// Dispose of all of the observers that were combined.
     /// </summary>
-    public void Dispose()
-    {
-        foreach (var observer in _observers)
-            observer.Dispose();
-    }
+    public void Dispose() => _disposeState.Dispose();
 
     #endregion
 
@@ -85,6 +104,11 @@ internal class ObserverCombine<TArgs> : IObserver<TArgs>
     #region Fields
 
     /// <summary>
+    /// Holds the dispose state.
+    /// </summary>
+    private readonly DisposeState _disposeState;
+
+    /// <summary>
     /// Holds the observers that are combined.
     /// </summary>
     private readonly IEnumerable<IObserver<TArgs>> _observers;
@@ -102,7 +126,26 @@ internal class ObserverCombine<TArgs> : IObserver<TArgs>
         _observers = observers;
         foreach (var observer in _observers)
             observer.OnEach(args => Next?.Invoke(args));
+
+        _disposeState = new(
+            owner: this,
+            onDispose: () =>
+            {
+                foreach (var observer in _observers)
+                    observer.Dispose();
+            }
+        );
     }
+
+    #endregion
+
+    #region Properties
+
+    /// <inheritdoc/>
+    public bool IsDisposed => _disposeState.IsDisposed;
+
+    /// <inheritdoc/>
+    public Observable Disposed => _disposeState.Disposed;
 
     #endregion
 
@@ -111,11 +154,7 @@ internal class ObserverCombine<TArgs> : IObserver<TArgs>
     /// <summary>
     /// Dispose of all of the observers that were combined.
     /// </summary>
-    public void Dispose()
-    {
-        foreach (var observer in _observers)
-            observer.Dispose();
-    }
+    public void Dispose() => _disposeState.Dispose();
 
     #endregion
 

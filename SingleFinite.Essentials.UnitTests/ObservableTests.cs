@@ -96,8 +96,62 @@ public class ObservableTests
 
         observedNumbers.Clear();
 
-        firstObservableSource.Emit(11);
+        secondObservableSource.Emit(11);
         Assert.AreEqual(1, observedNumbers.Count);
         Assert.AreEqual(11, observedNumbers[0]);
+    }
+
+    [TestMethod]
+    public void Combine_Continues_To_Emit_After_Single_Observer_Disposed()
+    {
+        var observedNumbers = new List<int>();
+
+        var firstObservableSource = new ObservableSource<int>();
+        var secondObservableSource = new ObservableSource<int>();
+
+        var firstObserver = firstObservableSource.Observable.Observe();
+        var secondObserver = secondObservableSource.Observable.Observe();
+
+        var combinedObserver = Observable.Combine(
+            firstObserver,
+            secondObserver
+        );
+
+        combinedObserver.OnEach(observedNumbers.Add);
+
+        firstObserver.Dispose();
+        Assert.IsFalse(combinedObserver.IsDisposed);
+
+        firstObservableSource.Emit(9);
+        Assert.AreEqual(0, observedNumbers.Count);
+
+        secondObservableSource.Emit(11);
+        Assert.AreEqual(1, observedNumbers.Count);
+        Assert.AreEqual(11, observedNumbers[0]);
+    }
+
+    [TestMethod]
+    public void Combine_Dispose_Will_Dispose_Combined_Observers()
+    {
+        var firstObservableSource = new ObservableSource<int>();
+        var secondObservableSource = new ObservableSource<int>();
+
+        var firstObserver = firstObservableSource.Observable.Observe();
+        var secondObserver = secondObservableSource.Observable.Observe();
+
+        var combinedObserver = Observable.Combine(
+            firstObserver,
+            secondObserver
+        );
+
+        Assert.IsFalse(combinedObserver.IsDisposed);
+        Assert.IsFalse(firstObserver.IsDisposed);
+        Assert.IsFalse(secondObserver.IsDisposed);
+
+        combinedObserver.Dispose();
+
+        Assert.IsTrue(combinedObserver.IsDisposed);
+        Assert.IsTrue(firstObserver.IsDisposed);
+        Assert.IsTrue(secondObserver.IsDisposed);
     }
 }

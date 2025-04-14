@@ -137,9 +137,63 @@ public class AsyncObservableTests
 
         observedNumbers.Clear();
 
-        await firstObservableSource.EmitAsync(11);
+        await secondObservableSource.EmitAsync(11);
         Assert.AreEqual(1, observedNumbers.Count);
         Assert.AreEqual(11, observedNumbers[0]);
+    }
+
+    [TestMethod]
+    public async Task Combine_Continues_To_Emit_After_Single_Observer_Disposed()
+    {
+        var observedNumbers = new List<int>();
+
+        var firstObservableSource = new AsyncObservableSource<int>();
+        var secondObservableSource = new AsyncObservableSource<int>();
+
+        var firstObserver = firstObservableSource.Observable.Observe();
+        var secondObserver = secondObservableSource.Observable.Observe();
+
+        var combinedObserver = AsyncObservable.Combine(
+            firstObserver,
+            secondObserver
+        );
+
+        combinedObserver.OnEach(observedNumbers.Add);
+
+        firstObserver.Dispose();
+        Assert.IsFalse(combinedObserver.IsDisposed);
+
+        await firstObservableSource.EmitAsync(9);
+        Assert.AreEqual(0, observedNumbers.Count);
+
+        await secondObservableSource.EmitAsync(11);
+        Assert.AreEqual(1, observedNumbers.Count);
+        Assert.AreEqual(11, observedNumbers[0]);
+    }
+
+    [TestMethod]
+    public void Combine_Dispose_Will_Dispose_Combined_Observers()
+    {
+        var firstObservableSource = new AsyncObservableSource<int>();
+        var secondObservableSource = new AsyncObservableSource<int>();
+
+        var firstObserver = firstObservableSource.Observable.Observe();
+        var secondObserver = secondObservableSource.Observable.Observe();
+
+        var combinedObserver = AsyncObservable.Combine(
+            firstObserver,
+            secondObserver
+        );
+
+        Assert.IsFalse(combinedObserver.IsDisposed);
+        Assert.IsFalse(firstObserver.IsDisposed);
+        Assert.IsFalse(secondObserver.IsDisposed);
+
+        combinedObserver.Dispose();
+
+        Assert.IsTrue(combinedObserver.IsDisposed);
+        Assert.IsTrue(firstObserver.IsDisposed);
+        Assert.IsTrue(secondObserver.IsDisposed);
     }
 
     #region Types
