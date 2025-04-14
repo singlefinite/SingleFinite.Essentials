@@ -55,7 +55,11 @@ public sealed class AsyncObservable
     /// <returns>
     /// An observer that runs when the event for this observable is raised.
     /// </returns>
-    public IAsyncObserver Observe() => new AsyncObserverSourceObservable(this);
+    public IAsyncObserver Observe() => new AsyncObserverEventSource<Func<Task>>(
+        register: handler => Event += handler,
+        unregister: handler => Event -= handler,
+        handler: eventHandler => () => eventHandler()
+    );
 
     /// <summary>
     /// Raise the event for this observable.
@@ -80,7 +84,7 @@ public sealed class AsyncObservable
         Action<TEventDelegate> register,
         Action<TEventDelegate> unregister,
         Func<Func<Task>, TEventDelegate> handler
-    ) => new AsyncObserverSourceEvent<TEventDelegate>(
+    ) => new AsyncObserverEventSource<TEventDelegate>(
         register,
         unregister,
         handler
@@ -188,7 +192,11 @@ public sealed class AsyncObservable<TArgs>
     /// An observer that runs when the event for this observable is raised.
     /// </returns>
     public IAsyncObserver<TArgs> Observe() =>
-        new AsyncObserverSource<TArgs>(this);
+        new AsyncObserverEventSource<Func<TArgs, Task>, TArgs>(
+            register: handler => Event += handler,
+            unregister: handler => Event -= handler,
+            handler: eventHandler => args => eventHandler(args)
+        );
 
     /// <summary>
     /// Raise the event for this observable.
@@ -215,7 +223,7 @@ public sealed class AsyncObservable<TArgs>
         Action<TEventDelegate> register,
         Action<TEventDelegate> unregister,
         Func<Func<TArgs, Task>, TEventDelegate> handler
-    ) => new AsyncObserverSourceEvent<TEventDelegate, TArgs>(
+    ) => new AsyncObserverEventSource<TEventDelegate, TArgs>(
         register,
         unregister,
         handler

@@ -55,7 +55,11 @@ public sealed class Observable
     /// <returns>
     /// An observer that runs when the event for this observable is raised.
     /// </returns>
-    public IObserver Observe() => new ObserverSourceObservable(this);
+    public IObserver Observe() => new ObserverEventSource<Action>(
+        register: handler => Event += handler,
+        unregister: handler => Event -= handler,
+        handler: eventHandler => () => eventHandler()
+    );
 
     /// <summary>
     /// Raise the event for this observable.
@@ -79,7 +83,7 @@ public sealed class Observable
         Action<TEventDelegate> register,
         Action<TEventDelegate> unregister,
         Func<Action, TEventDelegate> handler
-    ) => new ObserverSourceEvent<TEventDelegate>(
+    ) => new ObserverEventSource<TEventDelegate>(
         register,
         unregister,
         handler
@@ -186,7 +190,12 @@ public sealed class Observable<TArgs>
     /// <returns>
     /// An observer that runs when the event for this observable is raised.
     /// </returns>
-    public IObserver<TArgs> Observe() => new ObserverSourceObservable<TArgs>(this);
+    public IObserver<TArgs> Observe() =>
+        new ObserverEventSource<Action<TArgs>, TArgs>(
+            register: handler => Event += handler,
+            unregister: handler => Event -= handler,
+            handler: eventHandler => args => eventHandler(args)
+        );
 
     /// <summary>
     /// Raise the event for this observable.
@@ -211,7 +220,7 @@ public sealed class Observable<TArgs>
         Action<TEventDelegate> register,
         Action<TEventDelegate> unregister,
         Func<Action<TArgs>, TEventDelegate> handler
-    ) => new ObserverSourceEvent<TEventDelegate, TArgs>(
+    ) => new ObserverEventSource<TEventDelegate, TArgs>(
         register,
         unregister,
         handler

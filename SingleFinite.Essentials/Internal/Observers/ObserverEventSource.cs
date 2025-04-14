@@ -22,10 +22,11 @@
 namespace SingleFinite.Essentials.Internal.Observers;
 
 /// <summary>
-/// An observer that is the root of an observer chain and has an observable
+/// An observer that is the root of an observer chain and has a generic event
 /// for a source.
 /// </summary>
-internal class AsyncObserverSourceObservable : IAsyncObserver
+/// <typeparam name="TEventDelegate">The event delegate type.</typeparam>
+internal class ObserverEventSource<TEventDelegate> : IObserver
 {
     #region Fields
 
@@ -35,9 +36,14 @@ internal class AsyncObserverSourceObservable : IAsyncObserver
     private bool _isDisposed;
 
     /// <summary>
-    /// An observable that is the source of events for the observer.
+    /// Action used to unregister event handler.
     /// </summary>
-    private readonly AsyncObservable _observable;
+    private readonly Action<TEventDelegate> _unregister;
+
+    /// <summary>
+    /// Holds the event handler.
+    /// </summary>
+    private readonly TEventDelegate _handler;
 
     /// <summary>
     /// Used to make Dispose method thread safe.
@@ -51,13 +57,23 @@ internal class AsyncObserverSourceObservable : IAsyncObserver
     /// <summary>
     /// Constructor.
     /// </summary>
-    /// <param name="observable">
-    /// An observable that is the source of events for the observer.
+    /// <param name="register">Action used to register event handler.</param>
+    /// <param name="unregister">
+    /// Action used to unregister event handler.
     /// </param>
-    public AsyncObserverSourceObservable(AsyncObservable observable)
+    /// <param name="handler">
+    /// Func used to get handler.  The action that raises the Next event
+    /// of this observer is passed into the func.
+    /// </param>
+    public ObserverEventSource(
+        Action<TEventDelegate> register,
+        Action<TEventDelegate> unregister,
+        Func<Action, TEventDelegate> handler
+    )
     {
-        _observable = observable;
-        _observable.Event += OnEventAsync;
+        _unregister = unregister;
+        _handler = handler(RaiseNext);
+        register(_handler);
     }
 
     #endregion
@@ -65,12 +81,7 @@ internal class AsyncObserverSourceObservable : IAsyncObserver
     #region Methods
 
     /// <summary>
-    /// Raise the Event.
-    /// </summary>
-    private Task OnEventAsync() => Next?.Invoke() ?? Task.CompletedTask;
-
-    /// <summary>
-    /// Unsubscribe from the observable events.
+    /// Unregister event handler.
     /// </summary>
     public void Dispose()
     {
@@ -80,27 +91,34 @@ internal class AsyncObserverSourceObservable : IAsyncObserver
                 return;
 
             _isDisposed = true;
-            _observable.Event -= OnEventAsync;
+            _unregister(_handler);
         }
     }
+
+    /// <summary>
+    /// Raise the Next event.
+    /// </summary>
+    private void RaiseNext() => Next?.Invoke();
 
     #endregion
 
     #region Events
 
     /// <summary>
-    /// Raised when the observable event is raised. 
+    /// Raised when the underlying event is raised. 
     /// </summary>
-    public event Func<Task>? Next;
+    public event Action? Next;
 
     #endregion
 }
 
 /// <summary>
-/// An observer that is the root of an observer chain and has an observable
+/// An observer that is the root of an observer chain and has a generic event
 /// for a source.
 /// </summary>
-internal class AsyncObserverSource<TArgs> : IAsyncObserver<TArgs>
+/// <typeparam name="TEventDelegate">The event delegate type.</typeparam>
+/// <typeparam name="TArgs">The type of arguments for the observer.</typeparam>
+internal class ObserverEventSource<TEventDelegate, TArgs> : IObserver<TArgs>
 {
     #region Fields
 
@@ -110,9 +128,14 @@ internal class AsyncObserverSource<TArgs> : IAsyncObserver<TArgs>
     private bool _isDisposed;
 
     /// <summary>
-    /// An observable that is the source of events for the observer.
+    /// Action used to unregister event handler.
     /// </summary>
-    private readonly AsyncObservable<TArgs> _observable;
+    private readonly Action<TEventDelegate> _unregister;
+
+    /// <summary>
+    /// Holds the event handler.
+    /// </summary>
+    private readonly TEventDelegate _handler;
 
     /// <summary>
     /// Used to make Dispose method thread safe.
@@ -126,13 +149,23 @@ internal class AsyncObserverSource<TArgs> : IAsyncObserver<TArgs>
     /// <summary>
     /// Constructor.
     /// </summary>
-    /// <param name="observable">
-    /// An observable that is the source of events for the observer.
+    /// <param name="register">Action used to register event handler.</param>
+    /// <param name="unregister">
+    /// Action used to unregister event handler.
     /// </param>
-    public AsyncObserverSource(AsyncObservable<TArgs> observable)
+    /// <param name="handler">
+    /// Func used to get handler.  The action that raises the Next event
+    /// of this observer is passed into the func.
+    /// </param>
+    public ObserverEventSource(
+        Action<TEventDelegate> register,
+        Action<TEventDelegate> unregister,
+        Func<Action<TArgs>, TEventDelegate> handler
+    )
     {
-        _observable = observable;
-        _observable.Event += OnEventAsync;
+        _unregister = unregister;
+        _handler = handler(RaiseNext);
+        register(_handler);
     }
 
     #endregion
@@ -140,13 +173,7 @@ internal class AsyncObserverSource<TArgs> : IAsyncObserver<TArgs>
     #region Methods
 
     /// <summary>
-    /// Raise the Event.
-    /// </summary>
-    private Task OnEventAsync(TArgs args) =>
-        Next?.Invoke(args) ?? Task.CompletedTask;
-
-    /// <summary>
-    /// Unsubscribe from the observable events.
+    /// Unregister event handler.
     /// </summary>
     public void Dispose()
     {
@@ -156,18 +183,24 @@ internal class AsyncObserverSource<TArgs> : IAsyncObserver<TArgs>
                 return;
 
             _isDisposed = true;
-            _observable.Event -= OnEventAsync;
+            _unregister(_handler);
         }
     }
+
+    /// <summary>
+    /// Raise the Next event.
+    /// </summary>
+    /// <param name="args">Arguments passed with the event.</param>
+    private void RaiseNext(TArgs args) => Next?.Invoke(args);
 
     #endregion
 
     #region Events
 
     /// <summary>
-    /// Raised when the observable event is raised. 
+    /// Raised when the underlying event is raised. 
     /// </summary>
-    public event Func<TArgs, Task>? Next;
+    public event Action<TArgs>? Next;
 
     #endregion
 }

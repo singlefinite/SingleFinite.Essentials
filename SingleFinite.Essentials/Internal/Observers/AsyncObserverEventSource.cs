@@ -26,7 +26,7 @@ namespace SingleFinite.Essentials.Internal.Observers;
 /// for a source.
 /// </summary>
 /// <typeparam name="TEventDelegate">The event delegate type.</typeparam>
-internal class ObserverSourceEvent<TEventDelegate> : IObserver
+internal class AsyncObserverEventSource<TEventDelegate> : IAsyncObserver
 {
     #region Fields
 
@@ -45,6 +45,11 @@ internal class ObserverSourceEvent<TEventDelegate> : IObserver
     /// </summary>
     private readonly TEventDelegate _handler;
 
+    /// <summary>
+    /// Used to make Dispose method thread safe.
+    /// </summary>
+    private readonly Lock _disposeLock = new();
+
     #endregion
 
     #region Constructors
@@ -60,14 +65,14 @@ internal class ObserverSourceEvent<TEventDelegate> : IObserver
     /// Func used to get handler.  The action that raises the Next event
     /// of this observer is passed into the func.
     /// </param>
-    public ObserverSourceEvent(
+    public AsyncObserverEventSource(
         Action<TEventDelegate> register,
         Action<TEventDelegate> unregister,
-        Func<Action, TEventDelegate> handler
+        Func<Func<Task>, TEventDelegate> handler
     )
     {
         _unregister = unregister;
-        _handler = handler(RaiseNext);
+        _handler = handler(RaiseNextAsync);
         register(_handler);
     }
 
@@ -80,17 +85,21 @@ internal class ObserverSourceEvent<TEventDelegate> : IObserver
     /// </summary>
     public void Dispose()
     {
-        if (_isDisposed)
-            return;
+        lock (_disposeLock)
+        {
+            if (_isDisposed)
+                return;
 
-        _isDisposed = true;
-        _unregister(_handler);
+            _isDisposed = true;
+            _unregister(_handler);
+        }
     }
 
     /// <summary>
     /// Raise the Next event.
     /// </summary>
-    private void RaiseNext() => Next?.Invoke();
+    /// <returns>The task from invoking the Next event.</returns>
+    private Task RaiseNextAsync() => Next?.Invoke() ?? Task.CompletedTask;
 
     #endregion
 
@@ -99,7 +108,7 @@ internal class ObserverSourceEvent<TEventDelegate> : IObserver
     /// <summary>
     /// Raised when the underlying event is raised. 
     /// </summary>
-    public event Action? Next;
+    public event Func<Task>? Next;
 
     #endregion
 }
@@ -110,7 +119,7 @@ internal class ObserverSourceEvent<TEventDelegate> : IObserver
 /// </summary>
 /// <typeparam name="TEventDelegate">The event delegate type.</typeparam>
 /// <typeparam name="TArgs">The type of arguments for the observer.</typeparam>
-internal class ObserverSourceEvent<TEventDelegate, TArgs> : IObserver<TArgs>
+internal class AsyncObserverEventSource<TEventDelegate, TArgs> : IAsyncObserver<TArgs>
 {
     #region Fields
 
@@ -129,6 +138,11 @@ internal class ObserverSourceEvent<TEventDelegate, TArgs> : IObserver<TArgs>
     /// </summary>
     private readonly TEventDelegate _handler;
 
+    /// <summary>
+    /// Used to make Dispose method thread safe.
+    /// </summary>
+    private readonly Lock _disposeLock = new();
+
     #endregion
 
     #region Constructors
@@ -144,14 +158,14 @@ internal class ObserverSourceEvent<TEventDelegate, TArgs> : IObserver<TArgs>
     /// Func used to get handler.  The action that raises the Next event
     /// of this observer is passed into the func.
     /// </param>
-    public ObserverSourceEvent(
+    public AsyncObserverEventSource(
         Action<TEventDelegate> register,
         Action<TEventDelegate> unregister,
-        Func<Action<TArgs>, TEventDelegate> handler
+        Func<Func<TArgs, Task>, TEventDelegate> handler
     )
     {
         _unregister = unregister;
-        _handler = handler(RaiseNext);
+        _handler = handler(RaiseNextAsync);
         register(_handler);
     }
 
@@ -164,18 +178,23 @@ internal class ObserverSourceEvent<TEventDelegate, TArgs> : IObserver<TArgs>
     /// </summary>
     public void Dispose()
     {
-        if (_isDisposed)
-            return;
+        lock (_disposeLock)
+        {
+            if (_isDisposed)
+                return;
 
-        _isDisposed = true;
-        _unregister(_handler);
+            _isDisposed = true;
+            _unregister(_handler);
+        }
     }
 
     /// <summary>
     /// Raise the Next event.
     /// </summary>
     /// <param name="args">Arguments passed with the event.</param>
-    private void RaiseNext(TArgs args) => Next?.Invoke(args);
+    /// <returns>The task from invoking the Next event.</returns>
+    private Task RaiseNextAsync(TArgs args) =>
+        Next?.Invoke(args) ?? Task.CompletedTask;
 
     #endregion
 
@@ -184,7 +203,7 @@ internal class ObserverSourceEvent<TEventDelegate, TArgs> : IObserver<TArgs>
     /// <summary>
     /// Raised when the underlying event is raised. 
     /// </summary>
-    public event Action<TArgs>? Next;
+    public event Func<TArgs, Task>? Next;
 
     #endregion
 }
