@@ -19,7 +19,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System;
 using System.Collections;
 
 namespace SingleFinite.Essentials;
@@ -103,14 +102,29 @@ public class ObservableList<TItem> : IList<TItem>
     public void Add(TItem item) =>
         Insert(_list.Count, item);
 
+    /// <summary>
+    /// Add the given items to the end of the list.
+    /// </summary>
+    /// <param name="items">The items to add.</param>
+    public void AddRange(IEnumerable<TItem> items) =>
+        InsertRange(_list.Count, items);
+
     /// <inheritdoc/>
-    public void Insert(int index, TItem item)
+    public void Insert(int index, TItem item) =>
+        InsertRange(index, [item]);
+
+    /// <summary>
+    /// Insert the given items starting at the given index.
+    /// </summary>
+    /// <param name="index">The index to insert the items at.</param>
+    /// <param name="items">The items to insert.</param>
+    public void InsertRange(int index, IEnumerable<TItem> items)
     {
-        _list.Insert(index, item);
+        _list.InsertRange(index, items);
         _changedSource.Emit(
             new(
                 ChangeType: ListChangeType.Add,
-                Items: [item],
+                Items: items,
                 OldIndex: -1,
                 NewIndex: index
             )
@@ -128,17 +142,38 @@ public class ObservableList<TItem> : IList<TItem>
     /// <param name="newIndex">
     /// The new index of the item that is to be moved.
     /// </param>
-    public void Move(int oldIndex, int newIndex)
-    {
-        var item = _list[oldIndex];
+    public void Move(int oldIndex, int newIndex) =>
+        MoveRange(oldIndex, newIndex, 1);
 
-        _list.RemoveAt(oldIndex);
-        _list.Insert(newIndex, item);
+    /// <summary>
+    /// Move the items within the list.  This is the same as calling the
+    /// RemoveAt method for each item followed by the Insert method for each
+    /// item but it will result in the Changed observable only being emitted
+    /// once with a Move change type.
+    /// </summary>
+    /// <param name="oldIndex">
+    /// The start index of the items that are to be moved.
+    /// </param>
+    /// <param name="newIndex">
+    /// The new start index of the items that are to be moved.
+    /// </param>
+    /// <param name="count">
+    /// The number of items to move.
+    /// </param>
+    public void MoveRange(int oldIndex, int newIndex, int count)
+    {
+        var items = _list
+            .Skip(oldIndex)
+            .Take(count)
+            .ToList();
+
+        _list.RemoveRange(oldIndex, count);
+        _list.InsertRange(newIndex, items);
 
         _changedSource.Emit(
             new(
                 ChangeType: ListChangeType.Move,
-                Items: [item],
+                Items: items,
                 OldIndex: oldIndex,
                 NewIndex: newIndex
             )
@@ -157,14 +192,26 @@ public class ObservableList<TItem> : IList<TItem>
     }
 
     /// <inheritdoc/>
-    public void RemoveAt(int index)
+    public void RemoveAt(int index) =>
+        RemoveRange(index, 1);
+
+    /// <summary>
+    /// Remove the given items from the list.
+    /// </summary>
+    /// <param name="index">The index to start removing items from.</param>
+    /// <param name="count">The number of items to remove.</param>
+    public void RemoveRange(int index, int count)
     {
-        var item = _list[index];
-        _list.RemoveAt(index);
+        var removedItems = _list
+            .Skip(index)
+            .Take(count)
+            .ToList();
+
+        _list.RemoveRange(index, count);
         _changedSource.Emit(
             new(
                 ChangeType: ListChangeType.Remove,
-                Items: [item],
+                Items: removedItems,
                 OldIndex: index,
                 NewIndex: -1
             )
