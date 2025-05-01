@@ -27,7 +27,7 @@ namespace SingleFinite.Essentials;
 /// elapses and a new call has not been made in that time.  This can be thought
 /// off as a throttler that has a buffer size of 1.
 /// </summary>
-public sealed class ThrottleBuffer : IDisposable, IDisposeObservable
+public sealed class ThrottlerLatest : IDisposable, IDisposeObservable
 {
     #region Fields
 

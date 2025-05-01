@@ -22,7 +22,7 @@
 namespace SingleFinite.Essentials.UnitTests;
 
 [TestClass]
-public class ThrottleBufferTests
+public class ThrottleLatestTests
 {
     [TestMethod]
     public async Task Throttle_Invokes_Last_Action()
@@ -30,24 +30,24 @@ public class ThrottleBufferTests
         var observedItems = new List<string>();
         var observedErrors = 0;
         var dispatcher = new DedicatedThreadDispatcher();
-        var throttleBuffer = new ThrottleBuffer();
+        var throttleLatest = new ThrottlerLatest();
         var limit = TimeSpan.FromMilliseconds(250);
 
-        throttleBuffer.Throttle(
+        throttleLatest.Throttle(
             action: () => observedItems.Add("one"),
             limit: limit,
             dispatcher: dispatcher,
             onError: _ => observedErrors++
         );
 
-        throttleBuffer.Throttle(
+        throttleLatest.Throttle(
             action: () => observedItems.Add("two"),
             limit: limit,
             dispatcher: dispatcher,
             onError: _ => observedErrors++
         );
 
-        throttleBuffer.Throttle(
+        throttleLatest.Throttle(
             action: () => observedItems.Add("three"),
             limit: limit,
             dispatcher: dispatcher,
@@ -70,20 +70,20 @@ public class ThrottleBufferTests
     public async Task Throttle_With_Default_Dispatcher_Invokes_Last_Action()
     {
         var observedItems = new List<string>();
-        var throttleBuffer = new ThrottleBuffer();
+        var throttleLatest = new ThrottlerLatest();
         var limit = TimeSpan.FromMilliseconds(250);
 
-        throttleBuffer.Throttle(
+        throttleLatest.Throttle(
             action: () => observedItems.Add("one"),
             limit: limit
         );
 
-        throttleBuffer.Throttle(
+        throttleLatest.Throttle(
             action: () => observedItems.Add("two"),
             limit: limit
         );
 
-        throttleBuffer.Throttle(
+        throttleLatest.Throttle(
             action: () => observedItems.Add("three"),
             limit: limit
         );

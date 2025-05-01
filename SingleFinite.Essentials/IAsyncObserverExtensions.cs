@@ -642,12 +642,12 @@ public static class IAsyncObserverExtensions
     /// <returns>
     /// A new observer that has been added to the chain of observers.
     /// </returns>
-    public static IAsyncObserver ThrottleBuffer(
+    public static IAsyncObserver ThrottleLatest(
         this IAsyncObserver observer,
         TimeSpan limit,
         IDispatcher? dispatcher = default,
         Action<Exception>? onError = default
-    ) => new AsyncObserverThrottleBuffer(
+    ) => new AsyncObserverThrottleLatest(
         observer,
         limit,
         dispatcher,
@@ -674,12 +674,12 @@ public static class IAsyncObserverExtensions
     /// <returns>
     /// A new observer that has been added to the chain of observers.
     /// </returns>
-    public static IAsyncObserver<TArgs> ThrottleBuffer<TArgs>(
+    public static IAsyncObserver<TArgs> ThrottleLatest<TArgs>(
         this IAsyncObserver<TArgs> observer,
         TimeSpan limit,
         IDispatcher? dispatcher = default,
         Action<Exception>? onError = default
-    ) => new AsyncObserverThrottleBuffer<TArgs>(
+    ) => new AsyncObserverThrottleLatest<TArgs>(
         observer,
         limit,
         dispatcher,

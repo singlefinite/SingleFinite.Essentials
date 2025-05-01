@@ -35,19 +35,19 @@ namespace SingleFinite.Essentials.Internal.Observers;
 /// Optional handler for any exceptions that are thrown by the action when
 /// it is invoked through the dispatcher.
 /// </param>
-internal class AsyncObserverThrottleBuffer(
-    IAsyncObserver parent,
+internal class ObserverThrottleLatest(
+    IObserver parent,
     TimeSpan limit,
     IDispatcher? dispatcher,
     Action<Exception>? onError
-) : AsyncObserverBase(parent)
+) : ObserverBase(parent)
 {
     #region Fields
 
     /// <summary>
     /// Used to throttle events.
     /// </summary>
-    private readonly ThrottleBuffer _throttleBuffer = new();
+    private readonly ThrottlerLatest _throttleLatest = new();
 
     #endregion
 
@@ -57,21 +57,21 @@ internal class AsyncObserverThrottleBuffer(
     /// Throttle the event if needed.
     /// </summary>
     /// <returns>Returns true if the event wasn't throttled.</returns>
-    protected override Task<bool> OnEventAsync()
+    protected override bool OnEvent()
     {
         var isThrottled = false;
-        isThrottled = _throttleBuffer.Throttle(
-            action: async () =>
+        isThrottled = _throttleLatest.Throttle(
+            action: () =>
             {
                 if (isThrottled)
-                    await RaiseNextEventAsync();
+                    RaiseNextEvent();
             },
             limit: limit,
             dispatcher: dispatcher,
             onError: onError
         );
 
-        return Task.FromResult(!isThrottled);
+        return !isThrottled;
     }
 
     #endregion
@@ -94,19 +94,19 @@ internal class AsyncObserverThrottleBuffer(
 /// Optional handler for any exceptions that are thrown by the action when
 /// it is invoked through the dispatcher.
 /// </param>
-internal class AsyncObserverThrottleBuffer<TArgs>(
-    IAsyncObserver<TArgs> parent,
+internal class ObserverThrottleLatest<TArgs>(
+    IObserver<TArgs> parent,
     TimeSpan limit,
     IDispatcher? dispatcher,
     Action<Exception>? onError
-) : AsyncObserverBase<TArgs>(parent)
+) : ObserverBase<TArgs>(parent)
 {
     #region Fields
 
     /// <summary>
     /// Used to throttle events.
     /// </summary>
-    private readonly ThrottleBuffer _throttleBuffer = new();
+    private readonly ThrottlerLatest _throttleLatest = new();
 
     #endregion
 
@@ -117,21 +117,21 @@ internal class AsyncObserverThrottleBuffer<TArgs>(
     /// </summary>
     /// <param name="args">Arguments to pass with the event.</param>
     /// <returns>Returns true if the event wasn't throttled.</returns>
-    protected override Task<bool> OnEventAsync(TArgs args)
+    protected override bool OnEvent(TArgs args)
     {
         var isThrottled = false;
-        isThrottled = _throttleBuffer.Throttle(
-            action: async () =>
+        isThrottled = _throttleLatest.Throttle(
+            action: () =>
             {
                 if (isThrottled)
-                    await RaiseNextEventAsync(args);
+                    RaiseNextEvent(args);
             },
             limit: limit,
             dispatcher: dispatcher,
             onError: onError
         );
 
-        return Task.FromResult(!isThrottled);
+        return !isThrottled;
     }
 
     #endregion

@@ -445,7 +445,7 @@ public class AsyncObserverTests
     }
 
     [TestMethod]
-    public async Task ThrottleBuffer_Runs_AsExpected()
+    public async Task ThrottleLatest_Runs_AsExpected()
     {
         var observedNames = new List<string>();
 
@@ -455,7 +455,7 @@ public class AsyncObserverTests
 
         var observer = observable
             .Observe()
-            .ThrottleBuffer(
+            .ThrottleLatest(
                 limit: TimeSpan.FromMilliseconds(500),
                 dispatcher: dispatcher
             )

@@ -449,12 +449,12 @@ public static class IObserverExtensions
     /// <returns>
     /// A new observer that has been added to the chain of observers.
     /// </returns>
-    public static IObserver ThrottleBuffer(
+    public static IObserver ThrottleLatest(
         this IObserver observer,
         TimeSpan limit,
         IDispatcher? dispatcher = default,
         Action<Exception>? onError = default
-    ) => new ObserverThrottleBuffer(
+    ) => new ObserverThrottleLatest(
         observer,
         limit,
         dispatcher,
@@ -481,12 +481,12 @@ public static class IObserverExtensions
     /// <returns>
     /// A new observer that has been added to the chain of observers.
     /// </returns>
-    public static IObserver<TArgs> ThrottleBuffer<TArgs>(
+    public static IObserver<TArgs> ThrottleLatest<TArgs>(
         this IObserver<TArgs> observer,
         TimeSpan limit,
         IDispatcher? dispatcher = default,
         Action<Exception>? onError = default
-    ) => new ObserverThrottleBuffer<TArgs>(
+    ) => new ObserverThrottleLatest<TArgs>(
         observer,
         limit,
         dispatcher,
