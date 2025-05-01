@@ -28,7 +28,7 @@ namespace SingleFinite.Essentials.Internal.Observers;
 /// <param name="delay">The delay period for debouncing.</param>
 /// <param name="dispatcher">
 /// The dispatcher to run on after the delay has passed.
-/// If not set the debounce will be run on the calling thread.
+/// If not set the debounce will be run on a thread from the thread pool.
 /// </param>
 /// <param name="onError">
 /// Optional action invoked if the debounced action throws an exception.
@@ -98,7 +98,7 @@ internal class ObserverDebounce(
 /// <param name="delay">The delay period for debouncing.</param>
 /// <param name="dispatcher">
 /// The dispatcher to run on after the delay has passed.
-/// If not set the debounce will be run on the calling thread.
+/// If not set the debounce will be run on a thread from the thread pool.
 /// </param>
 /// <param name="onError">
 /// Optional action invoked if the debounced action throws an exception.

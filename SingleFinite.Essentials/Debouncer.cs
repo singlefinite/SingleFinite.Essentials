@@ -81,7 +81,7 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
     /// </param>
     /// <param name="dispatcher">
     /// The dispatcher that will run the action after the delay has passed.
-    /// If not set the debounce will be run on the calling thread.
+    /// If not set the debounce will be run on a thread from the thread pool.
     /// </param>
     /// <param name="onError">
     /// Optional handler for any exceptions that are thrown by the action when
@@ -128,7 +128,7 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
     /// </param>
     /// <param name="dispatcher">
     /// The dispatcher that will run the func after the delay has passed.
-    /// If not set the debounce will be run on the calling thread.
+    /// If not set the debounce will be run on a thread from the thread pool.
     /// </param>
     /// <param name="onError">
     /// Optional handler for any exceptions that are thrown by the func when it

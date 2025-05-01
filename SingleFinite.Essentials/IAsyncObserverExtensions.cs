@@ -541,6 +541,7 @@ public static class IAsyncObserverExtensions
     /// <param name="delay">The delay period for debouncing.</param>
     /// <param name="dispatcher">
     /// The dispatcher to run on after the delay has passed.
+    /// If not set the debounce will be run on a thread from the thread pool.
     /// </param>
     /// <param name="onError">
     /// Optional action invoked if the debounced action throws an exception.
@@ -570,7 +571,7 @@ public static class IAsyncObserverExtensions
     /// <param name="delay">The delay period for debouncing.</param>
     /// <param name="dispatcher">
     /// The dispatcher to run on after the delay has passed.
-    /// If not set the debounce will be run on the calling thread.
+    /// If not set the debounce will be run on a thread from the thread pool.
     /// </param>
     /// <param name="onError">
     /// Optional action invoked if the debounced action throws an exception.
@@ -632,8 +633,8 @@ public static class IAsyncObserverExtensions
     /// <param name="limit">The limit for throttling.</param>
     /// <param name="dispatcher">
     /// The dispatcher to use to potentially invoke the action in the future if
-    /// it was throttled.  If not set the action will be run on the calling
-    /// thread.
+    /// it was throttled.  If not set the action will be run on a thread from
+    /// the thread pool.
     /// </param>
     /// <param name="onError">
     /// Optional handler for any exceptions that are thrown by the action when
@@ -664,8 +665,8 @@ public static class IAsyncObserverExtensions
     /// <param name="limit">The limit for throttling.</param>
     /// <param name="dispatcher">
     /// The dispatcher to use to potentially invoke the action in the future if
-    /// it was throttled.  If not set the action will be run on the calling
-    /// thread.
+    /// it was throttled.  If not set the action will be run on a thread from
+    /// the thread pool.
     /// </param>
     /// <param name="onError">
     /// Optional handler for any exceptions that are thrown by the action when
