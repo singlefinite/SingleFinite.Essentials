@@ -82,11 +82,11 @@ public sealed class ThrottlerLatest : IDisposable, IDisposeObservable
     {
         _debouncer.Cancel();
 
-        if (_throttler.Throttle(action, limit))
+        if (_throttler.Throttle(action, limit, out var elapsed))
         {
             _debouncer.Debounce(
                 action: () => Throttle(action, limit, dispatcher, onError),
-                delay: limit,
+                delay: limit - elapsed,
                 dispatcher: dispatcher,
                 onError: onError
             );
