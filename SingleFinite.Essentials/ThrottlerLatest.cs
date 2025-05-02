@@ -62,8 +62,8 @@ public sealed class ThrottlerLatest : IDisposable, IDisposeObservable
     /// </param>
     /// <param name="dispatcher">
     /// The dispatcher to use to potentially invoke the action in the future if
-    /// it was throttled.  If not set the action will be run on a thread from
-    /// the thread pool.
+    /// it was throttled.  If not set the action will be run under the
+    /// synchronization context of the thread this method was called on.
     /// </param>
     /// <param name="onError">
     /// Optional handler for any exceptions that are thrown by the action when

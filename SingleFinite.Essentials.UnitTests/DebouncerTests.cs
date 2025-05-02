@@ -71,12 +71,12 @@ public class DebouncerTests
         var debouncer = new Debouncer();
 
         debouncer.Debounce(
-            action: () => observedNames.Add("One"),
+            action: () => observedNames.Add($"One"),
             delay: TimeSpan.FromMilliseconds(100)
         );
 
         debouncer.Debounce(
-            action: () => observedNames.Add("Two"),
+            action: () => observedNames.Add($"Two"),
             delay: TimeSpan.FromMilliseconds(100)
         );
 

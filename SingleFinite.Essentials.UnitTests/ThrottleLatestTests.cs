@@ -25,6 +25,50 @@ namespace SingleFinite.Essentials.UnitTests;
 public class ThrottleLatestTests
 {
     [TestMethod]
+    public async Task Testing()
+    {
+        var observedThreadId = -1;
+        var taskThreadId = -1;
+        var otherThreadId = -1;
+        var eventWaitHandle = new ManualResetEvent(false);
+
+        Task? task = null;
+
+        await Task.Run(() =>
+        {
+            taskThreadId = Environment.CurrentManagedThreadId;
+
+            var tcs = new TaskCompletionSource<int>();
+            tcs.Task.ContinueWith(_ =>
+            {
+                observedThreadId = Environment.CurrentManagedThreadId;
+                eventWaitHandle.Set();
+            });
+
+            task = tcs.Task;
+
+            Task.Run(() =>
+            {
+                Task.Delay(250);
+                otherThreadId = Environment.CurrentManagedThreadId;
+                tcs.SetResult(1);
+            });
+        });
+
+        if (task != null)
+            await task;
+
+        eventWaitHandle.WaitOne();
+
+        Assert.AreNotEqual(-1, observedThreadId);
+        Assert.AreNotEqual(-1, taskThreadId);
+        Assert.AreNotEqual(-1, otherThreadId);
+
+        Assert.AreEqual(taskThreadId, observedThreadId);
+        Assert.AreNotEqual(taskThreadId, otherThreadId);
+    }
+
+    [TestMethod]
     public async Task Throttle_Invokes_Last_Action()
     {
         var observedItems = new List<string>();

@@ -81,7 +81,8 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
     /// </param>
     /// <param name="dispatcher">
     /// The dispatcher that will run the action after the delay has passed.
-    /// If not set the debounce will be run on a thread from the thread pool.
+    /// If not set the debounce will be run under the synchronization context
+    /// of the thread this method was called on.
     /// </param>
     /// <param name="onError">
     /// Optional handler for any exceptions that are thrown by the action when
@@ -96,7 +97,7 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
     {
         _disposeState.ThrowIfDisposed();
 
-        var resolvedDispatcher = dispatcher ?? new CurrentThreadDispatcher();
+        var resolvedDispatcher = dispatcher ?? new ContinuationDispatcher();
 
         lock (_timerLock)
         {
@@ -128,7 +129,8 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
     /// </param>
     /// <param name="dispatcher">
     /// The dispatcher that will run the func after the delay has passed.
-    /// If not set the debounce will be run on a thread from the thread pool.
+    /// If not set the debounce will be run under the synchronization context
+    /// of the thread this method was called on.
     /// </param>
     /// <param name="onError">
     /// Optional handler for any exceptions that are thrown by the func when it
@@ -143,7 +145,7 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
     {
         _disposeState.ThrowIfDisposed();
 
-        var resolvedDispatcher = dispatcher ?? new CurrentThreadDispatcher();
+        var resolvedDispatcher = dispatcher ?? new ContinuationDispatcher();
 
         lock (_timerLock)
         {
