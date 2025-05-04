@@ -25,7 +25,7 @@ namespace SingleFinite.Essentials;
 /// Implementation of <see cref="IDispatcher"/> that invokes functions using the
 /// same synchronization context from the thread that this class was created on.
 /// </summary>
-public class ContinuationDispatcher :
+public sealed class ContinuationDispatcher :
     IDispatcher,
     IDisposable,
     IDisposeObservable
