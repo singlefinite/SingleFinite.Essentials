@@ -24,10 +24,10 @@ using System.Collections;
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// A list that is observable.
+/// Implementation of <see cref="IObservableList{TItem}"/>."/>
 /// </summary>
 /// <typeparam name="TItem">The type of item held by the list.</typeparam>
-public class ObservableList<TItem> : IList<TItem>
+public class ObservableList<TItem> : IObservableList<TItem>, IList, IReadOnlyList<TItem>
 {
     #region Fields
 
@@ -57,6 +57,7 @@ public class ObservableList<TItem> : IList<TItem>
     public ObservableList(IEnumerable<TItem> items)
     {
         _list = [.. items];
+
     }
 
     #endregion
@@ -77,10 +78,27 @@ public class ObservableList<TItem> : IList<TItem>
     /// <inheritdoc/>
     public int Count => _list.Count;
 
-    /// <summary>
-    /// This will always be false.
-    /// </summary>
-    public bool IsReadOnly => false;
+    /// <inheritdoc/>
+    bool IList.IsReadOnly => ((IList)_list).IsReadOnly;
+
+    /// <inheritdoc/>
+    bool IList.IsFixedSize => ((IList)_list).IsFixedSize;
+
+    /// <inheritdoc/>
+    object? IList.this[int index]
+    {
+        get => ((IList)_list)[index];
+        set => ((IList)_list)[index] = value;
+    }
+
+    /// <inheritdoc/>
+    bool ICollection<TItem>.IsReadOnly => ((ICollection<TItem>)_list).IsReadOnly;
+
+    /// <inheritdoc/>
+    bool ICollection.IsSynchronized => ((ICollection)_list).IsSynchronized;
+
+    /// <inheritdoc/>
+    object ICollection.SyncRoot => ((ICollection)_list).SyncRoot;
 
     #endregion
 
@@ -102,10 +120,7 @@ public class ObservableList<TItem> : IList<TItem>
     public void Add(TItem item) =>
         Insert(_list.Count, item);
 
-    /// <summary>
-    /// Add the given items to the end of the list.
-    /// </summary>
-    /// <param name="items">The items to add.</param>
+    /// <inheritdoc/>
     public void AddRange(IEnumerable<TItem> items) =>
         InsertRange(_list.Count, items);
 
@@ -113,11 +128,7 @@ public class ObservableList<TItem> : IList<TItem>
     public void Insert(int index, TItem item) =>
         InsertRange(index, [item]);
 
-    /// <summary>
-    /// Insert the given items starting at the given index.
-    /// </summary>
-    /// <param name="index">The index to insert the items at.</param>
-    /// <param name="items">The items to insert.</param>
+    /// <inheritdoc/>
     public void InsertRange(int index, IEnumerable<TItem> items)
     {
         _list.InsertRange(index, items);
@@ -131,35 +142,11 @@ public class ObservableList<TItem> : IList<TItem>
         );
     }
 
-    /// <summary>
-    /// Move an item within the list.  This is the same as calling the RemoveAt
-    /// method followed by the Insert method but it will result in the Changed
-    /// observable only being emitted once with a Move change type.
-    /// </summary>
-    /// <param name="oldIndex">
-    /// The index of the item that is to be moved.
-    /// </param>
-    /// <param name="newIndex">
-    /// The new index of the item that is to be moved.
-    /// </param>
+    /// <inheritdoc/>
     public void Move(int oldIndex, int newIndex) =>
         MoveRange(oldIndex, newIndex, 1);
 
-    /// <summary>
-    /// Move the items within the list.  This is the same as calling the
-    /// RemoveAt method for each item followed by the Insert method for each
-    /// item but it will result in the Changed observable only being emitted
-    /// once with a Move change type.
-    /// </summary>
-    /// <param name="oldIndex">
-    /// The start index of the items that are to be moved.
-    /// </param>
-    /// <param name="newIndex">
-    /// The new start index of the items that are to be moved.
-    /// </param>
-    /// <param name="count">
-    /// The number of items to move.
-    /// </param>
+    /// <inheritdoc/>
     public void MoveRange(int oldIndex, int newIndex, int count)
     {
         var items = _list
@@ -195,11 +182,7 @@ public class ObservableList<TItem> : IList<TItem>
     public void RemoveAt(int index) =>
         RemoveRange(index, 1);
 
-    /// <summary>
-    /// Remove the given items from the list.
-    /// </summary>
-    /// <param name="index">The index to start removing items from.</param>
-    /// <param name="count">The number of items to remove.</param>
+    /// <inheritdoc/>
     public void RemoveRange(int index, int count)
     {
         var removedItems = _list
@@ -241,13 +224,35 @@ public class ObservableList<TItem> : IList<TItem>
     IEnumerator IEnumerable.GetEnumerator() =>
         _list.GetEnumerator();
 
+    /// <inheritdoc/>
+    int IList.Add(object? value) =>
+        ((IList)_list).Add(value);
+
+    /// <inheritdoc/>
+    bool IList.Contains(object? value) =>
+        ((IList)_list).Contains(value);
+
+    /// <inheritdoc/>
+    int IList.IndexOf(object? value) =>
+        ((IList)_list).IndexOf(value);
+
+    /// <inheritdoc/>
+    void IList.Insert(int index, object? value) =>
+        ((IList)_list).Insert(index, value);
+
+    /// <inheritdoc/>
+    void IList.Remove(object? value) =>
+        ((IList)_list).Remove(value);
+
+    /// <inheritdoc/>
+    void ICollection.CopyTo(Array array, int index) =>
+        ((ICollection)_list).CopyTo(array, index);
+
     #endregion
 
     #region Events
 
-    /// <summary>
-    /// Observable that emits when the list has been changed.
-    /// </summary>
+    /// <inheritdoc/>
     public Observable<ListChange<TItem>> Changed => _changedSource.Observable;
     private readonly ObservableSource<ListChange<TItem>> _changedSource = new();
 
