@@ -20,6 +20,8 @@
 // SOFTWARE.
 
 using System.Collections;
+using System.Collections.Specialized;
+using System.ComponentModel;
 
 namespace SingleFinite.Essentials;
 
@@ -27,7 +29,7 @@ namespace SingleFinite.Essentials;
 /// Implementation of <see cref="IObservableList{TItem}"/>."/>
 /// </summary>
 /// <typeparam name="TItem">The type of item held by the list.</typeparam>
-public class ObservableList<TItem> : IObservableList<TItem>, IList, IReadOnlyList<TItem>
+public class ObservableList<TItem> : IObservableList<TItem>, IList, IReadOnlyList<TItem>, INotifyCollectionChanged, INotifyPropertyChanged
 {
     #region Fields
 
@@ -140,6 +142,17 @@ public class ObservableList<TItem> : IObservableList<TItem>, IList, IReadOnlyLis
                 NewIndex: index
             )
         );
+
+        OnCollectionChanged(
+            new(
+                action: NotifyCollectionChangedAction.Add,
+                changedItems: items.ToList(),
+                startingIndex: index
+            )
+        );
+
+        OnCountChanged();
+        OnIndexerChanged();
     }
 
     /// <inheritdoc/>
@@ -154,6 +167,9 @@ public class ObservableList<TItem> : IObservableList<TItem>, IList, IReadOnlyLis
             .Take(count)
             .ToList();
 
+        if (items.Count == 0 || oldIndex == newIndex)
+            return;
+
         _list.RemoveRange(oldIndex, count);
         _list.InsertRange(newIndex, items);
 
@@ -165,6 +181,17 @@ public class ObservableList<TItem> : IObservableList<TItem>, IList, IReadOnlyLis
                 NewIndex: newIndex
             )
         );
+
+        OnCollectionChanged(
+            new(
+                action: NotifyCollectionChangedAction.Move,
+                changedItems: items,
+                index: newIndex,
+                oldIndex: oldIndex
+            )
+        );
+
+        OnIndexerChanged();
     }
 
     /// <inheritdoc/>
@@ -190,7 +217,11 @@ public class ObservableList<TItem> : IObservableList<TItem>, IList, IReadOnlyLis
             .Take(count)
             .ToList();
 
+        if (removedItems.Count == 0)
+            return;
+
         _list.RemoveRange(index, count);
+
         _changedSource.Emit(
             new(
                 ChangeType: ListChangeType.Remove,
@@ -199,13 +230,28 @@ public class ObservableList<TItem> : IObservableList<TItem>, IList, IReadOnlyLis
                 NewIndex: -1
             )
         );
+
+        OnCollectionChanged(
+            new(
+                action: NotifyCollectionChangedAction.Remove,
+                changedItems: removedItems,
+                startingIndex: index
+            )
+        );
+
+        OnCountChanged();
+        OnIndexerChanged();
     }
 
     /// <inheritdoc/>
     public void Clear()
     {
         var items = _list.ToArray();
+        if (items.Length == 0)
+            return;
+
         _list.Clear();
+
         _changedSource.Emit(
             new(
                 ChangeType: ListChangeType.Remove,
@@ -214,7 +260,36 @@ public class ObservableList<TItem> : IObservableList<TItem>, IList, IReadOnlyLis
                 NewIndex: -1
             )
         );
+
+        OnCountChanged();
+        OnIndexerChanged();
+        OnCollectionReset();
     }
+
+    /// <summary>
+    /// Raises the PropertyChanged event for the Count property.
+    /// </summary>
+    private void OnCountChanged() =>
+        PropertyChanged?.Invoke(this, EventArgsCache.CountPropertyChanged);
+
+    /// <summary>
+    /// Raises the PropertyChanged event for the Indexer property.
+    /// </summary>
+    private void OnIndexerChanged() =>
+        PropertyChanged?.Invoke(this, EventArgsCache.IndexerPropertyChanged);
+
+    /// <summary>
+    /// Raises the Collection changed event.
+    /// </summary>
+    /// <param name="args">The args to pass with the event.</param>
+    private void OnCollectionChanged(NotifyCollectionChangedEventArgs args) =>
+        CollectionChanged?.Invoke(this, args);
+
+    /// <summary>
+    /// Raises the Collection event for reset action.
+    /// </summary>
+    private void OnCollectionReset() =>
+        CollectionChanged?.Invoke(this, EventArgsCache.ResetCollectionChanged);
 
     /// <inheritdoc/>
     public IEnumerator<TItem> GetEnumerator() =>
@@ -255,6 +330,27 @@ public class ObservableList<TItem> : IObservableList<TItem>, IList, IReadOnlyLis
     /// <inheritdoc/>
     public Observable<ListChange<TItem>> Changed => _changedSource.Observable;
     private readonly ObservableSource<ListChange<TItem>> _changedSource = new();
+
+    /// <inheritdoc/>
+    public event NotifyCollectionChangedEventHandler? CollectionChanged;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    #endregion
+
+    #region Types
+
+    /// <summary>
+    /// Static event argument classes that can be reused for improved
+    /// performance.
+    /// </summary>
+    private static class EventArgsCache
+    {
+        public static readonly PropertyChangedEventArgs CountPropertyChanged = new("Count");
+        public static readonly PropertyChangedEventArgs IndexerPropertyChanged = new("Item[]");
+        public static readonly NotifyCollectionChangedEventArgs ResetCollectionChanged = new(NotifyCollectionChangedAction.Reset);
+    }
 
     #endregion
 }
