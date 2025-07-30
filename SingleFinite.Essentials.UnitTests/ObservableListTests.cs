@@ -289,6 +289,37 @@ public class ObservableListTests
     }
 
     [TestMethod]
+    public void Indexer_Is_Observed()
+    {
+        var observedChanges = new List<ListChange<int>>();
+
+        var list = new ObservableList<int>([1, 2, 3, 4, 5]);
+        list.Changed
+            .Observe()
+            .OnEach(observedChanges.Add);
+
+        Assert.AreEqual(0, observedChanges.Count);
+
+        list[2] = 6;
+
+        Assert.AreEqual(5, list.Count);
+        Assert.AreEqual(1, list[0]);
+        Assert.AreEqual(2, list[1]);
+        Assert.AreEqual(6, list[2]);
+        Assert.AreEqual(4, list[3]);
+        Assert.AreEqual(5, list[4]);
+
+        Assert.AreEqual(1, observedChanges.Count);
+        Assert.AreEqual(ListChangeType.Replace, observedChanges[0].ChangeType);
+        Assert.AreEqual(1, observedChanges[0].Items.Count());
+        Assert.AreEqual(6, observedChanges[0].Items.First());
+        Assert.AreEqual(1, observedChanges[0].ReplacedItems.Count());
+        Assert.AreEqual(3, observedChanges[0].ReplacedItems.First());
+        Assert.AreEqual(2, observedChanges[0].OldIndex);
+        Assert.AreEqual(2, observedChanges[0].NewIndex);
+    }
+
+    [TestMethod]
     public void Clear_Is_Observed()
     {
         var observedChanges = new List<ListChange<int>>();
@@ -387,6 +418,26 @@ public class ObservableListTests
 
         list.Move(4, 0);
         collection.Move(4, 0);
+
+        Assert.AreEqual(1, observedListPropertyChanges.Count);
+        Assert.AreEqual(1, observedCollectionPropertyChanges.Count);
+        Assert.AreEqual(observedListPropertyChanges[0], observedCollectionPropertyChanges[0]);
+
+        Assert.AreEqual(1, observedListCollectionChanges.Count);
+        Assert.AreEqual(1, observedCollectionCollectionChanges.Count);
+        Assert.AreEqual(observedListCollectionChanges[0].Action, observedCollectionCollectionChanges[0].Action);
+        AssertItemsAreEqual(observedListCollectionChanges[0].OldItems, observedCollectionCollectionChanges[0].OldItems);
+        Assert.AreEqual(observedListCollectionChanges[0].OldStartingIndex, observedCollectionCollectionChanges[0].OldStartingIndex);
+        AssertItemsAreEqual(observedListCollectionChanges[0].NewItems, observedCollectionCollectionChanges[0].NewItems);
+        Assert.AreEqual(observedListCollectionChanges[0].NewStartingIndex, observedCollectionCollectionChanges[0].NewStartingIndex);
+
+        observedListPropertyChanges.Clear();
+        observedListCollectionChanges.Clear();
+        observedCollectionPropertyChanges.Clear();
+        observedCollectionCollectionChanges.Clear();
+
+        list[0] = 9;
+        collection[0] = 9;
 
         Assert.AreEqual(1, observedListPropertyChanges.Count);
         Assert.AreEqual(1, observedCollectionPropertyChanges.Count);

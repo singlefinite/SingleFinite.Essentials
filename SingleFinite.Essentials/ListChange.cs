@@ -39,7 +39,12 @@ public enum ListChangeType
     /// <summary>
     /// An item was moved.
     /// </summary>
-    Move
+    Move,
+
+    /// <summary>
+    /// An item was replaced.
+    /// </summary>
+    Replace
 }
 
 /// <summary>
@@ -50,6 +55,10 @@ public enum ListChangeType
 /// </typeparam>
 /// <param name="ChangeType">The type of change.</param>
 /// <param name="Items">The items that are the subject of the change.</param>
+/// <param name="ReplacedItems">
+/// Replaced items, if any, that were replaced with the items in the Items
+/// parameter.
+/// </param>
 /// <param name="OldIndex">
 /// When the change is Remove or Move this will be the starting index of the
 /// items before the change, otherwise it will be -1.
@@ -61,6 +70,7 @@ public enum ListChangeType
 public record ListChange<TItem>(
     ListChangeType ChangeType,
     IEnumerable<TItem> Items,
+    IEnumerable<TItem> ReplacedItems,
     int OldIndex,
     int NewIndex
 );

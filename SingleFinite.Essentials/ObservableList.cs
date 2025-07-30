@@ -72,8 +72,32 @@ public class ObservableList<TItem> : IObservableList<TItem>, IList, IReadOnlyLis
         get => _list[index];
         set
         {
-            RemoveAt(index);
-            Insert(index, value);
+            var replacedItem = _list[index];
+            if (Object.Equals(replacedItem, value))
+                return;
+
+            _list[index] = value;
+
+            _changedSource.Emit(
+                new(
+                    ChangeType: ListChangeType.Replace,
+                    Items: [value],
+                    ReplacedItems: [replacedItem],
+                    OldIndex: index,
+                    NewIndex: index
+                )
+            );
+
+            OnCollectionChanged(
+                new(
+                    action: NotifyCollectionChangedAction.Replace,
+                    newItem: value,
+                    oldItem: replacedItem,
+                    index: index
+                )
+            );
+
+            OnIndexerChanged();
         }
     }
 
@@ -138,6 +162,7 @@ public class ObservableList<TItem> : IObservableList<TItem>, IList, IReadOnlyLis
             new(
                 ChangeType: ListChangeType.Add,
                 Items: items,
+                ReplacedItems: [],
                 OldIndex: -1,
                 NewIndex: index
             )
@@ -177,6 +202,7 @@ public class ObservableList<TItem> : IObservableList<TItem>, IList, IReadOnlyLis
             new(
                 ChangeType: ListChangeType.Move,
                 Items: items,
+                ReplacedItems: [],
                 OldIndex: oldIndex,
                 NewIndex: newIndex
             )
@@ -226,6 +252,7 @@ public class ObservableList<TItem> : IObservableList<TItem>, IList, IReadOnlyLis
             new(
                 ChangeType: ListChangeType.Remove,
                 Items: removedItems,
+                ReplacedItems: [],
                 OldIndex: index,
                 NewIndex: -1
             )
@@ -256,6 +283,7 @@ public class ObservableList<TItem> : IObservableList<TItem>, IList, IReadOnlyLis
             new(
                 ChangeType: ListChangeType.Remove,
                 Items: items,
+                ReplacedItems: [],
                 OldIndex: 0,
                 NewIndex: -1
             )
