@@ -110,11 +110,6 @@ public class CompositeObservableCollection<TItem, TCollection> :
         if (adjustedIndex < 0)
             return;
 
-        var adjustedNewIndex = e.NewStartingIndex + adjustedIndex;
-        var adjustedOldIndex = e.OldStartingIndex + adjustedIndex;
-        var newItemsAsEnumerable = e.NewItems as IEnumerable<TItem> ?? [];
-        var oldItemsAsEnumerable = e.OldItems as IEnumerable<TItem> ?? [];
-
         switch (e.Action)
         {
             case NotifyCollectionChangedAction.Add:
@@ -123,7 +118,7 @@ public class CompositeObservableCollection<TItem, TCollection> :
                     e: new(
                         action: e.Action,
                         changedItems: e.NewItems,
-                        startingIndex: adjustedNewIndex
+                        startingIndex: e.NewStartingIndex + adjustedIndex
                     )
                 );
                 PropertyChanged?.Invoke(this, EventArgsCache.CountPropertyChanged);
@@ -135,7 +130,7 @@ public class CompositeObservableCollection<TItem, TCollection> :
                     e: new(
                         action: e.Action,
                         changedItems: e.OldItems,
-                        startingIndex: adjustedOldIndex
+                        startingIndex: e.OldStartingIndex + adjustedIndex
                     )
                 );
                 PropertyChanged?.Invoke(this, EventArgsCache.CountPropertyChanged);
@@ -147,8 +142,8 @@ public class CompositeObservableCollection<TItem, TCollection> :
                     e: new(
                         action: e.Action,
                         changedItems: e.NewItems,
-                        index: adjustedNewIndex,
-                        oldIndex: adjustedOldIndex
+                        index: e.NewStartingIndex + adjustedIndex,
+                        oldIndex: e.OldStartingIndex + adjustedIndex
                     )
                 );
                 break;
@@ -160,7 +155,7 @@ public class CompositeObservableCollection<TItem, TCollection> :
                         action: e.Action,
                         newItems: e.NewItems ?? new List<TItem>(),
                         oldItems: e.OldItems ?? new List<TItem>(),
-                        startingIndex: adjustedNewIndex
+                        startingIndex: e.NewStartingIndex + adjustedIndex
                     )
                 );
                 break;
@@ -168,11 +163,7 @@ public class CompositeObservableCollection<TItem, TCollection> :
             case NotifyCollectionChangedAction.Reset:
                 CollectionChanged?.Invoke(
                     sender: this,
-                    e: new(
-                        action: NotifyCollectionChangedAction.Remove,
-                        changedItems: collection.ToList(),
-                        startingIndex: adjustedIndex
-                    )
+                    e: EventArgsCache.ResetEventArgs
                 );
                 PropertyChanged?.Invoke(this, EventArgsCache.CountPropertyChanged);
                 break;
@@ -231,7 +222,11 @@ public class CompositeObservableCollection<TItem, TCollection> :
     /// </summary>
     private static class EventArgsCache
     {
-        public static readonly PropertyChangedEventArgs CountPropertyChanged = new("Count");
+        public static readonly PropertyChangedEventArgs CountPropertyChanged =
+            new("Count");
+
+        public static readonly NotifyCollectionChangedEventArgs ResetEventArgs =
+            new(NotifyCollectionChangedAction.Reset);
     }
 
     #endregion
