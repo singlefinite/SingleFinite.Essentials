@@ -126,15 +126,6 @@ public class CompositeObservableCollection<TItem, TCollection> :
                         startingIndex: adjustedNewIndex
                     )
                 );
-                _changed.Emit(
-                    new(
-                        ChangeType: ListChangeType.Add,
-                        Items: newItemsAsEnumerable,
-                        ReplacedItems: [],
-                        OldIndex: -1,
-                        NewIndex: adjustedNewIndex
-                    )
-                );
                 PropertyChanged?.Invoke(this, EventArgsCache.CountPropertyChanged);
                 break;
 
@@ -145,15 +136,6 @@ public class CompositeObservableCollection<TItem, TCollection> :
                         action: e.Action,
                         changedItems: e.OldItems,
                         startingIndex: adjustedOldIndex
-                    )
-                );
-                _changed.Emit(
-                    new(
-                        ChangeType: ListChangeType.Remove,
-                        Items: oldItemsAsEnumerable,
-                        ReplacedItems: [],
-                        OldIndex: adjustedOldIndex,
-                        NewIndex: -1
                     )
                 );
                 PropertyChanged?.Invoke(this, EventArgsCache.CountPropertyChanged);
@@ -169,15 +151,6 @@ public class CompositeObservableCollection<TItem, TCollection> :
                         oldIndex: adjustedOldIndex
                     )
                 );
-                _changed.Emit(
-                    new(
-                        ChangeType: ListChangeType.Move,
-                        Items: newItemsAsEnumerable,
-                        ReplacedItems: [],
-                        OldIndex: adjustedOldIndex,
-                        NewIndex: adjustedNewIndex
-                    )
-                );
                 break;
 
             case NotifyCollectionChangedAction.Replace:
@@ -190,15 +163,6 @@ public class CompositeObservableCollection<TItem, TCollection> :
                         startingIndex: adjustedNewIndex
                     )
                 );
-                _changed.Emit(
-                    new(
-                        ChangeType: ListChangeType.Replace,
-                        Items: newItemsAsEnumerable,
-                        ReplacedItems: oldItemsAsEnumerable,
-                        OldIndex: adjustedNewIndex,
-                        NewIndex: adjustedNewIndex
-                    )
-                );
                 break;
 
             case NotifyCollectionChangedAction.Reset:
@@ -208,15 +172,6 @@ public class CompositeObservableCollection<TItem, TCollection> :
                         action: NotifyCollectionChangedAction.Remove,
                         changedItems: collection.ToList(),
                         startingIndex: adjustedIndex
-                    )
-                );
-                _changed.Emit(
-                    new(
-                        ChangeType: ListChangeType.Remove,
-                        Items: collection,
-                        ReplacedItems: [],
-                        OldIndex: adjustedIndex,
-                        NewIndex: -1
                     )
                 );
                 PropertyChanged?.Invoke(this, EventArgsCache.CountPropertyChanged);
@@ -259,12 +214,6 @@ public class CompositeObservableCollection<TItem, TCollection> :
     #endregion
 
     #region Events
-
-    /// <summary>
-    /// Observable that emits when the collection changes.
-    /// </summary>
-    public Observable<ListChange<TItem>> Changed => _changed.Observable;
-    private readonly ObservableSource<ListChange<TItem>> _changed = new();
 
     /// <inheritdoc/>
     public event NotifyCollectionChangedEventHandler? CollectionChanged;
