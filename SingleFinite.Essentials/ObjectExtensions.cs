@@ -56,5 +56,23 @@ public static class ObjectExtensions
         return item;
     }
 
+    /// <summary>
+    /// Execute the given block of code against the given item and return the
+    /// item.
+    /// </summary>
+    /// <typeparam name="TType">
+    /// The type of item to execute the block of code against.
+    /// </typeparam>
+    /// <param name="item">
+    /// The item to execute the block of code against.
+    /// </param>
+    /// <param name="block">The block of code to execute.</param>
+    /// <returns>The item that was passed in.</returns>
+    public static TType Also<TType>(this TType item, Action<TType> block)
+    {
+        block(item);
+        return item;
+    }
+
     #endregion
 }

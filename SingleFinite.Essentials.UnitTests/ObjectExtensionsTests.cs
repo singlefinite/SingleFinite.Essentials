@@ -46,4 +46,32 @@ public class ObjectExtensionsTests
             Assert.AreEqual("testItem is null.", ex.Message);
         }
     }
+
+    [TestMethod]
+    public void Also_Executes_Code_Against_Item()
+    {
+        var person = new Person().Also(it =>
+        {
+            it.Update(
+                name: "Example",
+                age: 99
+            );
+        });
+
+        Assert.AreEqual("Example", person.Name);
+        Assert.AreEqual(99, person.Age);
+    }
+
+    private class Person
+    {
+        public string Name { get; private set; } = "";
+
+        public int Age { get; private set; } = 0;
+
+        public void Update(string name, int age)
+        {
+            Name = name;
+            Age = age;
+        }
+    }
 }
