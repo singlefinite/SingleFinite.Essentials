@@ -88,11 +88,13 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
     /// Optional handler for any exceptions that are thrown by the action when
     /// it is invoked.
     /// </param>
+    /// <param name="cancellationTokens">Optional cancellation tokens.</param>
     public void Debounce(
         Action action,
         TimeSpan delay,
         IDispatcher? dispatcher = default,
-        Action<Exception>? onError = default
+        Action<Exception>? onError = default,
+        params IEnumerable<CancellationToken> cancellationTokens
     )
     {
         _disposeState.ThrowIfDisposed();
@@ -108,7 +110,8 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
                 {
                     resolvedDispatcher.Run(
                         action: action,
-                        onError: onError
+                        onError: onError,
+                        cancellationTokens: cancellationTokens
                     );
                 },
                 dueTime: delay,
@@ -136,11 +139,13 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
     /// Optional handler for any exceptions that are thrown by the func when it
     /// is invoked.
     /// </param>
+    /// <param name="cancellationTokens">Optional cancellation tokens.</param>
     public void Debounce(
         Func<Task> func,
         TimeSpan delay,
         IDispatcher? dispatcher = default,
-        Action<Exception>? onError = default
+        Action<Exception>? onError = default,
+        params IEnumerable<CancellationToken> cancellationTokens
     )
     {
         _disposeState.ThrowIfDisposed();
@@ -155,8 +160,9 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
                 state: () =>
                 {
                     resolvedDispatcher.Run(
-                        func: func,
-                        onError: onError
+                        function: func,
+                        onError: onError,
+                        cancellationTokens: cancellationTokens
                     );
                 },
                 dueTime: delay,

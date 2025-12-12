@@ -22,7 +22,7 @@
 namespace SingleFinite.Essentials.UnitTests;
 
 [TestClass]
-public class CurrentThreadDispatcherTests
+public class CurrentThreadDispatcherTests(TestContext testContext)
 {
     [TestMethod]
     public async Task RunAsync_Invokes_On_Calling_Thread()
@@ -32,28 +32,31 @@ public class CurrentThreadDispatcherTests
         var threadId1 = Environment.CurrentManagedThreadId;
         var observedThreadId1 = -1;
         await dispatcher.RunAsync(
-            func: () =>
+            function: () =>
             {
                 observedThreadId1 = Environment.CurrentManagedThreadId;
                 return Task.FromResult(0);
-            }
+            },
+            cancellationToken: testContext.CancellationToken
         );
         Assert.AreEqual(threadId1, observedThreadId1);
 
         await Task.Run(
-            async () =>
+            function: async () =>
             {
                 var threadId2 = Environment.CurrentManagedThreadId;
                 var observedThreadId2 = -1;
                 await dispatcher.RunAsync(
-                    func: () =>
+                    function: () =>
                     {
                         observedThreadId2 = Environment.CurrentManagedThreadId;
                         return Task.FromResult(0);
-                    }
+                    },
+                    cancellationToken: testContext.CancellationToken
                 );
                 Assert.AreEqual(threadId2, observedThreadId2);
-            }
+            },
+            cancellationToken: testContext.CancellationToken
         );
     }
 }

@@ -22,7 +22,7 @@
 namespace SingleFinite.Essentials.UnitTests;
 
 [TestClass]
-public class AsyncObservableTests
+public class AsyncObservableTests(TestContext testContext)
 {
     [TestMethod]
     public async Task Observe_Method_Invokes_Callback_When_Event_Raised_Async()
@@ -33,7 +33,10 @@ public class AsyncObservableTests
             .Observe()
             .OnEach(async args =>
             {
-                await Task.Run(() => observedNumber = args);
+                await Task.Run(
+                    action: () => observedNumber = args,
+                    cancellationToken: testContext.CancellationToken
+                );
             });
 
         Assert.AreEqual(0, observedNumber);
@@ -52,7 +55,10 @@ public class AsyncObservableTests
             .Observe()
             .OnEach(async args =>
             {
-                await Task.Run(() => observedNumber = args);
+                await Task.Run(
+                    action: () => observedNumber = args,
+                    cancellationToken: testContext.CancellationToken
+                );
             });
 
         Assert.AreEqual(0, observedNumber);
@@ -103,17 +109,20 @@ public class AsyncObservableTests
             )
             .OnEach(args => observedNames.Add(args.Name));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         await observableSource.EmitAsync(new("One", 0));
         await observableSource.EmitAsync(new("Two", 0));
         await observableSource.EmitAsync(new("Three", 0));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
-        await Task.Delay(TimeSpan.FromSeconds(1.1));
+        await Task.Delay(
+            delay: TimeSpan.FromSeconds(1.1),
+            cancellationToken: testContext.CancellationToken
+        );
 
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("Three", observedNames[0]);
     }
 
@@ -132,13 +141,13 @@ public class AsyncObservableTests
         combinedObserver.OnEach(observedNumbers.Add);
 
         await firstObservableSource.EmitAsync(9);
-        Assert.AreEqual(1, observedNumbers.Count);
+        Assert.HasCount(1, observedNumbers);
         Assert.AreEqual(9, observedNumbers[0]);
 
         observedNumbers.Clear();
 
         await secondObservableSource.EmitAsync(11);
-        Assert.AreEqual(1, observedNumbers.Count);
+        Assert.HasCount(1, observedNumbers);
         Assert.AreEqual(11, observedNumbers[0]);
     }
 
@@ -164,10 +173,10 @@ public class AsyncObservableTests
         Assert.IsFalse(combinedObserver.IsDisposed);
 
         await firstObservableSource.EmitAsync(9);
-        Assert.AreEqual(0, observedNumbers.Count);
+        Assert.IsEmpty(observedNumbers);
 
         await secondObservableSource.EmitAsync(11);
-        Assert.AreEqual(1, observedNumbers.Count);
+        Assert.HasCount(1, observedNumbers);
         Assert.AreEqual(11, observedNumbers[0]);
     }
 

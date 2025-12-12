@@ -30,18 +30,24 @@ public static class IDispatcherExtensions
     /// Execute the given async function without result.
     /// </summary>
     /// <param name="dispatcher">The dispatcher being extended.</param>
-    /// <param name="func">The function to execute.</param>
+    /// <param name="function">The function to execute.</param>
+    /// <param name="cancellationTokens">Optional cancellation tokens.</param>
     /// <returns>A task that runs until the function has completed.</returns>
     public static Task RunAsync(
         this IDispatcher dispatcher,
-        Func<Task> func
+        Func<Task> function,
+        params IEnumerable<CancellationToken> cancellationTokens
     ) =>
         dispatcher.RunAsync(
-            async () =>
+            function: async () =>
             {
-                await func().ConfigureAwait(false);
+                await function().ConfigureAwait(false);
                 return 0;
-            }
+            },
+            cancellationToken: CombineCancellationTokens(
+                dispatcher,
+                cancellationTokens
+            )
         );
 
     /// <summary>
@@ -51,14 +57,20 @@ public static class IDispatcherExtensions
     /// The type of result returned by the function.
     /// </typeparam>
     /// <param name="dispatcher">The dispatcher being extended.</param>
-    /// <param name="func">The function to execute.</param>
+    /// <param name="function">The function to execute.</param>
+    /// <param name="cancellationTokens">Optional cancellation tokens.</param>
     /// <returns>A task that runs until the function has completed.</returns>
     public static Task<TResult> RunAsync<TResult>(
         this IDispatcher dispatcher,
-        Func<TResult> func
+        Func<TResult> function,
+        params IEnumerable<CancellationToken> cancellationTokens
     ) =>
         dispatcher.RunAsync(
-            () => Task.FromResult(func())
+            function: () => Task.FromResult(function()),
+            cancellationToken: CombineCancellationTokens(
+                dispatcher,
+                cancellationTokens
+            )
         );
 
     /// <summary>
@@ -66,17 +78,23 @@ public static class IDispatcherExtensions
     /// </summary>
     /// <param name="dispatcher">The dispatcher being extended.</param>
     /// <param name="action">The action to execute.</param>
+    /// <param name="cancellationTokens">Optional cancellation tokens.</param>
     /// <returns>A task that runs until the action has completed.</returns>
     public static Task RunAsync(
         this IDispatcher dispatcher,
-        Action action
+        Action action,
+        params IEnumerable<CancellationToken> cancellationTokens
     ) =>
         dispatcher.RunAsync(
-            () =>
+            function: () =>
             {
                 action();
                 return Task.FromResult(0);
-            }
+            },
+            cancellationToken: CombineCancellationTokens(
+                dispatcher,
+                cancellationTokens
+            )
         );
 
     /// <summary>
@@ -89,19 +107,25 @@ public static class IDispatcherExtensions
     /// <param name="onError">
     /// Callback that is invoked if the action generates an exception.
     /// </param>
+    /// <param name="cancellationTokens">Optional cancellation tokens.</param>
     public static void Run(
         this IDispatcher dispatcher,
         Action action,
-        Action<Exception>? onError = default
+        Action<Exception>? onError = default,
+        params IEnumerable<CancellationToken> cancellationTokens
     )
     {
         dispatcher
             .RunAsync(
-                () =>
+                function: () =>
                 {
                     action();
                     return Task.FromResult(0);
-                }
+                },
+                cancellationToken: CombineCancellationTokens(
+                    dispatcher,
+                    cancellationTokens
+                )
             )
             .ContinueOnError(onError ?? dispatcher.OnError);
     }
@@ -112,23 +136,29 @@ public static class IDispatcherExtensions
     /// away without waiting for the func to complete execution.
     /// </summary>
     /// <param name="dispatcher">The dispatcher being extended.</param>
-    /// <param name="func">The func to execute.</param>
+    /// <param name="function">The func to execute.</param>
     /// <param name="onError">
     /// Callback that is invoked if the func generates an exception.
     /// </param>
+    /// <param name="cancellationTokens">Optional cancellation tokens.</param>
     public static void Run(
         this IDispatcher dispatcher,
-        Func<Task> func,
-        Action<Exception>? onError = default
+        Func<Task> function,
+        Action<Exception>? onError = default,
+        params IEnumerable<CancellationToken> cancellationTokens
     )
     {
         dispatcher
             .RunAsync(
-                async () =>
+                function: async () =>
                 {
-                    await func().ConfigureAwait(false);
+                    await function().ConfigureAwait(false);
                     return Task.FromResult(0);
-                }
+                },
+                cancellationToken: CombineCancellationTokens(
+                    dispatcher,
+                    cancellationTokens
+                )
             )
             .ContinueOnError(onError ?? dispatcher.OnError);
     }
@@ -140,7 +170,7 @@ public static class IDispatcherExtensions
     /// The type of result returned by the function.
     /// </typeparam>
     /// <param name="dispatcher">The dispatcher being extended.</param>
-    /// <param name="func">The function to execute.</param>
+    /// <param name="function">The function to execute.</param>
     /// <param name="cancellationTokens">
     /// Optional cancellation tokens to link with the cancellation token for 
     /// the dispatcher.
@@ -148,27 +178,18 @@ public static class IDispatcherExtensions
     /// <returns>A task that runs until the function has completed.</returns>
     public static Task<TResult> RunAsync<TResult>(
         this IDispatcher dispatcher,
-        Func<CancellationToken, Task<TResult>> func,
+        Func<CancellationToken, Task<TResult>> function,
         params IEnumerable<CancellationToken> cancellationTokens
     )
     {
-        var allCancellationTokens =
-            new List<CancellationToken>(cancellationTokens)
-            {
-                dispatcher.CancellationToken
-            };
-
-        var cancellationToken = allCancellationTokens.Count switch
-        {
-            0 => CancellationToken.None,
-            1 => allCancellationTokens[0],
-            _ => CancellationTokenSource
-                .CreateLinkedTokenSource([.. allCancellationTokens])
-                .Token
-        };
+        var combinedCancellationToken = CombineCancellationTokens(
+            dispatcher,
+            cancellationTokens
+        );
 
         return dispatcher.RunAsync(
-            func: () => func(cancellationToken)
+            function: () => function(combinedCancellationToken),
+            cancellationToken: combinedCancellationToken
         );
     }
 
@@ -176,7 +197,7 @@ public static class IDispatcherExtensions
     /// Execute the given cancellable async function without result.
     /// </summary>
     /// <param name="dispatcher">The dispatcher being extended.</param>
-    /// <param name="func">The function to execute.</param>
+    /// <param name="function">The function to execute.</param>
     /// <param name="cancellationTokens">
     /// Optional cancellation tokens to link with the cancellation token for 
     /// the dispatcher.
@@ -184,13 +205,13 @@ public static class IDispatcherExtensions
     /// <returns>A task that runs until the function has completed.</returns>
     public static Task RunAsync(
         this IDispatcher dispatcher,
-        Func<CancellationToken, Task> func,
+        Func<CancellationToken, Task> function,
         params IEnumerable<CancellationToken> cancellationTokens
     ) =>
         dispatcher.RunAsync(
-            func: async cancellationToken =>
+            function: async cancellationToken =>
             {
-                await func(cancellationToken).ConfigureAwait(false);
+                await function(cancellationToken).ConfigureAwait(false);
                 return 0;
             },
             cancellationTokens: cancellationTokens
@@ -203,7 +224,7 @@ public static class IDispatcherExtensions
     /// The type of result returned by the function.
     /// </typeparam>
     /// <param name="dispatcher">The dispatcher being extended.</param>
-    /// <param name="func">The function to execute.</param>
+    /// <param name="function">The function to execute.</param>
     /// <param name="cancellationTokens">
     /// Optional cancellation tokens to link with the cancellation token for
     /// the dispatcher.
@@ -211,11 +232,11 @@ public static class IDispatcherExtensions
     /// <returns>A task that runs until the function has completed.</returns>
     public static Task<TResult> RunAsync<TResult>(
         this IDispatcher dispatcher,
-        Func<CancellationToken, TResult> func,
+        Func<CancellationToken, TResult> function,
         params IEnumerable<CancellationToken> cancellationTokens
     ) =>
         dispatcher.RunAsync(
-            func: cancellationToken => Task.FromResult(func(cancellationToken)),
+            function: cancellationToken => Task.FromResult(function(cancellationToken)),
             cancellationTokens: cancellationTokens
         );
 
@@ -235,7 +256,7 @@ public static class IDispatcherExtensions
         params IEnumerable<CancellationToken> cancellationTokens
     ) =>
         dispatcher.RunAsync(
-            func: cancellationToken =>
+            function: cancellationToken =>
             {
                 action(cancellationToken);
                 return Task.FromResult(0);
@@ -288,7 +309,7 @@ public static class IDispatcherExtensions
     {
         dispatcher
             .RunAsync(
-                func: cancellationToken =>
+                function: cancellationToken =>
                 {
                     action(cancellationToken);
                     return Task.CompletedTask;
@@ -304,18 +325,18 @@ public static class IDispatcherExtensions
     /// away without waiting for the function to complete execution.
     /// </summary>
     /// <param name="dispatcher">The dispatcher being extended.</param>
-    /// <param name="func">The async function to execute.</param>
+    /// <param name="function">The async function to execute.</param>
     /// <param name="cancellationTokens">
     /// Optional cancellation tokens to link with the cancellation token for
     /// the dispatcher.
     /// </param>
     public static void Run(
         this IDispatcher dispatcher,
-        Func<CancellationToken, Task> func,
+        Func<CancellationToken, Task> function,
         params IEnumerable<CancellationToken> cancellationTokens
     ) =>
         dispatcher.Run(
-            func,
+            function,
             onError: null,
             cancellationTokens
         );
@@ -326,7 +347,7 @@ public static class IDispatcherExtensions
     /// away without waiting for the function to complete execution.
     /// </summary>
     /// <param name="dispatcher">The dispatcher being extended.</param>
-    /// <param name="func">The async function to execute.</param>
+    /// <param name="function">The async function to execute.</param>
     /// <param name="onError">
     /// Callback that is invoked if the function generates an exception.
     /// </param>
@@ -336,16 +357,16 @@ public static class IDispatcherExtensions
     /// </param>
     public static void Run(
         this IDispatcher dispatcher,
-        Func<CancellationToken, Task> func,
+        Func<CancellationToken, Task> function,
         Action<Exception>? onError,
         params IEnumerable<CancellationToken> cancellationTokens
     )
     {
         dispatcher
             .RunAsync(
-                func: async cancellationToken =>
+                function: async cancellationToken =>
                 {
-                    await func(cancellationToken).ConfigureAwait(false);
+                    await function(cancellationToken).ConfigureAwait(false);
                     return Task.CompletedTask;
                 },
                 cancellationTokens: cancellationTokens
@@ -384,5 +405,39 @@ public static class IDispatcherExtensions
             },
             continuationOptions: TaskContinuationOptions.OnlyOnFaulted
         );
+    }
+
+    /// <summary>
+    /// Combine the dispatcher's cancellation token with the given cancellation
+    /// tokens into a single cancellation token.
+    /// </summary>
+    /// <param name="dispatcher">
+    /// The dispatcher whose cancellation token should be included in the
+    /// result.
+    /// </param>
+    /// <param name="cancellationTokens">
+    /// The cancellation tokens to include in the result.
+    /// </param>
+    /// <returns></returns>
+    private static CancellationToken CombineCancellationTokens(
+        IDispatcher dispatcher,
+        params IEnumerable<CancellationToken> cancellationTokens
+    )
+    {
+        var allCancellationTokens = new List<CancellationToken>(cancellationTokens)
+        {
+            dispatcher.CancellationToken
+        }
+        .Where(token => token != CancellationToken.None)
+        .ToList();
+
+        return allCancellationTokens.Count switch
+        {
+            0 => CancellationToken.None,
+            1 => allCancellationTokens[0],
+            _ => CancellationTokenSource
+                .CreateLinkedTokenSource([.. allCancellationTokens])
+                .Token
+        };
     }
 }

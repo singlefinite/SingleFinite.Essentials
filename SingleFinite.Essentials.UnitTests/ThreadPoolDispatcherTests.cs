@@ -35,14 +35,14 @@ public class ThreadPoolDispatcherTests
         var dispatcher = new ThreadPoolDispatcher();
 
         dispatcher.Run(
-            cancellationToken =>
+            action: cancellationToken =>
             {
                 startWaitHandle.Set();
                 cancellationToken.WaitHandle.WaitOne();
                 counter++;
                 waitHandle.Set();
             },
-            cancellationTokenSource.Token
+            cancellationTokens: cancellationTokenSource.Token
         );
 
         startWaitHandle.WaitOne();
@@ -51,7 +51,7 @@ public class ThreadPoolDispatcherTests
         waitHandle.WaitOne();
 
         Assert.AreEqual(1, counter);
-        Assert.AreEqual(true, cancellationTokenSource.Token.IsCancellationRequested);
-        Assert.AreEqual(false, dispatcher.CancellationToken.IsCancellationRequested);
+        Assert.IsTrue(cancellationTokenSource.Token.IsCancellationRequested);
+        Assert.IsFalse(dispatcher.CancellationToken.IsCancellationRequested);
     }
 }

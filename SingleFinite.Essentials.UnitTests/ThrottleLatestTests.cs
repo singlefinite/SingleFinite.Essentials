@@ -22,7 +22,7 @@
 namespace SingleFinite.Essentials.UnitTests;
 
 [TestClass]
-public class ThrottleLatestTests
+public class ThrottleLatestTests(TestContext testContext)
 {
     [TestMethod]
     public async Task Throttle_Invokes_Last_Action()
@@ -54,12 +54,15 @@ public class ThrottleLatestTests
             onError: _ => observedErrors++
         );
 
-        Assert.AreEqual(1, observedItems.Count);
+        Assert.HasCount(1, observedItems);
         Assert.AreEqual("one", observedItems[0]);
 
-        await Task.Delay(1000);
+        await Task.Delay(
+            millisecondsDelay: 1000,
+            cancellationToken: testContext.CancellationToken
+        );
 
-        Assert.AreEqual(2, observedItems.Count);
+        Assert.HasCount(2, observedItems);
         Assert.AreEqual("one", observedItems[0]);
         Assert.AreEqual("three", observedItems[1]);
 
@@ -88,12 +91,15 @@ public class ThrottleLatestTests
             limit: limit
         );
 
-        Assert.AreEqual(1, observedItems.Count);
+        Assert.HasCount(1, observedItems);
         Assert.AreEqual("one", observedItems[0]);
 
-        await Task.Delay(1000);
+        await Task.Delay(
+            millisecondsDelay: 1000,
+            cancellationToken: testContext.CancellationToken
+        );
 
-        Assert.AreEqual(2, observedItems.Count);
+        Assert.HasCount(2, observedItems);
         Assert.AreEqual("one", observedItems[0]);
         Assert.AreEqual("three", observedItems[1]);
     }

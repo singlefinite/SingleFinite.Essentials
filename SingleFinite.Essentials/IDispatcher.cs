@@ -33,9 +33,13 @@ public interface IDispatcher : ICancelObservable
     /// <typeparam name="TResult">
     /// The type of result returned by the function.
     /// </typeparam>
-    /// <param name="func">The function to execute.</param>
+    /// <param name="function">The function to execute.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
     /// <returns>A task that runs until the function has completed.</returns>
-    Task<TResult> RunAsync<TResult>(Func<Task<TResult>> func);
+    Task<TResult> RunAsync<TResult>(
+        Func<Task<TResult>> function,
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     /// Handle the given exception.  This method is used by extension methods

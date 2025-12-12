@@ -33,13 +33,11 @@ public class DisposeStateTests
 
         disposeState.Dispose();
 
-        var ex = Assert.ThrowsException<ObjectDisposedException>(
+        var ex = Assert.Throws<ObjectDisposedException>(
             disposeState.ThrowIfDisposed
         );
 
-        Assert.IsTrue(
-            ex.Message.Contains(typeof(ExampleDisposable).FullName ?? "")
-        );
+        Assert.Contains(typeof(ExampleDisposable).FullName ?? "", ex.Message);
     }
 
     [TestMethod]

@@ -91,13 +91,13 @@ public class ObservableTests
         combinedObserver.OnEach(observedNumbers.Add);
 
         firstObservableSource.Emit(9);
-        Assert.AreEqual(1, observedNumbers.Count);
+        Assert.HasCount(1, observedNumbers);
         Assert.AreEqual(9, observedNumbers[0]);
 
         observedNumbers.Clear();
 
         secondObservableSource.Emit(11);
-        Assert.AreEqual(1, observedNumbers.Count);
+        Assert.HasCount(1, observedNumbers);
         Assert.AreEqual(11, observedNumbers[0]);
     }
 
@@ -123,10 +123,10 @@ public class ObservableTests
         Assert.IsFalse(combinedObserver.IsDisposed);
 
         firstObservableSource.Emit(9);
-        Assert.AreEqual(0, observedNumbers.Count);
+        Assert.IsEmpty(observedNumbers);
 
         secondObservableSource.Emit(11);
-        Assert.AreEqual(1, observedNumbers.Count);
+        Assert.HasCount(1, observedNumbers);
         Assert.AreEqual(11, observedNumbers[0]);
     }
 

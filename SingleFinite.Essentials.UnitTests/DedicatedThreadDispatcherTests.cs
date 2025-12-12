@@ -22,7 +22,7 @@
 namespace SingleFinite.Essentials.UnitTests;
 
 [TestClass]
-public class DedicatedThreadDispatcherTests
+public class DedicatedThreadDispatcherTests(TestContext testContext)
 {
     [TestMethod]
     public void Run_Method_Is_Thread_Safe_And_Does_Not_Deadlock()
@@ -52,15 +52,18 @@ public class DedicatedThreadDispatcherTests
         {
             list.ForEach(handle =>
             {
-                Task.Run(async () =>
-                {
-                    await dispatcher.RunAsync(() =>
+                Task.Run(
+                    function: async () =>
                     {
-                        counter++;
-                        nameSet.Add(Thread.CurrentThread.Name);
-                    });
-                    handle.Set();
-                });
+                        await dispatcher.RunAsync(() =>
+                        {
+                            counter++;
+                            nameSet.Add(Thread.CurrentThread.Name);
+                        });
+                        handle.Set();
+                    },
+                    cancellationToken: testContext.CancellationToken
+                );
             });
         });
 
@@ -75,7 +78,7 @@ public class DedicatedThreadDispatcherTests
         });
 
         Assert.AreEqual(loopCount * runPerLoopCount, counter);
-        Assert.AreEqual(1, nameSet.Count);
+        Assert.HasCount(1, nameSet);
         Assert.AreEqual("SingleFinite.Essentials.DedicatedThreadDispatcher", nameSet.First());
     }
 
@@ -86,12 +89,18 @@ public class DedicatedThreadDispatcherTests
 
         // Make sure an uncaught exception doesn't bring down the app.
         //
-        dispatcher.Run(() => throw new InvalidOperationException());
+        dispatcher.Run(
+            function: () => throw new InvalidOperationException(),
+            cancellationTokens: testContext.CancellationToken
+        );
 
-        await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+        await Assert.ThrowsAsync<InvalidOperationException>(
             async () =>
             {
-                await dispatcher.RunAsync(() => throw new InvalidOperationException());
+                await dispatcher.RunAsync(
+                    function: () => throw new InvalidOperationException(),
+                    cancellationTokens: testContext.CancellationToken
+                );
             }
         );
     }
@@ -104,7 +113,12 @@ public class DedicatedThreadDispatcherTests
 
         (dispatcher as IDisposable).Dispose();
 
-        await Assert.ThrowsExceptionAsync<ObjectDisposedException>(() => dispatcher.RunAsync(() => count++));
+        await Assert.ThrowsAsync<ObjectDisposedException>(
+            () => dispatcher.RunAsync(
+                function: () => count++,
+                cancellationTokens: testContext.CancellationToken
+            )
+        );
         Assert.AreEqual(0, count);
 
         // Make sure multiple calls to dispose don't cause an exception.
@@ -119,11 +133,21 @@ public class DedicatedThreadDispatcherTests
         using var dispatcher = new DedicatedThreadDispatcher();
 
         await dispatcher.RunAsync(
-            () => dispatcher.RunAsync(
-                () => dispatcher.RunAsync(
-                    async () => { await Task.Delay(25); count++; }
-                )
-            )
+            function: () => dispatcher.RunAsync(
+                function: () => dispatcher.RunAsync(
+                    function: async () =>
+                    {
+                        await Task.Delay(
+                            millisecondsDelay: 25,
+                            cancellationToken: testContext.CancellationToken
+                        );
+                        count++;
+                    },
+                    cancellationTokens: testContext.CancellationToken
+                ),
+                cancellationTokens: testContext.CancellationToken
+            ),
+            cancellationTokens: testContext.CancellationToken
         );
 
         Assert.AreEqual(1, count);
@@ -146,22 +170,26 @@ public class DedicatedThreadDispatcherTests
         Exception? observedException = null;
 
         mainDispatcher.Run(
-            func: async () =>
+            function: async () =>
             {
                 mainThreadId = Environment.CurrentManagedThreadId;
-                await Task.Run(() =>
-                {
-                    backgroundThreadId = Environment.CurrentManagedThreadId;
-                    Thread.Sleep(100);
-                    throw new InvalidOperationException("Test Exception");
-                });
+                await Task.Run(
+                    function: () =>
+                    {
+                        backgroundThreadId = Environment.CurrentManagedThreadId;
+                        Thread.Sleep(100);
+                        throw new InvalidOperationException("Test Exception");
+                    },
+                    cancellationToken: testContext.CancellationToken
+                );
             },
             onError: ex =>
             {
                 onErrorThreadId = Environment.CurrentManagedThreadId;
                 observedException = ex;
                 eventWaitHandle.Set();
-            }
+            },
+            cancellationTokens: testContext.CancellationToken
         );
 
         eventWaitHandle.WaitOne();
@@ -196,18 +224,22 @@ public class DedicatedThreadDispatcherTests
         );
 
         mainDispatcher.Run(
-            func: async () =>
+            function: async () =>
             {
-                await Task.Run(() =>
-                {
-                    throw new InvalidOperationException("Test Exception");
-                });
-            }
+                await Task.Run(
+                    function: () =>
+                    {
+                        throw new InvalidOperationException("Test Exception");
+                    },
+                    cancellationToken: testContext.CancellationToken
+                );
+            },
+            cancellationTokens: testContext.CancellationToken
         );
 
         eventWaitHandle.WaitOne();
 
-        Assert.AreEqual(1, observedExceptions.Count);
+        Assert.HasCount(1, observedExceptions);
         var observedException = observedExceptions.First();
         Assert.IsInstanceOfType<InvalidOperationException>(observedException);
         Assert.AreEqual("Test Exception", observedException.Message);

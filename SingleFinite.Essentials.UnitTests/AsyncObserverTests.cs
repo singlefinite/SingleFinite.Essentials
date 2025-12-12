@@ -22,7 +22,7 @@
 namespace SingleFinite.Essentials.UnitTests;
 
 [TestClass]
-public class AsyncObserverTests
+public class AsyncObserverTests(TestContext testContext)
 {
     [TestMethod]
     public async Task ForEach_Runs_As_Expected_Async()
@@ -36,7 +36,10 @@ public class AsyncObserverTests
             .Observe()
             .OnEach(async () =>
             {
-                await Task.Run(() => observedCount++);
+                await Task.Run(
+                    action: () => observedCount++,
+                    cancellationToken: testContext.CancellationToken
+                );
             });
 
         Assert.AreEqual(0, observedCount);
@@ -48,7 +51,10 @@ public class AsyncObserverTests
 
         observer.OnEach(async () =>
         {
-            await Task.Run(() => observedCount++);
+            await Task.Run(
+                action: () => observedCount++,
+                cancellationToken: testContext.CancellationToken
+            );
         });
 
         Assert.AreEqual(0, observedCount);
@@ -78,27 +84,30 @@ public class AsyncObserverTests
             .Select(args => Task.Run(() => args.Name))
             .OnEach(async name =>
             {
-                await Task.Run(() => observedNames.Add(name));
+                await Task.Run(
+                    action: () => observedNames.Add(name),
+                    cancellationToken: testContext.CancellationToken
+                );
             });
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         await observableSource.EmitAsync(new("Hello", 0));
 
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("Hello", observedNames[0]);
         observedNames.Clear();
 
         await observableSource.EmitAsync(new("World", 0));
 
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("World", observedNames[0]);
         observedNames.Clear();
 
         observer.Dispose();
         await observableSource.EmitAsync(new("Again", 0));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
     }
 
     [TestMethod]
@@ -114,26 +123,29 @@ public class AsyncObserverTests
             .Where(args => Task.Run(() => args.Name.Length > 3))
             .OnEach(async args =>
             {
-                await Task.Run(() => observedNames.Add(args.Name));
+                await Task.Run(
+                    action: () => observedNames.Add(args.Name),
+                    cancellationToken: testContext.CancellationToken
+                );
             });
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         await observableSource.EmitAsync(new("Hello", 0));
 
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("Hello", observedNames[0]);
         observedNames.Clear();
 
         await observableSource.EmitAsync(new("Hi", 0));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         observer.Dispose();
 
         await observableSource.EmitAsync(new("Howdy", 0));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
     }
 
     [TestMethod]
@@ -148,32 +160,41 @@ public class AsyncObserverTests
             .Observe()
             .OnEach(async args =>
             {
-                await Task.Run(() => observedNames.Add(args.Name));
+                await Task.Run(
+                    action: () => observedNames.Add(args.Name),
+                    cancellationToken: testContext.CancellationToken
+                );
             })
-            .Until(args => Task.Run(() => args.Name == "stop"))
+            .Until(args => Task.Run(
+                function: () => args.Name == "stop",
+                cancellationToken: testContext.CancellationToken
+            ))
             .OnEach(async args =>
             {
-                await Task.Run(() => observedNames.Add(args.Name));
+                await Task.Run(
+                    action: () => observedNames.Add(args.Name),
+                    cancellationToken: testContext.CancellationToken
+                );
             });
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         await observableSource.EmitAsync(new("Hello", 0));
 
-        Assert.AreEqual(2, observedNames.Count);
+        Assert.HasCount(2, observedNames);
         Assert.AreEqual("Hello", observedNames[0]);
         Assert.AreEqual("Hello", observedNames[1]);
         observedNames.Clear();
 
         await observableSource.EmitAsync(new("stop", 0));
 
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("stop", observedNames[0]);
         observedNames.Clear();
 
         await observableSource.EmitAsync(new("World", 0));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
     }
 
     [TestMethod]
@@ -191,11 +212,11 @@ public class AsyncObserverTests
             .OnEach(args => observedNames.Add(args.Name))
             .On(disposable);
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         await observableSource.EmitAsync(new("Hello", 0));
 
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("Hello", observedNames[0]);
         observedNames.Clear();
 
@@ -203,7 +224,7 @@ public class AsyncObserverTests
 
         await observableSource.EmitAsync(new("World", 0));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
     }
 
     [TestMethod]
@@ -221,11 +242,11 @@ public class AsyncObserverTests
             .OnEach(args => observedNames.Add(args.Name))
             .On(cancellationTokenSource.Token);
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         await observableSource.EmitAsync(new("Hello", 0));
 
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("Hello", observedNames[0]);
         observedNames.Clear();
 
@@ -233,7 +254,7 @@ public class AsyncObserverTests
 
         await observableSource.EmitAsync(new("World", 0));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
     }
 
     [TestMethod]
@@ -248,36 +269,45 @@ public class AsyncObserverTests
             .Observe()
             .OnEach(async args =>
             {
-                await Task.Run(() => observedNames.Add(args.Name));
+                await Task.Run(
+                    action: () => observedNames.Add(args.Name),
+                    cancellationToken: testContext.CancellationToken
+                );
             })
             .Until(
-                args => Task.Run(() => args.Name == "stop"),
+                args => Task.Run(
+                    function: () => args.Name == "stop",
+                    cancellationToken: testContext.CancellationToken
+                ),
                 continueOnDispose: true
             )
             .OnEach(async args =>
             {
-                await Task.Run(() => observedNames.Add($"{args.Name}!"));
+                await Task.Run(
+                    action: () => observedNames.Add($"{args.Name}!"),
+                    cancellationToken: testContext.CancellationToken
+                );
             });
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         await observableSource.EmitAsync(new("Hello", 0));
 
-        Assert.AreEqual(2, observedNames.Count);
+        Assert.HasCount(2, observedNames);
         Assert.AreEqual("Hello", observedNames[0]);
         Assert.AreEqual("Hello!", observedNames[1]);
         observedNames.Clear();
 
         await observableSource.EmitAsync(new("stop", 0));
 
-        Assert.AreEqual(2, observedNames.Count);
+        Assert.HasCount(2, observedNames);
         Assert.AreEqual("stop", observedNames[0]);
         Assert.AreEqual("stop!", observedNames[1]);
         observedNames.Clear();
 
         await observableSource.EmitAsync(new("World", 0));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
     }
 
     [TestMethod]
@@ -293,18 +323,21 @@ public class AsyncObserverTests
             .OfType<SubExampleArgs>()
             .OnEach(async args =>
             {
-                await Task.Run(() => observedNames.Add(args.SubName));
+                await Task.Run(
+                    action: () => observedNames.Add(args.SubName),
+                    cancellationToken: testContext.CancellationToken
+                );
             });
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         await observableSource.EmitAsync(new("Hello", 0));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         await observableSource.EmitAsync(new SubExampleArgs(SubName: "Hi"));
 
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("Hi", observedNames[0]);
     }
 
@@ -320,26 +353,32 @@ public class AsyncObserverTests
             .Observe()
             .OnEach(async args =>
             {
-                await Task.Run(() => observedNames.Add(args.Name));
+                await Task.Run(
+                    action: () => observedNames.Add(args.Name),
+                    cancellationToken: testContext.CancellationToken
+                );
             })
             .Once()
             .OnEach(async args =>
             {
-                await Task.Run(() => observedNames.Add($"{args.Name}!"));
+                await Task.Run(
+                    action: () => observedNames.Add($"{args.Name}!"),
+                    cancellationToken: testContext.CancellationToken
+                );
             });
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         await observableSource.EmitAsync(new("Hello", 0));
 
-        Assert.AreEqual(2, observedNames.Count);
+        Assert.HasCount(2, observedNames);
         Assert.AreEqual("Hello", observedNames[0]);
         Assert.AreEqual("Hello!", observedNames[1]);
         observedNames.Clear();
 
         await observableSource.EmitAsync(new("World", 0));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
     }
 
     [TestMethod]
@@ -348,7 +387,8 @@ public class AsyncObserverTests
         var dispatcherThreadId = -1;
         var dispatcher = new DedicatedThreadDispatcher();
         await dispatcher.RunAsync(
-            action: () => dispatcherThreadId = Environment.CurrentManagedThreadId
+            action: () => dispatcherThreadId = Environment.CurrentManagedThreadId,
+            cancellationTokens: testContext.CancellationToken
         );
 
         var currentThreadId = Environment.CurrentManagedThreadId;
@@ -365,14 +405,14 @@ public class AsyncObserverTests
             .Dispatch(dispatcher)
             .OnEach(_ => observedThreadIdsAfterDispatch.Add(Environment.CurrentManagedThreadId));
 
-        Assert.AreEqual(0, observedThreadIdsAfterDispatch.Count);
+        Assert.IsEmpty(observedThreadIdsAfterDispatch);
 
         await observableSource.EmitAsync(new("Hello", 0));
 
-        Assert.AreEqual(1, observedThreadIdsBeforeDispatch.Count);
+        Assert.HasCount(1, observedThreadIdsBeforeDispatch);
         Assert.AreEqual(currentThreadId, observedThreadIdsBeforeDispatch[0]);
 
-        Assert.AreEqual(1, observedThreadIdsAfterDispatch.Count);
+        Assert.HasCount(1, observedThreadIdsAfterDispatch);
         Assert.AreEqual(dispatcherThreadId, observedThreadIdsAfterDispatch[0]);
     }
 
@@ -394,21 +434,27 @@ public class AsyncObserverTests
             )
             .OnEach(async args =>
             {
-                await Task.Delay(5);
+                await Task.Delay(
+                    millisecondsDelay: 5,
+                    cancellationToken: testContext.CancellationToken
+                );
                 observedNames.Add(args.Name);
             });
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         await observableSource.EmitAsync(new("One", 0));
         await observableSource.EmitAsync(new("Two", 0));
         await observableSource.EmitAsync(new("Three", 0));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
-        await Task.Delay(TimeSpan.FromSeconds(1.1));
+        await Task.Delay(
+            delay: TimeSpan.FromSeconds(1.1),
+            cancellationToken: testContext.CancellationToken
+        );
 
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("Three", observedNames[0]);
     }
 
@@ -427,19 +473,22 @@ public class AsyncObserverTests
             )
             .OnEach(args => observedNames.Add(args.Name));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         await observableSource.EmitAsync(new("One", 0));
         await observableSource.EmitAsync(new("Two", 0));
         await observableSource.EmitAsync(new("Three", 0));
 
-        await Task.Delay(TimeSpan.FromSeconds(1));
+        await Task.Delay(
+            delay: TimeSpan.FromSeconds(1),
+            cancellationToken: testContext.CancellationToken
+        );
 
         await observableSource.EmitAsync(new("Four", 0));
         await observableSource.EmitAsync(new("Five", 0));
         await observableSource.EmitAsync(new("Six", 0));
 
-        Assert.AreEqual(2, observedNames.Count);
+        Assert.HasCount(2, observedNames);
         Assert.AreEqual("One", observedNames[0]);
         Assert.AreEqual("Four", observedNames[1]);
     }
@@ -461,18 +510,21 @@ public class AsyncObserverTests
             )
             .OnEach(args => observedNames.Add(args.Name));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         await observableSource.EmitAsync(new("One", 0));
         await observableSource.EmitAsync(new("Two", 0));
         await observableSource.EmitAsync(new("Three", 0));
 
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("One", observedNames[0]);
 
-        await Task.Delay(TimeSpan.FromSeconds(1));
+        await Task.Delay(
+            delay: TimeSpan.FromSeconds(1),
+            cancellationToken: testContext.CancellationToken
+        );
 
-        Assert.AreEqual(2, observedNames.Count);
+        Assert.HasCount(2, observedNames);
         Assert.AreEqual("One", observedNames[0]);
         Assert.AreEqual("Three", observedNames[1]);
     }
@@ -490,35 +542,44 @@ public class AsyncObserverTests
             .Observe()
             .Catch(async (_, ex) =>
             {
-                await Task.Run(() => observedExceptions.Add(ex));
+                await Task.Run(
+                    action: () => observedExceptions.Add(ex),
+                    cancellationToken: testContext.CancellationToken
+                );
                 return true;
             })
             .OnEach(async args =>
             {
-                await Task.Run(() =>
-                {
-                    if (args.Age == 99)
-                        throw new InvalidOperationException("err");
-                });
+                await Task.Run(
+                    action: () =>
+                    {
+                        if (args.Age == 99)
+                            throw new InvalidOperationException("err");
+                    },
+                    cancellationToken: testContext.CancellationToken
+                );
             })
             .OnEach(async args =>
             {
-                await Task.Run(() => observedNames.Add(args.Name));
+                await Task.Run(
+                    action: () => observedNames.Add(args.Name),
+                    cancellationToken: testContext.CancellationToken
+                );
             });
 
         await observableSource.EmitAsync(new ExampleArgs("Hello", 99));
 
-        Assert.AreEqual(1, observedExceptions.Count);
+        Assert.HasCount(1, observedExceptions);
         Assert.IsInstanceOfType<InvalidOperationException>(observedExceptions[0]);
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         observedExceptions.Clear();
         observedNames.Clear();
 
         await observableSource.EmitAsync(new ExampleArgs("Hi", 10));
 
-        Assert.AreEqual(0, observedExceptions.Count);
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.IsEmpty(observedExceptions);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("Hi", observedNames[0]);
     }
 
@@ -536,36 +597,48 @@ public class AsyncObserverTests
             .Observe()
             .Catch(async (_, ex) =>
             {
-                await Task.Run(() => observedUnhandledExceptions.Add(ex));
+                await Task.Run(
+                    action: () => observedUnhandledExceptions.Add(ex),
+                    cancellationToken: testContext.CancellationToken
+                );
                 return true;
             })
             .Catch((args, ex) =>
             {
-                return Task.Run(() =>
-                {
-                    observedExceptions.Add(ex);
-                    return args.Age > 50;
-                });
+                return Task.Run(
+                    function: () =>
+                    {
+                        observedExceptions.Add(ex);
+                        return args.Age > 50;
+                    },
+                    cancellationToken: testContext.CancellationToken
+                );
             })
             .OnEach(async args =>
             {
-                await Task.Run(() =>
-                {
-                    if (args.Age == 99 || args.Age == 11)
-                        throw new InvalidOperationException("err");
-                });
+                await Task.Run(
+                    action: () =>
+                    {
+                        if (args.Age == 99 || args.Age == 11)
+                            throw new InvalidOperationException("err");
+                    },
+                    cancellationToken: testContext.CancellationToken
+                );
             })
             .OnEach(async args =>
             {
-                await Task.Run(() => observedNames.Add(args.Name));
+                await Task.Run(
+                    action: () => observedNames.Add(args.Name),
+                    cancellationToken: testContext.CancellationToken
+                );
             });
 
         await observableSource.EmitAsync(new ExampleArgs("Hello", 99));
 
-        Assert.AreEqual(0, observedUnhandledExceptions.Count);
-        Assert.AreEqual(1, observedExceptions.Count);
+        Assert.IsEmpty(observedUnhandledExceptions);
+        Assert.HasCount(1, observedExceptions);
         Assert.IsInstanceOfType<InvalidOperationException>(observedExceptions[0]);
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         observedUnhandledExceptions.Clear();
         observedExceptions.Clear();
@@ -573,11 +646,11 @@ public class AsyncObserverTests
 
         await observableSource.EmitAsync(new ExampleArgs("World", 11));
 
-        Assert.AreEqual(1, observedUnhandledExceptions.Count);
+        Assert.HasCount(1, observedUnhandledExceptions);
         Assert.IsInstanceOfType<InvalidOperationException>(observedUnhandledExceptions[0]);
-        Assert.AreEqual(1, observedExceptions.Count);
+        Assert.HasCount(1, observedExceptions);
         Assert.IsInstanceOfType<InvalidOperationException>(observedExceptions[0]);
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         observedUnhandledExceptions.Clear();
         observedExceptions.Clear();
@@ -585,9 +658,9 @@ public class AsyncObserverTests
 
         await observableSource.EmitAsync(new ExampleArgs("Hi", 10));
 
-        Assert.AreEqual(0, observedUnhandledExceptions.Count);
-        Assert.AreEqual(0, observedExceptions.Count);
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.IsEmpty(observedUnhandledExceptions);
+        Assert.IsEmpty(observedExceptions);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("Hi", observedNames[0]);
     }
 
@@ -607,11 +680,14 @@ public class AsyncObserverTests
             )
             .OnEach(async args =>
             {
-                await Task.Delay(500);
+                await Task.Delay(
+                    millisecondsDelay: 500,
+                    cancellationToken: testContext.CancellationToken
+                );
                 observedNames.Add(args.Name);
             });
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         var firstEventTask = observableSource.EmitAsync(new("Hello", 0));
         var secondEventTask = observableSource.EmitAsync(new("World", 0));
@@ -619,7 +695,7 @@ public class AsyncObserverTests
         await firstEventTask;
         await secondEventTask;
 
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("Hello", observedNames[0]);
     }
 

@@ -59,20 +59,22 @@ public sealed class AsyncObservableSource
     public Task EmitAsync() => Event?.Invoke() ?? Task.CompletedTask;
 
     /// <summary>
-    /// Raise the event and return immediately without waiting for the event
-    /// to complete.
+    /// Raise the event using the given dispatcher.
     /// </summary>
     /// <param name="dispatcher">The dispatcher to raise the event on.</param>
     /// <param name="onError">
     /// Optional action that will be invoked if the event generates an
     /// exception.
     /// </param>
+    /// <param name="cancellationTokens">Optional cancellation tokens.</param>
     public void EmitEvent(
         IDispatcher dispatcher,
-        Action<Exception>? onError = default
+        Action<Exception>? onError = default,
+        params IEnumerable<CancellationToken> cancellationTokens
     ) => dispatcher.Run(
-        func: EmitAsync,
-        onError: onError
+        function: EmitAsync,
+        onError: onError,
+        cancellationTokens: cancellationTokens
     );
 
     #endregion
@@ -130,8 +132,7 @@ public sealed class AsyncObservableSource<TArgs>
         Event?.Invoke(args) ?? Task.CompletedTask;
 
     /// <summary>
-    /// Raise the event and return immediately without waiting for the event
-    /// to complete.
+    /// Raise the event using the given dispatcher.
     /// </summary>
     /// <param name="args">The arguments to pass with the event.</param>
     /// <param name="dispatcher">The dispatcher to raise the event on.</param>
@@ -139,13 +140,16 @@ public sealed class AsyncObservableSource<TArgs>
     /// Optional action that will be invoked if the event generates an
     /// exception.
     /// </param>
+    /// <param name="cancellationTokens">Optional cancellation tokens.</param>
     public void Emit(
         TArgs args,
         IDispatcher dispatcher,
-        Action<Exception>? onError = default
+        Action<Exception>? onError = default,
+        params IEnumerable<CancellationToken> cancellationTokens
     ) => dispatcher.Run(
-        func: () => EmitAsync(args),
-        onError: onError
+        function: () => EmitAsync(args),
+        onError: onError,
+        cancellationTokens: cancellationTokens
     );
 
     #endregion

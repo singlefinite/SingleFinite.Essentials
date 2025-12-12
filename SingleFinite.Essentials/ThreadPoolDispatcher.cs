@@ -81,15 +81,19 @@ public sealed class ThreadPoolDispatcher :
     /// <typeparam name="TResult">
     /// The type of result returned by the function.
     /// </typeparam>
-    /// <param name="func">The function to execute.</param>
+    /// <param name="function">The function to execute.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
     /// <returns>A task that runs until the function has completed.</returns>
     /// <exception cref="ObjectDisposedException">
     /// Thrown if this object has been disposed.
     /// </exception>
-    public Task<TResult> RunAsync<TResult>(Func<Task<TResult>> func)
+    public Task<TResult> RunAsync<TResult>(
+        Func<Task<TResult>> function,
+        CancellationToken cancellationToken = default
+    )
     {
         _disposeState.ThrowIfDisposed();
-        return Task.Run(func);
+        return Task.Run(function, cancellationToken);
     }
 
     /// <inheritdoc/>

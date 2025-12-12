@@ -43,7 +43,7 @@ internal class AsyncObserverDispatch(
     protected override async Task<bool> OnEventAsync()
     {
         await dispatcher.RunAsync(
-            func: RaiseNextEventAsync
+            function: RaiseNextEventAsync
         );
 
         return false;
@@ -77,7 +77,7 @@ internal class AsyncObserverDispatch<TArgs>(
     protected override async Task<bool> OnEventAsync(TArgs args)
     {
         await dispatcher.RunAsync(
-            func: () => RaiseNextEventAsync(args)
+            function: () => RaiseNextEventAsync(args)
         );
 
         return false;

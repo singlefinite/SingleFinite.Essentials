@@ -48,7 +48,7 @@ internal class ObserverToAsync(
     protected override bool OnEvent()
     {
         dispatcher.Run(
-            func: async () =>
+            function: async () =>
             {
                 if (BranchNext is not null)
                     await BranchNext.Invoke();
@@ -106,7 +106,7 @@ internal class ObserverToAsync<TArgs>(
     protected override bool OnEvent(TArgs args)
     {
         dispatcher.Run(
-            func: async () =>
+            function: async () =>
             {
                 if (BranchNext is not null)
                     await BranchNext.Invoke(args);

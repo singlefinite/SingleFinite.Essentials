@@ -22,7 +22,7 @@
 namespace SingleFinite.Essentials.UnitTests;
 
 [TestClass]
-public class ObserverTests
+public class ObserverTests(TestContext testContext)
 {
     [TestMethod]
     public void ForEach_Runs_As_Expected()
@@ -72,24 +72,24 @@ public class ObserverTests
             .Select(args => args.Name)
             .OnEach(observedNames.Add);
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         observableSource.Emit(new("Hello", 0));
 
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("Hello", observedNames[0]);
         observedNames.Clear();
 
         observableSource.Emit(new("World", 0));
 
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("World", observedNames[0]);
         observedNames.Clear();
 
         observer.Dispose();
         observableSource.Emit(new("Again", 0));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
     }
 
     [TestMethod]
@@ -105,23 +105,23 @@ public class ObserverTests
             .Where(args => args.Name.Length > 3)
             .OnEach(args => observedNames.Add(args.Name));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         observableSource.Emit(new("Hello", 0));
 
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("Hello", observedNames[0]);
         observedNames.Clear();
 
         observableSource.Emit(new("Hi", 0));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         observer.Dispose();
 
         observableSource.Emit(new("Howdy", 0));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
     }
 
     [TestMethod]
@@ -138,24 +138,24 @@ public class ObserverTests
             .Until(args => args.Name == "stop")
             .OnEach(args => observedNames.Add(args.Name));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         observableSource.Emit(new("Hello", 0));
 
-        Assert.AreEqual(2, observedNames.Count);
+        Assert.HasCount(2, observedNames);
         Assert.AreEqual("Hello", observedNames[0]);
         Assert.AreEqual("Hello", observedNames[1]);
         observedNames.Clear();
 
         observableSource.Emit(new("stop", 0));
 
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("stop", observedNames[0]);
         observedNames.Clear();
 
         observableSource.Emit(new("World", 0));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
     }
 
     [TestMethod]
@@ -172,25 +172,25 @@ public class ObserverTests
             .Until(args => args.Name == "stop", continueOnDispose: true)
             .OnEach(args => observedNames.Add($"{args.Name}!"));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         observableSource.Emit(new("Hello", 0));
 
-        Assert.AreEqual(2, observedNames.Count);
+        Assert.HasCount(2, observedNames);
         Assert.AreEqual("Hello", observedNames[0]);
         Assert.AreEqual("Hello!", observedNames[1]);
         observedNames.Clear();
 
         observableSource.Emit(new("stop", 0));
 
-        Assert.AreEqual(2, observedNames.Count);
+        Assert.HasCount(2, observedNames);
         Assert.AreEqual("stop", observedNames[0]);
         Assert.AreEqual("stop!", observedNames[1]);
         observedNames.Clear();
 
         observableSource.Emit(new("World", 0));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
     }
 
     [TestMethod]
@@ -208,11 +208,11 @@ public class ObserverTests
             .OnEach(args => observedNames.Add(args.Name))
             .On(disposable);
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         observableSource.Emit(new("Hello", 0));
 
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("Hello", observedNames[0]);
         observedNames.Clear();
 
@@ -220,7 +220,7 @@ public class ObserverTests
 
         observableSource.Emit(new("World", 0));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
     }
 
     [TestMethod]
@@ -238,11 +238,11 @@ public class ObserverTests
             .OnEach(args => observedNames.Add(args.Name))
             .On(cancellationTokenSource.Token);
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         observableSource.Emit(new("Hello", 0));
 
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("Hello", observedNames[0]);
         observedNames.Clear();
 
@@ -250,7 +250,7 @@ public class ObserverTests
 
         observableSource.Emit(new("World", 0));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
     }
 
     [TestMethod]
@@ -266,15 +266,15 @@ public class ObserverTests
             .OfType<SubExampleArgs>()
             .OnEach(args => observedNames.Add(args.SubName));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         observableSource.Emit(new("Hello", 0));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         observableSource.Emit(new SubExampleArgs(SubName: "Hi"));
 
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("Hi", observedNames[0]);
     }
 
@@ -292,18 +292,18 @@ public class ObserverTests
             .Once()
             .OnEach(args => observedNames.Add($"{args.Name}!"));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         observableSource.Emit(new("Hello", 0));
 
-        Assert.AreEqual(2, observedNames.Count);
+        Assert.HasCount(2, observedNames);
         Assert.AreEqual("Hello", observedNames[0]);
         Assert.AreEqual("Hello!", observedNames[1]);
         observedNames.Clear();
 
         observableSource.Emit(new("World", 0));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
     }
 
     [TestMethod]
@@ -312,7 +312,8 @@ public class ObserverTests
         var dispatcherThreadId = -1;
         var dispatcher = new DedicatedThreadDispatcher();
         await dispatcher.RunAsync(
-            action: () => dispatcherThreadId = Environment.CurrentManagedThreadId
+            action: () => dispatcherThreadId = Environment.CurrentManagedThreadId,
+            cancellationTokens: testContext.CancellationToken
         );
 
         var currentThreadId = Environment.CurrentManagedThreadId;
@@ -338,15 +339,15 @@ public class ObserverTests
                 eventWaitHandle.Set();
             });
 
-        Assert.AreEqual(0, observedThreadIdsAfterDispatch.Count);
+        Assert.IsEmpty(observedThreadIdsAfterDispatch);
 
         observableSource.Emit(new("Hello", 0));
         eventWaitHandle.WaitOne();
 
-        Assert.AreEqual(1, observedThreadIdsBeforeDispatch.Count);
+        Assert.HasCount(1, observedThreadIdsBeforeDispatch);
         Assert.AreEqual(currentThreadId, observedThreadIdsBeforeDispatch[0]);
 
-        Assert.AreEqual(1, observedThreadIdsAfterDispatch.Count);
+        Assert.HasCount(1, observedThreadIdsAfterDispatch);
         Assert.AreEqual(dispatcherThreadId, observedThreadIdsAfterDispatch[0]);
     }
 
@@ -370,17 +371,20 @@ public class ObserverTests
             )
             .OnEach(args => observedNames.Add(args.Name));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         observableSource.Emit(new("One", 0));
         observableSource.Emit(new("Two", 0));
         observableSource.Emit(new("Three", 0));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
-        await Task.Delay(TimeSpan.FromSeconds(1.1));
+        await Task.Delay(
+            delay: TimeSpan.FromSeconds(1.1),
+            cancellationToken: testContext.CancellationToken
+        );
 
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("Three", observedNames[0]);
 
         Assert.AreEqual(0, observedErrors);
@@ -401,19 +405,22 @@ public class ObserverTests
             )
             .OnEach(args => observedNames.Add(args.Name));
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         observableSource.Emit(new("One", 0));
         observableSource.Emit(new("Two", 0));
         observableSource.Emit(new("Three", 0));
 
-        await Task.Delay(TimeSpan.FromSeconds(1));
+        await Task.Delay(
+            delay: TimeSpan.FromSeconds(1),
+            cancellationToken: testContext.CancellationToken
+        );
 
         observableSource.Emit(new("Four", 0));
         observableSource.Emit(new("Five", 0));
         observableSource.Emit(new("Six", 0));
 
-        Assert.AreEqual(2, observedNames.Count);
+        Assert.HasCount(2, observedNames);
         Assert.AreEqual("One", observedNames[0]);
         Assert.AreEqual("Four", observedNames[1]);
     }
@@ -436,18 +443,21 @@ public class ObserverTests
             .OnEach(args => observedNames.Add(args.Name)
             );
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         observableSource.Emit(new("One", 0));
         observableSource.Emit(new("Two", 0));
         observableSource.Emit(new("Three", 0));
 
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("One", observedNames[0]);
 
-        await Task.Delay(TimeSpan.FromSeconds(1));
+        await Task.Delay(
+            delay: TimeSpan.FromSeconds(1),
+            cancellationToken: testContext.CancellationToken
+        );
 
-        Assert.AreEqual(2, observedNames.Count);
+        Assert.HasCount(2, observedNames);
         Assert.AreEqual("One", observedNames[0]);
         Assert.AreEqual("Three", observedNames[1]);
     }
@@ -477,17 +487,17 @@ public class ObserverTests
 
         observableSource.Emit(new ExampleArgs("Hello", 99));
 
-        Assert.AreEqual(1, observedExceptions.Count);
+        Assert.HasCount(1, observedExceptions);
         Assert.IsInstanceOfType<InvalidOperationException>(observedExceptions[0]);
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         observedExceptions.Clear();
         observedNames.Clear();
 
         observableSource.Emit(new ExampleArgs("Hi", 10));
 
-        Assert.AreEqual(0, observedExceptions.Count);
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.IsEmpty(observedExceptions);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("Hi", observedNames[0]);
     }
 
@@ -522,10 +532,10 @@ public class ObserverTests
 
         observableSource.Emit(new ExampleArgs("Hello", 99));
 
-        Assert.AreEqual(0, observedUnhandledExceptions.Count);
-        Assert.AreEqual(1, observedExceptions.Count);
+        Assert.IsEmpty(observedUnhandledExceptions);
+        Assert.HasCount(1, observedExceptions);
         Assert.IsInstanceOfType<InvalidOperationException>(observedExceptions[0]);
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         observedUnhandledExceptions.Clear();
         observedExceptions.Clear();
@@ -533,11 +543,11 @@ public class ObserverTests
 
         observableSource.Emit(new ExampleArgs("World", 11));
 
-        Assert.AreEqual(1, observedUnhandledExceptions.Count);
+        Assert.HasCount(1, observedUnhandledExceptions);
         Assert.IsInstanceOfType<InvalidOperationException>(observedUnhandledExceptions[0]);
-        Assert.AreEqual(1, observedExceptions.Count);
+        Assert.HasCount(1, observedExceptions);
         Assert.IsInstanceOfType<InvalidOperationException>(observedExceptions[0]);
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         observedUnhandledExceptions.Clear();
         observedExceptions.Clear();
@@ -545,9 +555,9 @@ public class ObserverTests
 
         observableSource.Emit(new ExampleArgs("Hi", 10));
 
-        Assert.AreEqual(0, observedUnhandledExceptions.Count);
-        Assert.AreEqual(0, observedExceptions.Count);
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.IsEmpty(observedUnhandledExceptions);
+        Assert.IsEmpty(observedExceptions);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("Hi", observedNames[0]);
     }
 
@@ -583,7 +593,10 @@ public class ObserverTests
         observer.Dispose();
 
         observableSource.Emit();
-        await Task.Delay(100);
+        await Task.Delay(
+            millisecondsDelay: 100,
+            cancellationToken: testContext.CancellationToken
+        );
 
         Assert.AreEqual(0, observedCount);
     }
@@ -621,7 +634,7 @@ public class ObserverTests
         waitHandle.WaitOne(1000);
 
         Assert.AreEqual(1, observedCount);
-        Assert.AreEqual(1, observedErrors.Count);
+        Assert.HasCount(1, observedErrors);
         Assert.IsInstanceOfType<InvalidOperationException>(observedErrors[0]);
     }
 

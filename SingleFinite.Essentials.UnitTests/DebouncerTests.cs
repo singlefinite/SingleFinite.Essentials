@@ -22,7 +22,7 @@
 namespace SingleFinite.Essentials.UnitTests;
 
 [TestClass]
-public class DebouncerTests
+public class DebouncerTests(TestContext testContext)
 {
     [TestMethod]
     public async Task Debounce_Works_As_Expected()
@@ -53,11 +53,14 @@ public class DebouncerTests
             onError: _ => observedErrors++
         );
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
-        await Task.Delay(TimeSpan.FromMilliseconds(200));
+        await Task.Delay(
+            delay: TimeSpan.FromMilliseconds(200),
+            cancellationToken: testContext.CancellationToken
+        );
 
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("Three", observedNames[0]);
 
         Assert.AreEqual(0, observedErrors);
@@ -85,11 +88,14 @@ public class DebouncerTests
             delay: TimeSpan.FromMilliseconds(100)
         );
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
-        await Task.Delay(TimeSpan.FromMilliseconds(200));
+        await Task.Delay(
+            delay: TimeSpan.FromMilliseconds(200),
+            cancellationToken: testContext.CancellationToken
+        );
 
-        Assert.AreEqual(1, observedNames.Count);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("Three", observedNames[0]);
     }
 
@@ -108,13 +114,16 @@ public class DebouncerTests
             onError: _ => observedErrors++
         );
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         debouncer.Cancel();
 
-        await Task.Delay(TimeSpan.FromMilliseconds(200));
+        await Task.Delay(
+            delay: TimeSpan.FromMilliseconds(200),
+            cancellationToken: testContext.CancellationToken
+        );
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         Assert.AreEqual(0, observedErrors);
     }
@@ -134,13 +143,16 @@ public class DebouncerTests
             onError: _ => observedErrors++
         );
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         (debouncer as IDisposable)?.Dispose();
 
-        await Task.Delay(TimeSpan.FromMilliseconds(200));
+        await Task.Delay(
+            delay: TimeSpan.FromMilliseconds(200),
+            cancellationToken: testContext.CancellationToken
+        );
 
-        Assert.AreEqual(0, observedNames.Count);
+        Assert.IsEmpty(observedNames);
 
         Assert.AreEqual(0, observedErrors);
     }

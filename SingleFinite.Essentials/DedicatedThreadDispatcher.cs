@@ -136,34 +136,41 @@ public sealed class DedicatedThreadDispatcher :
     /// <typeparam name="TResult">
     /// The type of result returned by the function.
     /// </typeparam>
-    /// <param name="func">The function to execute.</param>
+    /// <param name="function">The function to execute.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
     /// <returns>A task that runs until the function has completed.</returns>
     /// <exception cref="ObjectDisposedException">
     /// Thrown if this object has been disposed.
     /// </exception>
-    public Task<TResult> RunAsync<TResult>(Func<Task<TResult>> func)
+    public Task<TResult> RunAsync<TResult>(
+        Func<Task<TResult>> function,
+        CancellationToken cancellationToken = default
+    )
     {
         _disposeState.ThrowIfDisposed();
 
         if (Thread.CurrentThread == _thread)
-            return func();
+            return function();
 
         var taskCompletionSource = new TaskCompletionSource<TResult>(
             TaskCreationOptions.RunContinuationsAsynchronously
         );
 
-        _queue.Add(async () =>
-        {
-            try
+        _queue.Add(
+            item: async () =>
             {
-                var result = await func().ConfigureAwait(false);
-                taskCompletionSource.SetResult(result);
-            }
-            catch (Exception ex)
-            {
-                taskCompletionSource.SetException(ex);
-            }
-        });
+                try
+                {
+                    var result = await function().ConfigureAwait(false);
+                    taskCompletionSource.SetResult(result);
+                }
+                catch (Exception ex)
+                {
+                    taskCompletionSource.SetException(ex);
+                }
+            },
+            cancellationToken: cancellationToken
+        );
 
         return taskCompletionSource.Task;
     }
