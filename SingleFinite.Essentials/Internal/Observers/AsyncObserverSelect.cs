@@ -83,10 +83,10 @@ internal class AsyncObserverSelect<TArgsOut>(
 /// The type of value that will be selected and passed down the observer chain.
 /// </typeparam>
 /// <param name="parent">The parent to this observer.</param>
-/// <param name="callback">The callback used to select the value.</param>
+/// <param name="selector">The callback used to select the value.</param>
 internal class AsyncObserverSelect<TArgsIn, TArgsOut>(
     IAsyncObserver<TArgsIn> parent,
-    Func<TArgsIn, Task<TArgsOut>> callback
+    Func<TArgsIn, Task<TArgsOut>> selector
 ) :
     AsyncObserverBase<TArgsIn>(parent),
     IAsyncObserver<TArgsOut>
@@ -106,7 +106,7 @@ internal class AsyncObserverSelect<TArgsIn, TArgsOut>(
     /// </returns>
     protected async override Task<bool> OnEventAsync(TArgsIn args)
     {
-        var value = await callback(args);
+        var value = await selector(args);
         if (BranchNext is not null)
             await BranchNext.Invoke(value);
         return false;

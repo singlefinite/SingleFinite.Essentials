@@ -82,10 +82,10 @@ internal class ObserverSelect<TArgsOut>(
 /// The type of value that will be selected and passed down the observer chain.
 /// </typeparam>
 /// <param name="parent">The parent to this observer.</param>
-/// <param name="callback">The callback used to select the value.</param>
+/// <param name="selector">The callback used to select the value.</param>
 internal class ObserverSelect<TArgsIn, TArgsOut>(
     IObserver<TArgsIn> parent,
-    Func<TArgsIn, TArgsOut> callback
+    Func<TArgsIn, TArgsOut> selector
 ) :
     ObserverBase<TArgsIn>(parent),
     IObserver<TArgsOut>
@@ -105,7 +105,7 @@ internal class ObserverSelect<TArgsIn, TArgsOut>(
     /// </returns>
     protected override bool OnEvent(TArgsIn args)
     {
-        var value = callback(args);
+        var value = selector(args);
         BranchNext?.Invoke(value);
         return false;
     }
