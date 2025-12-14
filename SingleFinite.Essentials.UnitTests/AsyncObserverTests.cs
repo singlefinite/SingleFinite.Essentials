@@ -111,6 +111,35 @@ public class AsyncObserverTests(TestContext testContext)
     }
 
     [TestMethod]
+    public async Task SelectNone_Runs_As_Expected_Async()
+    {
+        var observedNamesCount = 0;
+
+        var observableSource = new AsyncObservableSource<ExampleArgs>();
+        var observable = observableSource.Observable;
+
+        var observer = observable
+            .Observe()
+            .Select()
+            .OnEach(() => observedNamesCount++);
+
+        Assert.AreEqual(0, observedNamesCount);
+
+        await observableSource.EmitAsync(new("Hello", 0));
+
+        Assert.AreEqual(1, observedNamesCount);
+
+        await observableSource.EmitAsync(new("World", 0));
+
+        Assert.AreEqual(2, observedNamesCount);
+
+        observer.Dispose();
+        await observableSource.EmitAsync(new("Again", 0));
+
+        Assert.AreEqual(2, observedNamesCount);
+    }
+
+    [TestMethod]
     public async Task Where_Runs_As_Expected_Async()
     {
         var observedNames = new List<string>();

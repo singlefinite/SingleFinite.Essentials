@@ -93,6 +93,35 @@ public class ObserverTests(TestContext testContext)
     }
 
     [TestMethod]
+    public void SelectNone_Runs_As_Expected()
+    {
+        var observedNamesCount = 0;
+
+        var observableSource = new ObservableSource<ExampleArgs>();
+        var observable = observableSource.Observable;
+
+        var observer = observable
+            .Observe()
+            .Select()
+            .OnEach(() => observedNamesCount++);
+
+        Assert.AreEqual(0, observedNamesCount);
+
+        observableSource.Emit(new("Hello", 0));
+
+        Assert.AreEqual(1, observedNamesCount);
+
+        observableSource.Emit(new("World", 0));
+
+        Assert.AreEqual(2, observedNamesCount);
+
+        observer.Dispose();
+        observableSource.Emit(new("Again", 0));
+
+        Assert.AreEqual(2, observedNamesCount);
+    }
+
+    [TestMethod]
     public void Where_Runs_As_Expected()
     {
         var observedNames = new List<string>();

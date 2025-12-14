@@ -340,6 +340,16 @@ public static class IObserverExtensions
             );
 
         /// <summary>
+        /// Turn the observer that has an argument into an observer that doesn't
+        /// have an argument.
+        /// </summary>
+        /// <returns>A new observer that doesn't have an argument.</returns>
+        public IObserver Select() =>
+            new ObserverSelectNone<TArgs>(
+                parent: observer
+            );
+
+        /// <summary>
         /// Filter out observable events that don't match the predicate and
         /// prevent them from being passed down the observer chain.
         /// </summary>
