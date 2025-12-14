@@ -398,6 +398,14 @@ public static class IAsyncObserverExtensions
             );
 
         /// <summary>
+        /// Turn this async observer into a synchronous observer.
+        /// </summary>
+        public IObserver ToSync() =>
+            new AsyncObserverToSync(
+                parent: observer
+            );
+
+        /// <summary>
         /// Create an observable that will emit when the parent observer
         /// observes an event.
         /// </summary>
@@ -787,6 +795,14 @@ public static class IAsyncObserverExtensions
                 parent: observer,
                 maxConcurrent: maxConcurrent,
                 maxBuffer: maxBuffer
+            );
+
+        /// <summary>
+        /// Turn this async observer into a synchronous observer.
+        /// </summary>
+        public IObserver<TArgs> ToSync() =>
+            new AsyncObserverToSync<TArgs>(
+                parent: observer
             );
 
         /// <summary>

@@ -729,6 +729,52 @@ public class AsyncObserverTests(TestContext testContext)
     }
 
     [TestMethod]
+    public async Task ToSync_Observes()
+    {
+        var observedCount = 0;
+
+        var observableSource = new AsyncObservableSource();
+        var observer = observableSource.Observable
+            .Observe()
+            .ToSync()
+            .OnEach(() => observedCount++);
+
+        Assert.AreEqual(0, observedCount);
+
+        await observableSource.EmitAsync();
+
+        Assert.AreEqual(1, observedCount);
+
+        observer.Dispose();
+        await observableSource.EmitAsync();
+
+        Assert.AreEqual(1, observedCount);
+    }
+
+    [TestMethod]
+    public async Task ToSync_WithArgs_Observes()
+    {
+        var observedText = "";
+
+        var observableSource = new AsyncObservableSource<String>();
+        var observer = observableSource.Observable
+            .Observe()
+            .ToSync()
+            .OnEach(text => observedText = text);
+
+        Assert.AreEqual("", observedText);
+
+        await observableSource.EmitAsync("Hello");
+
+        Assert.AreEqual("Hello", observedText);
+
+        observer.Dispose();
+        await observableSource.EmitAsync("World");
+
+        Assert.AreEqual("Hello", observedText);
+    }
+
+    [TestMethod]
     public async Task ToObservable_Observes()
     {
         var observed1Count = 0;
