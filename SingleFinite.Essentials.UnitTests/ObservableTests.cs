@@ -83,7 +83,7 @@ public class ObservableTests
 
         var firstObservableSource = new ObservableSource<int>();
         var secondObservableSource = new ObservableSource<int>();
-        var combinedObserver = Observable.Combine(
+        var combinedObserver = Observable<int>.Combine(
             firstObservableSource.Observable,
             secondObservableSource.Observable
         );
@@ -112,7 +112,7 @@ public class ObservableTests
         var firstObserver = firstObservableSource.Observable.Observe();
         var secondObserver = secondObservableSource.Observable.Observe();
 
-        var combinedObserver = Observable.Combine(
+        var combinedObserver = Observable<int>.Combine(
             firstObserver,
             secondObserver
         );
@@ -154,4 +154,73 @@ public class ObservableTests
         Assert.IsTrue(firstObserver.IsDisposed);
         Assert.IsTrue(secondObserver.IsDisposed);
     }
+
+    [TestMethod]
+    public void Combine_Args_With_SubTypes()
+    {
+        var observedArgs = new List<object?>();
+
+        var firstObservableSource = new ObservableSource<Parent>();
+        var secondObservableSource = new ObservableSource<Child>();
+
+        var firstCombinedObserver = Observable<object>.Combine(
+            firstObservableSource.Observable,
+            secondObservableSource.Observable
+        );
+
+        firstCombinedObserver.OnEach(observedArgs.Add);
+
+        firstObservableSource.Emit(new Parent());
+        secondObservableSource.Emit(new Child());
+
+        Assert.HasCount(2, observedArgs);
+        Assert.IsInstanceOfType<Parent>(observedArgs[0]);
+        Assert.IsInstanceOfType<Child>(observedArgs[1]);
+
+        observedArgs.Clear();
+        firstCombinedObserver.Dispose();
+
+        var secondCombinedObserver = Observable<Parent>.Combine(
+            firstObservableSource.Observable,
+            secondObservableSource.Observable
+        );
+
+        secondCombinedObserver.OnEach(observedArgs.Add);
+
+        firstObservableSource.Emit(new Parent());
+        secondObservableSource.Emit(new Child());
+
+        Assert.HasCount(2, observedArgs);
+        Assert.IsInstanceOfType<Parent>(observedArgs[0]);
+        Assert.IsInstanceOfType<Child>(observedArgs[1]);
+
+        observedArgs.Clear();
+        secondCombinedObserver.Dispose();
+
+        var thirdCombinedObserver = Observable<Child>.Combine(
+            firstObservableSource.Observable,
+            secondObservableSource.Observable
+        );
+
+        thirdCombinedObserver.OnEach(observedArgs.Add);
+
+        firstObservableSource.Emit(new Parent());
+        secondObservableSource.Emit(new Child());
+
+        Assert.HasCount(2, observedArgs);
+        Assert.IsNull(observedArgs[0]);
+        Assert.IsInstanceOfType<Child>(observedArgs[1]);
+    }
+
+    #region Types
+
+    private class Parent
+    {
+    }
+
+    private class Child : Parent
+    {
+    }
+
+    #endregion
 }

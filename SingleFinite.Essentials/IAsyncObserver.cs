@@ -30,13 +30,21 @@ namespace SingleFinite.Essentials;
 /// it will unregister all observers in the chain so any future observable
 /// events will not be observed.
 /// </summary>
-public interface IAsyncObserver : IDisposable, IDisposeObservable
+public interface IAsyncObserver : IDisposable, IDisposeObservable, IEventProvider
 {
     /// <summary>
     /// An event that is raised when the next observer(s) in the chain should
     /// handle the observed event.
     /// </summary>
     event Func<Task> Next;
+
+    /// <inheritdoc/>
+    void IEventProvider.Provide(EventReceiver receiver)
+    {
+        async Task OnNext() => await receiver.OnEventAsync();
+        Next += OnNext;
+        receiver.OnDispose(() => Next -= OnNext);
+    }
 }
 
 /// <summary>
@@ -49,7 +57,7 @@ public interface IAsyncObserver : IDisposable, IDisposeObservable
 /// <typeparam name="TArgs">
 /// The type of event arguments passed with observed events.
 /// </typeparam>
-public interface IAsyncObserver<TArgs> : IDisposable, IDisposeObservable
+public interface IAsyncObserver<TArgs> : IDisposable, IDisposeObservable, IEventProvider
 {
     /// <summary>
     /// Create an observer that will filter out events that don't have arguments
@@ -69,4 +77,12 @@ public interface IAsyncObserver<TArgs> : IDisposable, IDisposeObservable
     /// handle the observed event.
     /// </summary>
     event Func<TArgs, Task> Next;
+
+    /// <inheritdoc/>
+    void IEventProvider.Provide(EventReceiver receiver)
+    {
+        async Task OnNext(TArgs args) => await receiver.OnEventAsync(args);
+        Next += OnNext;
+        receiver.OnDispose(() => Next -= OnNext);
+    }
 }

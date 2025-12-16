@@ -29,14 +29,14 @@ internal class ObserverCombine : IObserver
     #region Fields
 
     /// <summary>
-    /// Holds the dispose state.
+    /// Holds the dispose state for this object.
     /// </summary>
     private readonly ConcurrentDisposeState _disposeState;
 
     /// <summary>
-    /// Holds the observers that are combined.
+    /// The event receiver used by this object.
     /// </summary>
-    private readonly IEnumerable<IObserver> _observers;
+    private readonly EventReceiver _eventReceiver;
 
     #endregion
 
@@ -45,19 +45,21 @@ internal class ObserverCombine : IObserver
     /// <summary>
     /// Constructor.
     /// </summary>
-    /// <param name="observers">The observers to combine.</param>
-    public ObserverCombine(IEnumerable<IObserver> observers)
+    /// <param name="eventProviders">Event providers to combine.</param>
+    public ObserverCombine(params IEnumerable<IEventProvider> eventProviders)
     {
-        _observers = observers;
-        foreach (var observer in _observers)
-            observer.OnEach(() => Next?.Invoke());
+        _eventReceiver = new(() => Next?.Invoke());
+
+        foreach (var eventProvider in eventProviders)
+            eventProvider.Provide(_eventReceiver);
 
         _disposeState = new(
             owner: this,
             onDispose: () =>
             {
-                foreach (var observer in _observers)
-                    observer.Dispose();
+                _eventReceiver.Dispose();
+                foreach (var eventProvider in eventProviders)
+                    (eventProvider as IDisposable)?.Dispose();
             }
         );
     }
@@ -76,9 +78,7 @@ internal class ObserverCombine : IObserver
 
     #region Methods
 
-    /// <summary>
-    /// Dispose of all of the observers that were combined.
-    /// </summary>
+    /// <inheritdoc/>
     public void Dispose() => _disposeState.Dispose();
 
     #endregion
@@ -86,7 +86,8 @@ internal class ObserverCombine : IObserver
     #region Events
 
     /// <summary>
-    /// Event that is raised whenever any of the combined observers emit.
+    /// Event that is raised whenever any of the event providers raises an
+    /// event.
     /// </summary>
     public event Action? Next;
 
@@ -97,21 +98,23 @@ internal class ObserverCombine : IObserver
 /// An observer that combines multipe observers into a single observer.
 /// </summary>
 /// <typeparam name="TArgs">
-/// The type of arguments passed with observed events.
+/// The type to cast event arguments to.  If an event provider doesn't have any
+/// arguments or can't be cast to the given type this observer will emit with
+/// null for the arguments.
 /// </typeparam>
-internal class ObserverCombine<TArgs> : IObserver<TArgs>
+internal class Observer<TArgs> : IObserver<TArgs?>
 {
     #region Fields
 
     /// <summary>
-    /// Holds the dispose state.
+    /// Holds the dispose state for this object.
     /// </summary>
-    private readonly DisposeState _disposeState;
+    private readonly ConcurrentDisposeState _disposeState;
 
     /// <summary>
-    /// Holds the observers that are combined.
+    /// The event receiver used by this object.
     /// </summary>
-    private readonly IEnumerable<IObserver<TArgs>> _observers;
+    private readonly EventReceiver _eventReceiver;
 
     #endregion
 
@@ -120,19 +123,30 @@ internal class ObserverCombine<TArgs> : IObserver<TArgs>
     /// <summary>
     /// Constructor.
     /// </summary>
-    /// <param name="observers">The observers to combine.</param>
-    public ObserverCombine(IEnumerable<IObserver<TArgs>> observers)
+    /// <param name="eventProviders">Event providers to combine.</param>
+    public Observer(params IEnumerable<IEventProvider> eventProviders)
     {
-        _observers = observers;
-        foreach (var observer in _observers)
-            observer.OnEach(args => Next?.Invoke(args));
+        _eventReceiver = new(args =>
+        {
+            if (Next is not null)
+            {
+                if (args is not null && typeof(TArgs).IsAssignableFrom(args.GetType()))
+                    Next((TArgs)args);
+                else
+                    Next(default);
+            }
+        });
+
+        foreach (var eventProvider in eventProviders)
+            eventProvider.Provide(_eventReceiver);
 
         _disposeState = new(
             owner: this,
             onDispose: () =>
             {
-                foreach (var observer in _observers)
-                    observer.Dispose();
+                _eventReceiver.Dispose();
+                foreach (var eventProvider in eventProviders)
+                    (eventProvider as IDisposable)?.Dispose();
             }
         );
     }
@@ -151,9 +165,7 @@ internal class ObserverCombine<TArgs> : IObserver<TArgs>
 
     #region Methods
 
-    /// <summary>
-    /// Dispose of all of the observers that were combined.
-    /// </summary>
+    /// <inheritdoc/>
     public void Dispose() => _disposeState.Dispose();
 
     #endregion
@@ -161,9 +173,10 @@ internal class ObserverCombine<TArgs> : IObserver<TArgs>
     #region Events
 
     /// <summary>
-    /// Event that is raised whenever any of the combined observers emit.
+    /// Event that is raised whenever any of the event providers raises an
+    /// event.
     /// </summary>
-    public event Action<TArgs>? Next;
+    public event Action<TArgs?>? Next;
 
     #endregion
 }

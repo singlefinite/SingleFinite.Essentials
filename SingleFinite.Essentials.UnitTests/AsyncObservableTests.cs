@@ -133,7 +133,7 @@ public class AsyncObservableTests(TestContext testContext)
 
         var firstObservableSource = new AsyncObservableSource<int>();
         var secondObservableSource = new AsyncObservableSource<int>();
-        var combinedObserver = AsyncObservable.Combine(
+        var combinedObserver = AsyncObservable<int>.Combine(
             firstObservableSource.Observable,
             secondObservableSource.Observable
         );
@@ -162,7 +162,7 @@ public class AsyncObservableTests(TestContext testContext)
         var firstObserver = firstObservableSource.Observable.Observe();
         var secondObserver = secondObservableSource.Observable.Observe();
 
-        var combinedObserver = AsyncObservable.Combine(
+        var combinedObserver = AsyncObservable<int>.Combine(
             firstObserver,
             secondObserver
         );
@@ -205,12 +205,77 @@ public class AsyncObservableTests(TestContext testContext)
         Assert.IsTrue(secondObserver.IsDisposed);
     }
 
+    [TestMethod]
+    public async Task Combine_Args_With_SubTypes()
+    {
+        var observedArgs = new List<object?>();
+
+        var firstObservableSource = new AsyncObservableSource<Parent>();
+        var secondObservableSource = new AsyncObservableSource<Child>();
+
+        var firstCombinedObserver = AsyncObservable<object>.Combine(
+            firstObservableSource.Observable,
+            secondObservableSource.Observable
+        );
+
+        firstCombinedObserver.OnEach(observedArgs.Add);
+
+        await firstObservableSource.EmitAsync(new Parent());
+        await secondObservableSource.EmitAsync(new Child());
+
+        Assert.HasCount(2, observedArgs);
+        Assert.IsInstanceOfType<Parent>(observedArgs[0]);
+        Assert.IsInstanceOfType<Child>(observedArgs[1]);
+
+        observedArgs.Clear();
+        firstCombinedObserver.Dispose();
+
+        var secondCombinedObserver = AsyncObservable<Parent>.Combine(
+            firstObservableSource.Observable,
+            secondObservableSource.Observable
+        );
+
+        secondCombinedObserver.OnEach(observedArgs.Add);
+
+        await firstObservableSource.EmitAsync(new Parent());
+        await secondObservableSource.EmitAsync(new Child());
+
+        Assert.HasCount(2, observedArgs);
+        Assert.IsInstanceOfType<Parent>(observedArgs[0]);
+        Assert.IsInstanceOfType<Child>(observedArgs[1]);
+
+        observedArgs.Clear();
+        secondCombinedObserver.Dispose();
+
+        var thirdCombinedObserver = Observable<Child>.Combine(
+            firstObservableSource.Observable,
+            secondObservableSource.Observable
+        );
+
+        thirdCombinedObserver.OnEach(observedArgs.Add);
+
+        await firstObservableSource.EmitAsync(new Parent());
+        await secondObservableSource.EmitAsync(new Child());
+
+        Assert.HasCount(2, observedArgs);
+        Assert.IsNull(observedArgs[0]);
+        Assert.IsInstanceOfType<Child>(observedArgs[1]);
+    }
+
     #region Types
 
     private record ExampleArgs(
         string Name,
         int Age
     );
+
+    private class Parent
+    {
+    }
+
+    private class Child : Parent
+    {
+    }
 
     #endregion
 }

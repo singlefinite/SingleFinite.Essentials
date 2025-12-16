@@ -29,14 +29,14 @@ internal class AsyncObserverCombine : IAsyncObserver
     #region Fields
 
     /// <summary>
-    /// Holds the dispose state.
+    /// Holds the dispose state for this object.
     /// </summary>
     private readonly ConcurrentDisposeState _disposeState;
 
     /// <summary>
-    /// Holds the observers that are combined.
+    /// The event receiver used by this object.
     /// </summary>
-    private readonly IEnumerable<IAsyncObserver> _observers;
+    private readonly EventReceiver _eventReceiver;
 
     #endregion
 
@@ -45,19 +45,27 @@ internal class AsyncObserverCombine : IAsyncObserver
     /// <summary>
     /// Constructor.
     /// </summary>
-    /// <param name="observers">The observers to combine.</param>
-    public AsyncObserverCombine(IEnumerable<IAsyncObserver> observers)
+    /// <param name="eventProviders">Event providers to combine.</param>
+    public AsyncObserverCombine(
+        params IEnumerable<IEventProvider> eventProviders
+    )
     {
-        _observers = observers;
-        foreach (var observer in _observers)
-            observer.OnEach(() => Next?.Invoke() ?? Task.CompletedTask);
+        _eventReceiver = new(async () =>
+        {
+            if (Next is not null)
+                await Next();
+        });
+
+        foreach (var eventProvider in eventProviders)
+            eventProvider.Provide(_eventReceiver);
 
         _disposeState = new(
             owner: this,
             onDispose: () =>
             {
-                foreach (var observer in _observers)
-                    observer.Dispose();
+                _eventReceiver.Dispose();
+                foreach (var eventProvider in eventProviders)
+                    (eventProvider as IDisposable)?.Dispose();
             }
         );
     }
@@ -76,9 +84,7 @@ internal class AsyncObserverCombine : IAsyncObserver
 
     #region Methods
 
-    /// <summary>
-    /// Dispose of all of the observers that were combined.
-    /// </summary>
+    /// <inheritdoc/>
     public void Dispose() => _disposeState.Dispose();
 
     #endregion
@@ -86,7 +92,8 @@ internal class AsyncObserverCombine : IAsyncObserver
     #region Events
 
     /// <summary>
-    /// Event that is raised whenever any of the combined observers emit.
+    /// Event that is raised whenever any of the event providers raises an
+    /// event.
     /// </summary>
     public event Func<Task>? Next;
 
@@ -97,21 +104,23 @@ internal class AsyncObserverCombine : IAsyncObserver
 /// An observer that combines multipe observers into a single observer.
 /// </summary>
 /// <typeparam name="TArgs">
-/// The type of arguments passed with observed events.
+/// The type to cast event arguments to.  If an event provider doesn't have any
+/// arguments or can't be cast to the given type this observer will emit with
+/// null for the arguments.
 /// </typeparam>
-internal class AsyncObserverCombine<TArgs> : IAsyncObserver<TArgs>
+internal class AsyncObserver<TArgs> : IAsyncObserver<TArgs?>
 {
     #region Fields
 
     /// <summary>
-    /// Holds the dispose state.
+    /// Holds the dispose state for this object.
     /// </summary>
     private readonly ConcurrentDisposeState _disposeState;
 
     /// <summary>
-    /// Holds the observers that are combined.
+    /// The event receiver used by this object.
     /// </summary>
-    private readonly IEnumerable<IAsyncObserver<TArgs>> _observers;
+    private readonly EventReceiver _eventReceiver;
 
     #endregion
 
@@ -120,19 +129,30 @@ internal class AsyncObserverCombine<TArgs> : IAsyncObserver<TArgs>
     /// <summary>
     /// Constructor.
     /// </summary>
-    /// <param name="observers">The observers to combine.</param>
-    public AsyncObserverCombine(IEnumerable<IAsyncObserver<TArgs>> observers)
+    /// <param name="eventProviders">Event providers to combine.</param>
+    public AsyncObserver(params IEnumerable<IEventProvider> eventProviders)
     {
-        _observers = observers;
-        foreach (var observer in _observers)
-            observer.OnEach(args => Next?.Invoke(args) ?? Task.CompletedTask);
+        _eventReceiver = new(async args =>
+        {
+            if (Next is not null)
+            {
+                if (args is not null && typeof(TArgs).IsAssignableFrom(args.GetType()))
+                    await Next((TArgs)args);
+                else
+                    await Next(default);
+            }
+        });
+
+        foreach (var eventProvider in eventProviders)
+            eventProvider.Provide(_eventReceiver);
 
         _disposeState = new(
             owner: this,
             onDispose: () =>
             {
-                foreach (var observer in _observers)
-                    observer.Dispose();
+                _eventReceiver.Dispose();
+                foreach (var eventProvider in eventProviders)
+                    (eventProvider as IDisposable)?.Dispose();
             }
         );
     }
@@ -151,9 +171,7 @@ internal class AsyncObserverCombine<TArgs> : IAsyncObserver<TArgs>
 
     #region Methods
 
-    /// <summary>
-    /// Dispose of all of the observers that were combined.
-    /// </summary>
+    /// <inheritdoc/>
     public void Dispose() => _disposeState.Dispose();
 
     #endregion
@@ -161,9 +179,10 @@ internal class AsyncObserverCombine<TArgs> : IAsyncObserver<TArgs>
     #region Events
 
     /// <summary>
-    /// Event that is raised whenever any of the combined observers emit.
+    /// Event that is raised whenever any of the event providers raises an
+    /// event.
     /// </summary>
-    public event Func<TArgs, Task>? Next;
+    public event Func<TArgs?, Task>? Next;
 
     #endregion
 }

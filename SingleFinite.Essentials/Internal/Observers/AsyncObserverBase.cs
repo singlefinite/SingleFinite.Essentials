@@ -65,6 +65,14 @@ internal abstract class AsyncObserverBase : IAsyncObserver
 
     #region Methods
 
+    /// <inheritdoc/>
+    void IEventProvider.Provide(EventReceiver receiver)
+    {
+        async Task OnNext() => await receiver.OnEventAsync();
+        Next += OnNext;
+        receiver.OnDispose(() => Next -= OnNext);
+    }
+
     /// <summary>
     /// This method is invoked when the parent event is raised.
     /// </summary>
@@ -146,6 +154,14 @@ internal abstract class AsyncObserverBase<TArgs> : IAsyncObserver<TArgs>
     #endregion
 
     #region Methods
+
+    /// <inheritdoc/>
+    void IEventProvider.Provide(EventReceiver receiver)
+    {
+        async Task OnNext(TArgs args) => await receiver.OnEventAsync(args);
+        Next += OnNext;
+        receiver.OnDispose(() => Next -= OnNext);
+    }
 
     /// <summary>
     /// This method is invoked when the parent event is raised.

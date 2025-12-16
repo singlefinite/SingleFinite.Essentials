@@ -65,6 +65,14 @@ internal abstract class ObserverBase : IObserver
 
     #region Methods
 
+    /// <inheritdoc/>
+    void IEventProvider.Provide(EventReceiver receiver)
+    {
+        void OnNext() => receiver.OnEvent();
+        Next += OnNext;
+        receiver.OnDispose(() => Next -= OnNext);
+    }
+
     /// <summary>
     /// This method is invoked when the parent event is raised.
     /// </summary>
@@ -144,6 +152,14 @@ internal abstract class ObserverBase<TArgs> : IObserver<TArgs>
     #endregion
 
     #region Methods
+
+    /// <inheritdoc/>
+    void IEventProvider.Provide(EventReceiver receiver)
+    {
+        void OnNext(TArgs args) => receiver.OnEvent(args);
+        Next += OnNext;
+        receiver.OnDispose(() => Next -= OnNext);
+    }
 
     /// <summary>
     /// This method is invoked when the parent event is raised.
