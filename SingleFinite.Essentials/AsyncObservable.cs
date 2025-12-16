@@ -20,7 +20,6 @@
 // SOFTWARE.
 
 using SingleFinite.Essentials.Internal.Observers;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace SingleFinite.Essentials;
 
@@ -86,7 +85,7 @@ public sealed class AsyncObservable : IEventProvider
     /// </param>
     /// <param name="handler">
     /// Func used to get handler.  The action that raises the Next event
-    /// of this observer is passed into the func.
+    /// of this observer is passed into the Func.
     /// </param>
     /// <returns>An observer that observes from the event.</returns>
     public static IAsyncObserver Observe<TEventDelegate>(
@@ -192,7 +191,7 @@ public sealed class AsyncObservable<TArgs> : IEventProvider
     /// </param>
     /// <param name="handler">
     /// Func used to get handler.  The action that raises the Next event
-    /// of this observer is passed into the func.
+    /// of this observer is passed into the Func.
     /// </param>
     /// <returns>An observer that observes from the event.</returns>
     public static IAsyncObserver<TArgs> Observe<TEventDelegate>(

@@ -131,14 +131,14 @@ public static class IDispatcherExtensions
     }
 
     /// <summary>
-    /// Execute the given async func.
-    /// This method will dispatch the func to be executed and return right 
-    /// away without waiting for the func to complete execution.
+    /// Execute the given async Func.
+    /// This method will dispatch the Func to be executed and return right 
+    /// away without waiting for the Func to complete execution.
     /// </summary>
     /// <param name="dispatcher">The dispatcher being extended.</param>
-    /// <param name="function">The func to execute.</param>
+    /// <param name="function">The Func to execute.</param>
     /// <param name="onError">
-    /// Callback that is invoked if the func generates an exception.
+    /// Callback that is invoked if the Func generates an exception.
     /// </param>
     /// <param name="cancellationTokens">Optional cancellation tokens.</param>
     public static void Run(

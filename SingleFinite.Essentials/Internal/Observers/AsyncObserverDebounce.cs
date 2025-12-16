@@ -63,7 +63,7 @@ internal class AsyncObserverDebounce(
     protected override Task<bool> OnEventAsync()
     {
         _debouncer.Debounce(
-            func: () => BranchNext?.Invoke() ?? Task.CompletedTask,
+            function: () => BranchNext?.Invoke() ?? Task.CompletedTask,
             delay: delay,
             dispatcher: dispatcher,
             onError: onError
@@ -135,7 +135,7 @@ internal class AsyncObserverDebounce<TArgs>(
     protected override Task<bool> OnEventAsync(TArgs args)
     {
         _debouncer.Debounce(
-            func: () => BranchNext?.Invoke(args) ?? Task.CompletedTask,
+            function: () => BranchNext?.Invoke(args) ?? Task.CompletedTask,
             delay: delay,
             dispatcher: dispatcher,
             onError: onError

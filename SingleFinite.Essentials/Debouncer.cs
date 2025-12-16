@@ -123,25 +123,25 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
     /// <summary>
     /// Debounce the given function.
     /// </summary>
-    /// <param name="func">
-    /// The func to invoke if a debounce method has not been called before the
+    /// <param name="function">
+    /// The Func to invoke if a debounce method has not been called before the
     /// given delay has passed.
     /// </param>
     /// <param name="delay">
-    /// The amount of time to wait before invoking the given func.
+    /// The amount of time to wait before invoking the given Func.
     /// </param>
     /// <param name="dispatcher">
-    /// The dispatcher that will run the func after the delay has passed.
+    /// The dispatcher that will run the Func after the delay has passed.
     /// If not set the debounce will be run under the synchronization context
     /// of the thread this method was called on.
     /// </param>
     /// <param name="onError">
-    /// Optional handler for any exceptions that are thrown by the func when it
+    /// Optional handler for any exceptions that are thrown by the Func when it
     /// is invoked.
     /// </param>
     /// <param name="cancellationTokens">Optional cancellation tokens.</param>
     public void Debounce(
-        Func<Task> func,
+        Func<Task> function,
         TimeSpan delay,
         IDispatcher? dispatcher = default,
         Action<Exception>? onError = default,
@@ -160,7 +160,7 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
                 state: () =>
                 {
                     resolvedDispatcher.Run(
-                        function: func,
+                        function: function,
                         onError: onError,
                         cancellationTokens: cancellationTokens
                     );

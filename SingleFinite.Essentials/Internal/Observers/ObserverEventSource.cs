@@ -58,7 +58,7 @@ internal class ObserverEventSource<TEventDelegate> : IObserver
     /// </param>
     /// <param name="handler">
     /// Func used to get handler.  The action that raises the Next event
-    /// of this observer is passed into the func.
+    /// of this observer is passed into the Func.
     /// </param>
     public ObserverEventSource(
         Action<TEventDelegate> register,
@@ -150,7 +150,7 @@ internal class ObserverEventSource<TEventDelegate, TArgs> : IObserver<TArgs>
     /// </param>
     /// <param name="handler">
     /// Func used to get handler.  The action that raises the Next event
-    /// of this observer is passed into the func.
+    /// of this observer is passed into the Func.
     /// </param>
     public ObserverEventSource(
         Action<TEventDelegate> register,

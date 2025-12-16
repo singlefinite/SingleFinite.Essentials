@@ -23,8 +23,6 @@ using SingleFinite.Essentials.Internal.Observers;
 
 namespace SingleFinite.Essentials;
 
-
-
 /// <summary>
 /// Methods that modify how an observable event is handled.  Observers are
 /// chained together to create different handler logic.
