@@ -151,22 +151,15 @@ public static class IAsyncObserverExtensions
         /// disposed.  If the callback returns true the observer chain is
         /// disposed.
         /// </param>
-        /// <param name="continueOnDispose">
-        /// When set to true the next observer in the observer chain will be
-        /// invoked even when predicate returns true and this observer chain
-        /// will be disposed.  Default is false.
-        /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IAsyncObserver Until(
-            Func<Task<bool>> predicate,
-            bool continueOnDispose = false
+            Func<Task<bool>> predicate
         ) =>
             new AsyncObserverUntil(
                 parent: observer,
-                predicate: predicate,
-                continueOnDispose: continueOnDispose
+                predicate: predicate
             );
 
         /// <summary>
@@ -177,50 +170,15 @@ public static class IAsyncObserverExtensions
         /// disposed.  If the callback returns true the observer chain is
         /// disposed.
         /// </param>
-        /// <param name="continueOnDispose">
-        /// When set to true the next observer in the observer chain will be
-        /// invoked even when predicate returns true and this observer chain
-        /// will be disposed.  Default is false.
-        /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IAsyncObserver Until(
-            Func<bool> predicate,
-            bool continueOnDispose = false
+            Func<bool> predicate
         ) =>
             new AsyncObserverUntil(
                 parent: observer,
-                predicate: () => Task.FromResult(predicate()),
-                continueOnDispose: continueOnDispose
-            );
-
-        /// <summary>
-        /// Dispose of the observer chain when the first event is observed.
-        /// </summary>
-        /// <returns>
-        /// A new observer that has been added to the chain of observers.
-        /// </returns>
-        public IAsyncObserver Once() =>
-            Until(
-                observer: observer,
-                predicate: () => Task.FromResult(true),
-                continueOnDispose: true
-            );
-
-        /// <summary>
-        /// Invoke the next observers using the provided dispatcher.
-        /// </summary>
-        /// <param name="dispatcher">
-        /// The dispatcher to invoke the next observers with.
-        /// </param>
-        /// <returns>
-        /// A new observer that has been added to the chain of observers.
-        /// </returns>
-        public IAsyncObserver Dispatch(IDispatcher dispatcher) =>
-            new AsyncObserverDispatch(
-                parent: observer,
-                dispatcher: dispatcher
+                predicate: () => Task.FromResult(predicate())
             );
 
         /// <summary>
@@ -232,8 +190,8 @@ public static class IAsyncObserverExtensions
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
-        public IAsyncObserver On(IDisposeObservable disposeObservable) =>
-            new AsyncObserverOn(
+        public IAsyncObserver Until(IDisposeObservable disposeObservable) =>
+            new AsyncObserverUntil(
                 parent: observer,
                 disposeObservable: disposeObservable
             );
@@ -249,10 +207,37 @@ public static class IAsyncObserverExtensions
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
-        public IAsyncObserver On(CancellationToken cancellationToken) =>
-            new AsyncObserverOn(
+        public IAsyncObserver Until(CancellationToken cancellationToken) =>
+            new AsyncObserverUntil(
                 parent: observer,
                 cancellationToken: cancellationToken
+            );
+
+        /// <summary>
+        /// Dispose of the observer chain when the first event is observed.
+        /// </summary>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IAsyncObserver Once() =>
+            Until(
+                observer: observer,
+                predicate: () => Task.FromResult(true)
+            );
+
+        /// <summary>
+        /// Invoke the next observers using the provided dispatcher.
+        /// </summary>
+        /// <param name="dispatcher">
+        /// The dispatcher to invoke the next observers with.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IAsyncObserver Dispatch(IDispatcher dispatcher) =>
+            new AsyncObserverDispatch(
+                parent: observer,
+                dispatcher: dispatcher
             );
 
         /// <summary>
@@ -548,22 +533,15 @@ public static class IAsyncObserverExtensions
         /// disposed.  If the callback returns true the observer chain is
         /// disposed.
         /// </param>
-        /// <param name="continueOnDispose">
-        /// When set to true the next observer in the observer chain will be
-        /// invoked even when predicate returns true and this observer chain
-        /// will be disposed.  Default is false.
-        /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IAsyncObserver<TArgs> Until(
-            Func<TArgs, Task<bool>> predicate,
-            bool continueOnDispose = false
+            Func<TArgs, Task<bool>> predicate
         ) =>
             new AsyncObserverUntil<TArgs>(
                 parent: observer,
-                predicate: predicate,
-                continueOnDispose: continueOnDispose
+                predicate: predicate
             );
 
         /// <summary>
@@ -574,50 +552,15 @@ public static class IAsyncObserverExtensions
         /// disposed.  If the callback returns true the observer chain is
         /// disposed.
         /// </param>
-        /// <param name="continueOnDispose">
-        /// When set to true the next observer in the observer chain will be
-        /// invoked even when predicate returns true and this observer chain
-        /// will be disposed.  Default is false.
-        /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IAsyncObserver<TArgs> Until(
-            Func<TArgs, bool> predicate,
-            bool continueOnDispose = false
+            Func<TArgs, bool> predicate
         ) =>
             new AsyncObserverUntil<TArgs>(
                 parent: observer,
-                predicate: args => Task.FromResult(predicate(args)),
-                continueOnDispose: continueOnDispose
-            );
-
-        /// <summary>
-        /// Dispose of the observer chain when the first event is observed.
-        /// </summary>
-        /// <returns>
-        /// A new observer that has been added to the chain of observers.
-        /// </returns>
-        public IAsyncObserver<TArgs> Once() =>
-            Until(
-                observer: observer,
-                predicate: _ => Task.FromResult(true),
-                continueOnDispose: true
-            );
-
-        /// <summary>
-        /// Invoke the next observers using the provided dispatcher.
-        /// </summary>
-        /// <param name="dispatcher">
-        /// The dispatcher to invoke the next observers with.
-        /// </param>
-        /// <returns>
-        /// A new observer that has been added to the chain of observers.
-        /// </returns>
-        public IAsyncObserver<TArgs> Dispatch(IDispatcher dispatcher) =>
-            new AsyncObserverDispatch<TArgs>(
-                parent: observer,
-                dispatcher: dispatcher
+                predicate: args => Task.FromResult(predicate(args))
             );
 
         /// <summary>
@@ -629,8 +572,8 @@ public static class IAsyncObserverExtensions
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
-        public IAsyncObserver<TArgs> On(IDisposeObservable disposeObservable) =>
-            new AsyncObserverOn<TArgs>(
+        public IAsyncObserver<TArgs> Until(IDisposeObservable disposeObservable) =>
+            new AsyncObserverUntil<TArgs>(
                 parent: observer,
                 disposeObservable: disposeObservable
             );
@@ -646,10 +589,37 @@ public static class IAsyncObserverExtensions
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
-        public IAsyncObserver<TArgs> On(CancellationToken cancellationToken) =>
-            new AsyncObserverOn<TArgs>(
+        public IAsyncObserver<TArgs> Until(CancellationToken cancellationToken) =>
+            new AsyncObserverUntil<TArgs>(
                 parent: observer,
                 cancellationToken: cancellationToken
+            );
+
+        /// <summary>
+        /// Dispose of the observer chain when the first event is observed.
+        /// </summary>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IAsyncObserver<TArgs> Once() =>
+            Until(
+                observer: observer,
+                predicate: _ => Task.FromResult(true)
+            );
+
+        /// <summary>
+        /// Invoke the next observers using the provided dispatcher.
+        /// </summary>
+        /// <param name="dispatcher">
+        /// The dispatcher to invoke the next observers with.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IAsyncObserver<TArgs> Dispatch(IDispatcher dispatcher) =>
+            new AsyncObserverDispatch<TArgs>(
+                parent: observer,
+                dispatcher: dispatcher
             );
 
         /// <summary>

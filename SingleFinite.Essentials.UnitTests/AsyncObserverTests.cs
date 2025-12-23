@@ -227,7 +227,7 @@ public class AsyncObserverTests(TestContext testContext)
     }
 
     [TestMethod]
-    public async Task On_DisposeObservable_Runs_As_Expected_Async()
+    public async Task Until_DisposeObservable_Runs_As_Expected_Async()
     {
         var disposable = new ExampleDisposable();
 
@@ -239,7 +239,7 @@ public class AsyncObserverTests(TestContext testContext)
         var observer = observable
             .Observe()
             .OnEach(args => observedNames.Add(args.Name))
-            .On(disposable);
+            .Until(disposable);
 
         Assert.IsEmpty(observedNames);
 
@@ -257,7 +257,7 @@ public class AsyncObserverTests(TestContext testContext)
     }
 
     [TestMethod]
-    public async Task On_CancellationToken_Runs_As_Expected_Async()
+    public async Task Until_CancellationToken_Runs_As_Expected_Async()
     {
         var cancellationTokenSource = new CancellationTokenSource();
 
@@ -269,7 +269,7 @@ public class AsyncObserverTests(TestContext testContext)
         var observer = observable
             .Observe()
             .OnEach(args => observedNames.Add(args.Name))
-            .On(cancellationTokenSource.Token);
+            .Until(cancellationTokenSource.Token);
 
         Assert.IsEmpty(observedNames);
 
@@ -280,59 +280,6 @@ public class AsyncObserverTests(TestContext testContext)
         observedNames.Clear();
 
         cancellationTokenSource.Cancel();
-
-        await observableSource.EmitAsync(new("World", 0));
-
-        Assert.IsEmpty(observedNames);
-    }
-
-    [TestMethod]
-    public async Task Until_Continue_On_Disposed_Runs_As_Expected_Async()
-    {
-        var observedNames = new List<string>();
-
-        var observableSource = new AsyncObservableSource<ExampleArgs>();
-        var observable = observableSource.Observable;
-
-        var observer = observable
-            .Observe()
-            .OnEach(async args =>
-            {
-                await Task.Run(
-                    action: () => observedNames.Add(args.Name),
-                    cancellationToken: testContext.CancellationToken
-                );
-            })
-            .Until(
-                args => Task.Run(
-                    function: () => args.Name == "stop",
-                    cancellationToken: testContext.CancellationToken
-                ),
-                continueOnDispose: true
-            )
-            .OnEach(async args =>
-            {
-                await Task.Run(
-                    action: () => observedNames.Add($"{args.Name}!"),
-                    cancellationToken: testContext.CancellationToken
-                );
-            });
-
-        Assert.IsEmpty(observedNames);
-
-        await observableSource.EmitAsync(new("Hello", 0));
-
-        Assert.HasCount(2, observedNames);
-        Assert.AreEqual("Hello", observedNames[0]);
-        Assert.AreEqual("Hello!", observedNames[1]);
-        observedNames.Clear();
-
-        await observableSource.EmitAsync(new("stop", 0));
-
-        Assert.HasCount(2, observedNames);
-        Assert.AreEqual("stop", observedNames[0]);
-        Assert.AreEqual("stop!", observedNames[1]);
-        observedNames.Clear();
 
         await observableSource.EmitAsync(new("World", 0));
 
@@ -400,9 +347,8 @@ public class AsyncObserverTests(TestContext testContext)
 
         await observableSource.EmitAsync(new("Hello", 0));
 
-        Assert.HasCount(2, observedNames);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("Hello", observedNames[0]);
-        Assert.AreEqual("Hello!", observedNames[1]);
         observedNames.Clear();
 
         await observableSource.EmitAsync(new("World", 0));
@@ -756,7 +702,7 @@ public class AsyncObserverTests(TestContext testContext)
     {
         var observedText = "";
 
-        var observableSource = new AsyncObservableSource<String>();
+        var observableSource = new AsyncObservableSource<string>();
         var observer = observableSource.Observable
             .Observe()
             .ToSync()

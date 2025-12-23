@@ -188,42 +188,7 @@ public class ObserverTests(TestContext testContext)
     }
 
     [TestMethod]
-    public void Until_Continue_On_Disposed_Runs_As_Expected()
-    {
-        var observedNames = new List<string>();
-
-        var observableSource = new ObservableSource<ExampleArgs>();
-        var observable = observableSource.Observable;
-
-        var observer = observable
-            .Observe()
-            .OnEach(args => observedNames.Add(args.Name))
-            .Until(args => args.Name == "stop", continueOnDispose: true)
-            .OnEach(args => observedNames.Add($"{args.Name}!"));
-
-        Assert.IsEmpty(observedNames);
-
-        observableSource.Emit(new("Hello", 0));
-
-        Assert.HasCount(2, observedNames);
-        Assert.AreEqual("Hello", observedNames[0]);
-        Assert.AreEqual("Hello!", observedNames[1]);
-        observedNames.Clear();
-
-        observableSource.Emit(new("stop", 0));
-
-        Assert.HasCount(2, observedNames);
-        Assert.AreEqual("stop", observedNames[0]);
-        Assert.AreEqual("stop!", observedNames[1]);
-        observedNames.Clear();
-
-        observableSource.Emit(new("World", 0));
-
-        Assert.IsEmpty(observedNames);
-    }
-
-    [TestMethod]
-    public void On_DisposeObservable_Runs_As_Expected()
+    public void Until_DisposeObservable_Runs_As_Expected()
     {
         var disposable = new ExampleDisposable();
 
@@ -235,7 +200,7 @@ public class ObserverTests(TestContext testContext)
         var observer = observable
             .Observe()
             .OnEach(args => observedNames.Add(args.Name))
-            .On(disposable);
+            .Until(disposable);
 
         Assert.IsEmpty(observedNames);
 
@@ -253,7 +218,7 @@ public class ObserverTests(TestContext testContext)
     }
 
     [TestMethod]
-    public void On_CancellationToken_Runs_As_Expected()
+    public void Until_CancellationToken_Runs_As_Expected()
     {
         var cancellationTokenSource = new CancellationTokenSource();
 
@@ -265,7 +230,7 @@ public class ObserverTests(TestContext testContext)
         var observer = observable
             .Observe()
             .OnEach(args => observedNames.Add(args.Name))
-            .On(cancellationTokenSource.Token);
+            .Until(cancellationTokenSource.Token);
 
         Assert.IsEmpty(observedNames);
 
@@ -325,9 +290,8 @@ public class ObserverTests(TestContext testContext)
 
         observableSource.Emit(new("Hello", 0));
 
-        Assert.HasCount(2, observedNames);
+        Assert.HasCount(1, observedNames);
         Assert.AreEqual("Hello", observedNames[0]);
-        Assert.AreEqual("Hello!", observedNames[1]);
         observedNames.Clear();
 
         observableSource.Emit(new("World", 0));
@@ -682,7 +646,7 @@ public class ObserverTests(TestContext testContext)
                 handler: nextEvent => () => nextEvent()
             )
             .OnEach(() => observedCount++)
-            .On(cancellationTokenSource.Token);
+            .Until(cancellationTokenSource.Token);
 
         Assert.AreEqual(0, observedCount);
 

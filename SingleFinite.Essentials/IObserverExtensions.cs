@@ -91,22 +91,47 @@ public static class IObserverExtensions
         /// disposed.  If the callback returns true the observer chain is
         /// disposed.
         /// </param>
-        /// <param name="continueOnDispose">
-        /// When set to true the next observer in the observer chain will be
-        /// invoked even when predicate returns true and this observer chain
-        /// will be disposed.  Default is false.
-        /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IObserver Until(
-            Func<bool> predicate,
-            bool continueOnDispose = false
+            Func<bool> predicate
         ) =>
             new ObserverUntil(
                 parent: observer,
-                predicate: predicate,
-                continueOnDispose: continueOnDispose
+                predicate: predicate
+            );
+
+        /// <summary>
+        /// Dispose of the observer chain when the given object is disposed.
+        /// </summary>
+        /// <param name="disposeObservable">
+        /// The object that when disposed will dispose of this observer.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IObserver Until(IDisposeObservable disposeObservable) =>
+            new ObserverUntil(
+                parent: observer,
+                disposeObservable: disposeObservable
+            );
+
+        /// <summary>
+        /// Dispose of the observer chain when the given cancellation token is
+        /// cancelled.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// The cancellation token that when cancelled will dispose of this
+        /// observer.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IObserver Until(CancellationToken cancellationToken) =>
+            new ObserverUntil(
+                parent: observer,
+                cancellationToken: cancellationToken
             );
 
         /// <summary>
@@ -118,8 +143,7 @@ public static class IObserverExtensions
         public IObserver Once() =>
             Until(
                 observer: observer,
-                predicate: () => true,
-                continueOnDispose: true
+                predicate: () => true
             );
 
         /// <summary>
@@ -142,38 +166,6 @@ public static class IObserverExtensions
                 parent: observer,
                 dispatcher: dispatcher,
                 onError: onError
-            );
-
-        /// <summary>
-        /// Dispose of the observer chain when the given object is disposed.
-        /// </summary>
-        /// <param name="disposeObservable">
-        /// The object that when disposed will dispose of this observer.
-        /// </param>
-        /// <returns>
-        /// A new observer that has been added to the chain of observers.
-        /// </returns>
-        public IObserver On(IDisposeObservable disposeObservable) =>
-            new ObserverOn(
-                parent: observer,
-                disposeObservable: disposeObservable
-            );
-
-        /// <summary>
-        /// Dispose of the observer chain when the given cancellation token is
-        /// cancelled.
-        /// </summary>
-        /// <param name="cancellationToken">
-        /// The cancellation token that when cancelled will dispose of this
-        /// observer.
-        /// </param>
-        /// <returns>
-        /// A new observer that has been added to the chain of observers.
-        /// </returns>
-        public IObserver On(CancellationToken cancellationToken) =>
-            new ObserverOn(
-                parent: observer,
-                cancellationToken: cancellationToken
             );
 
         /// <summary>
@@ -375,22 +367,47 @@ public static class IObserverExtensions
         /// disposed.  If the callback returns true the observer chain is
         /// disposed.
         /// </param>
-        /// <param name="continueOnDispose">
-        /// When set to true the next observer in the observer chain will be
-        /// invoked even when predicate returns true and this observer chain
-        /// will be disposed.  Default is false.
-        /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IObserver<TArgs> Until(
-            Func<TArgs, bool> predicate,
-            bool continueOnDispose = false
+            Func<TArgs, bool> predicate
         ) =>
             new ObserverUntil<TArgs>(
                 parent: observer,
-                predicate: predicate,
-                continueOnDispose: continueOnDispose
+                predicate: predicate
+            );
+
+        /// <summary>
+        /// Dispose of the observer chain when the given object is disposed.
+        /// </summary>
+        /// <param name="disposeObservable">
+        /// The object that when disposed will dispose of this observer.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IObserver<TArgs> Until(IDisposeObservable disposeObservable) =>
+            new ObserverUntil<TArgs>(
+                parent: observer,
+                disposeObservable: disposeObservable
+            );
+
+        /// <summary>
+        /// Dispose of the observer chain when the given cancellation token is
+        /// cancelled.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// The cancellation token that that cancelled will dispose of this
+        /// observer.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IObserver<TArgs> Until(CancellationToken cancellationToken) =>
+            new ObserverUntil<TArgs>(
+                parent: observer,
+                cancellationToken: cancellationToken
             );
 
         /// <summary>
@@ -402,8 +419,7 @@ public static class IObserverExtensions
         public IObserver<TArgs> Once() =>
             Until(
                 observer: observer,
-                predicate: _ => true,
-                continueOnDispose: true
+                predicate: _ => true
             );
 
         /// <summary>
@@ -426,38 +442,6 @@ public static class IObserverExtensions
                 parent: observer,
                 dispatcher: dispatcher,
                 onError: onError
-            );
-
-        /// <summary>
-        /// Dispose of the observer chain when the given object is disposed.
-        /// </summary>
-        /// <param name="disposeObservable">
-        /// The object that when disposed will dispose of this observer.
-        /// </param>
-        /// <returns>
-        /// A new observer that has been added to the chain of observers.
-        /// </returns>
-        public IObserver<TArgs> On(IDisposeObservable disposeObservable) =>
-            new ObserverOn<TArgs>(
-                parent: observer,
-                disposeObservable: disposeObservable
-            );
-
-        /// <summary>
-        /// Dispose of the observer chain when the given cancellation token is
-        /// cancelled.
-        /// </summary>
-        /// <param name="cancellationToken">
-        /// The cancellation token that that cancelled will dispose of this
-        /// observer.
-        /// </param>
-        /// <returns>
-        /// A new observer that has been added to the chain of observers.
-        /// </returns>
-        public IObserver<TArgs> On(CancellationToken cancellationToken) =>
-            new ObserverOn<TArgs>(
-                parent: observer,
-                cancellationToken: cancellationToken
             );
 
         /// <summary>
