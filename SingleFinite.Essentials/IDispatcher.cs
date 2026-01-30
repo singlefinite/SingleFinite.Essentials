@@ -25,7 +25,7 @@ namespace SingleFinite.Essentials;
 /// An abstraction of a platform specific dispatcher that is used to execute
 /// code on a different thread.
 /// </summary>
-public interface IDispatcher : ICancelObservable
+public interface IDispatcher
 {
     /// <summary>
     /// Execute the given async function.
@@ -40,15 +40,4 @@ public interface IDispatcher : ICancelObservable
         Func<Task<TResult>> function,
         CancellationToken cancellationToken = default
     );
-
-    /// <summary>
-    /// Handle the given exception.  This method is used by extension methods
-    /// when an exception handler is not provided by the calling code.  It's
-    /// useful if you want to make sure exceptions that would otheriwise be
-    /// quietly lost get handled.
-    /// </summary>
-    /// <param name="ex">
-    /// The exception to handle.
-    /// </param>
-    void OnError(Exception ex);
 }

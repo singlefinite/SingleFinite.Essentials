@@ -31,15 +31,10 @@ namespace SingleFinite.Essentials.Internal.Observers;
 /// it was throttled.  If not set the action will be run under the
 /// synchronization context of the thread this method was called on.
 /// </param>
-/// <param name="onError">
-/// Optional handler for any exceptions that are thrown by the action when
-/// it is invoked through the dispatcher.
-/// </param>
 internal class AsyncObserverThrottleLatest(
     IAsyncObserver parent,
     TimeSpan limit,
-    IDispatcher? dispatcher,
-    Action<Exception>? onError
+    IDispatcher? dispatcher
 ) : AsyncObserverBase(parent)
 {
     #region Fields
@@ -67,8 +62,7 @@ internal class AsyncObserverThrottleLatest(
                     await RaiseNextEventAsync();
             },
             limit: limit,
-            dispatcher: dispatcher,
-            onError: onError
+            dispatcher: dispatcher
         );
 
         return Task.FromResult(!isThrottled);
@@ -90,15 +84,10 @@ internal class AsyncObserverThrottleLatest(
 /// it was throttled.  If not set the action will be run under the
 /// synchronization context of the thread this method was called on.
 /// </param>
-/// <param name="onError">
-/// Optional handler for any exceptions that are thrown by the action when
-/// it is invoked through the dispatcher.
-/// </param>
 internal class AsyncObserverThrottleLatest<TArgs>(
     IAsyncObserver<TArgs> parent,
     TimeSpan limit,
-    IDispatcher? dispatcher,
-    Action<Exception>? onError
+    IDispatcher? dispatcher
 ) : AsyncObserverBase<TArgs>(parent)
 {
     #region Fields
@@ -127,8 +116,7 @@ internal class AsyncObserverThrottleLatest<TArgs>(
                     await RaiseNextEventAsync(args);
             },
             limit: limit,
-            dispatcher: dispatcher,
-            onError: onError
+            dispatcher: dispatcher
         );
 
         return Task.FromResult(!isThrottled);

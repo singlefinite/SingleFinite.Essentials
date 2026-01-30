@@ -29,14 +29,9 @@ namespace SingleFinite.Essentials.Internal.Observers;
 /// <param name="dispatcher">
 /// The dispatcher the async events will be run with.
 /// </param>
-/// <param name="onError">
-/// Optional action that is invoked if an exception is thrown from the async
-/// observers.
-/// </param>
 internal class ObserverToAsync(
     IObserver parent,
-    IDispatcher dispatcher,
-    Action<Exception>? onError
+    IDispatcher dispatcher
 ) : ObserverBase(parent), IAsyncObserver
 {
     #region Methods
@@ -52,8 +47,7 @@ internal class ObserverToAsync(
             {
                 if (BranchNext is not null)
                     await BranchNext.Invoke();
-            },
-            onError: onError
+            }
         );
         return false;
     }
@@ -86,14 +80,9 @@ internal class ObserverToAsync(
 /// <param name="dispatcher">
 /// The dispatcher the async events will be run with.
 /// </param>
-/// <param name="onError">
-/// Optional action that is invoked if an exception is thrown from the async
-/// observers.
-/// </param>
 internal class ObserverToAsync<TArgs>(
     IObserver<TArgs> parent,
-    IDispatcher dispatcher,
-    Action<Exception>? onError
+    IDispatcher dispatcher
 ) : ObserverBase<TArgs>(parent), IAsyncObserver<TArgs>
 {
     #region Methods
@@ -110,8 +99,7 @@ internal class ObserverToAsync<TArgs>(
             {
                 if (BranchNext is not null)
                     await BranchNext.Invoke(args);
-            },
-            onError: onError
+            }
         );
         return false;
     }

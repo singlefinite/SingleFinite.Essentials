@@ -25,53 +25,8 @@ namespace SingleFinite.Essentials;
 /// Implementation of <see cref="IDispatcher"/> that invokes functions on the
 /// same thread that calls the RunAsync method.
 /// </summary>
-public sealed class CurrentThreadDispatcher :
-    IDispatcher,
-    IDisposable,
-    IDisposeObservable
+public sealed class CurrentThreadDispatcher : IDispatcher
 {
-    #region Fields
-
-    /// <summary>
-    /// Holds the dispose state for this object.
-    /// </summary>
-    private readonly DisposeState _disposeState;
-
-    /// <summary>
-    /// Holds the exception handler for the dispatcher.
-    /// </summary>
-    private readonly Action<Exception>? _onError;
-
-    #endregion
-
-    #region Constructors
-
-    /// <summary>
-    /// Constructor.
-    /// </summary>
-    /// <param name="onError">
-    /// Optional exception handler that is invoked when the OnError method is
-    /// invoked.
-    /// </param>
-    public CurrentThreadDispatcher(Action<Exception>? onError = default)
-    {
-        _onError = onError;
-        _disposeState = new(this);
-    }
-
-    #endregion
-
-    #region Properties
-
-    /// <inheritdoc/>
-    public bool IsDisposed => _disposeState.IsDisposed;
-
-    /// <inheritdoc/>
-    public CancellationToken CancellationToken =>
-        _disposeState.CancellationToken;
-
-    #endregion
-
     #region Methods
 
     /// <summary>
@@ -91,22 +46,8 @@ public sealed class CurrentThreadDispatcher :
         CancellationToken cancellationToken = default
     )
     {
-        _disposeState.ThrowIfDisposed();
         return function();
     }
-
-    /// <inheritdoc/>
-    public void OnError(Exception ex) => _onError?.Invoke(ex);
-
-    /// <inheritdoc/>
-    public void Dispose() => _disposeState.Dispose();
-
-    #endregion
-
-    #region Events
-
-    /// <inheritdoc/>
-    public Observable Disposed => _disposeState.Disposed;
 
     #endregion
 }

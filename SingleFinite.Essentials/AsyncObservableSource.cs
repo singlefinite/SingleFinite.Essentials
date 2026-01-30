@@ -62,19 +62,13 @@ public sealed class AsyncObservableSource
     /// Raise the event using the given dispatcher.
     /// </summary>
     /// <param name="dispatcher">The dispatcher to raise the event on.</param>
-    /// <param name="onError">
-    /// Optional action that will be invoked if the event generates an
-    /// exception.
-    /// </param>
-    /// <param name="cancellationTokens">Optional cancellation tokens.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
     public void EmitEvent(
         IDispatcher dispatcher,
-        Action<Exception>? onError = default,
-        params IEnumerable<CancellationToken> cancellationTokens
+        CancellationToken cancellationToken
     ) => dispatcher.Run(
         function: EmitAsync,
-        onError: onError,
-        cancellationTokens: cancellationTokens
+        cancellationToken: cancellationToken
     );
 
     #endregion
@@ -136,20 +130,14 @@ public sealed class AsyncObservableSource<TArgs>
     /// </summary>
     /// <param name="args">The arguments to pass with the event.</param>
     /// <param name="dispatcher">The dispatcher to raise the event on.</param>
-    /// <param name="onError">
-    /// Optional action that will be invoked if the event generates an
-    /// exception.
-    /// </param>
-    /// <param name="cancellationTokens">Optional cancellation tokens.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
     public void Emit(
         TArgs args,
         IDispatcher dispatcher,
-        Action<Exception>? onError = default,
-        params IEnumerable<CancellationToken> cancellationTokens
+        CancellationToken cancellationToken
     ) => dispatcher.Run(
         function: () => EmitAsync(args),
-        onError: onError,
-        cancellationTokens: cancellationTokens
+        cancellationToken: cancellationToken
     );
 
     #endregion

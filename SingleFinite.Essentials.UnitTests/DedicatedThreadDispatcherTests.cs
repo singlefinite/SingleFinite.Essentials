@@ -91,7 +91,7 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
         //
         dispatcher.Run(
             function: () => throw new InvalidOperationException(),
-            cancellationTokens: testContext.CancellationToken
+            cancellationToken: testContext.CancellationToken
         );
 
         await Assert.ThrowsAsync<InvalidOperationException>(
@@ -99,7 +99,7 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
             {
                 await dispatcher.RunAsync(
                     function: () => throw new InvalidOperationException(),
-                    cancellationTokens: testContext.CancellationToken
+                    cancellationToken: testContext.CancellationToken
                 );
             }
         );
@@ -116,7 +116,7 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
         await Assert.ThrowsAsync<ObjectDisposedException>(
             () => dispatcher.RunAsync(
                 function: () => count++,
-                cancellationTokens: testContext.CancellationToken
+                cancellationToken: testContext.CancellationToken
             )
         );
         Assert.AreEqual(0, count);
@@ -143,105 +143,13 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
                         );
                         count++;
                     },
-                    cancellationTokens: testContext.CancellationToken
+                    cancellationToken: testContext.CancellationToken
                 ),
-                cancellationTokens: testContext.CancellationToken
+                cancellationToken: testContext.CancellationToken
             ),
-            cancellationTokens: testContext.CancellationToken
+            cancellationToken: testContext.CancellationToken
         );
 
         Assert.AreEqual(1, count);
-    }
-
-    [TestMethod]
-    public void Exceptions_Are_Reported_On_Calling_Thread()
-    {
-        using var mainDispatcher = new DedicatedThreadDispatcher();
-
-        var mainThreadId = -1;
-        var backgroundThreadId = -1;
-        var onErrorThreadId = -1;
-
-        var eventWaitHandle = new EventWaitHandle(
-            initialState: false,
-            mode: EventResetMode.ManualReset
-        );
-
-        Exception? observedException = null;
-
-        mainDispatcher.Run(
-            function: async () =>
-            {
-                mainThreadId = Environment.CurrentManagedThreadId;
-                await Task.Run(
-                    function: () =>
-                    {
-                        backgroundThreadId = Environment.CurrentManagedThreadId;
-                        Thread.Sleep(100);
-                        throw new InvalidOperationException("Test Exception");
-                    },
-                    cancellationToken: testContext.CancellationToken
-                );
-            },
-            onError: ex =>
-            {
-                onErrorThreadId = Environment.CurrentManagedThreadId;
-                observedException = ex;
-                eventWaitHandle.Set();
-            },
-            cancellationTokens: testContext.CancellationToken
-        );
-
-        eventWaitHandle.WaitOne();
-
-        Assert.AreNotEqual(-1, mainThreadId);
-        Assert.AreNotEqual(-1, backgroundThreadId);
-        Assert.AreNotEqual(-1, onErrorThreadId);
-
-        Assert.AreNotEqual(mainThreadId, backgroundThreadId);
-        Assert.AreNotEqual(mainThreadId, onErrorThreadId);
-
-        Assert.IsInstanceOfType<InvalidOperationException>(observedException);
-        Assert.AreEqual("Test Exception", observedException.Message);
-    }
-
-    [TestMethod]
-    public void Exceptions_Are_Reported_On_Dispatcher()
-    {
-        var eventWaitHandle = new EventWaitHandle(
-            initialState: false,
-            mode: EventResetMode.ManualReset
-        );
-
-        var observedExceptions = new List<Exception>();
-
-        using var mainDispatcher = new DedicatedThreadDispatcher(
-            onError: ex =>
-            {
-                observedExceptions.Add(ex);
-                eventWaitHandle.Set();
-            }
-        );
-
-        mainDispatcher.Run(
-            function: async () =>
-            {
-                await Task.Run(
-                    function: () =>
-                    {
-                        throw new InvalidOperationException("Test Exception");
-                    },
-                    cancellationToken: testContext.CancellationToken
-                );
-            },
-            cancellationTokens: testContext.CancellationToken
-        );
-
-        eventWaitHandle.WaitOne();
-
-        Assert.HasCount(1, observedExceptions);
-        var observedException = observedExceptions.First();
-        Assert.IsInstanceOfType<InvalidOperationException>(observedException);
-        Assert.AreEqual("Test Exception", observedException.Message);
     }
 }

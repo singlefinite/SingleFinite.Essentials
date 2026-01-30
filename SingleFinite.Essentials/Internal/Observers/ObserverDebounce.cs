@@ -31,14 +31,10 @@ namespace SingleFinite.Essentials.Internal.Observers;
 /// If not set the debounce will be run under the synchronization context
 /// of the thread this method was called on.
 /// </param>
-/// <param name="onError">
-/// Optional action invoked if the debounced action throws an exception.
-/// </param>
 internal class ObserverDebounce(
     IObserver parent,
     TimeSpan delay,
-    IDispatcher? dispatcher,
-    Action<Exception>? onError
+    IDispatcher? dispatcher
 ) : ObserverBase(parent), IObserver
 {
     #region Fields
@@ -65,8 +61,7 @@ internal class ObserverDebounce(
         _debouncer.Debounce(
             action: () => BranchNext?.Invoke(),
             delay: delay,
-            dispatcher: dispatcher,
-            onError: onError
+            dispatcher: dispatcher
         );
 
         return false;
@@ -102,14 +97,10 @@ internal class ObserverDebounce(
 /// If not set the debounce will be run under the synchronization context
 /// of the thread this method was called on.
 /// </param>
-/// <param name="onError">
-/// Optional action invoked if the debounced action throws an exception.
-/// </param>
 internal class ObserverDebounce<TArgs>(
     IObserver<TArgs> parent,
     TimeSpan delay,
-    IDispatcher? dispatcher,
-    Action<Exception>? onError
+    IDispatcher? dispatcher
 ) : ObserverBase<TArgs>(parent), IObserver<TArgs>
 {
     #region Fields
@@ -137,8 +128,7 @@ internal class ObserverDebounce<TArgs>(
         _debouncer.Debounce(
             action: () => BranchNext?.Invoke(args),
             delay: delay,
-            dispatcher: dispatcher,
-            onError: onError
+            dispatcher: dispatcher
         );
 
         return false;

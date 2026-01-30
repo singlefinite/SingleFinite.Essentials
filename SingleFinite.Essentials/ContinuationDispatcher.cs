@@ -25,22 +25,9 @@ namespace SingleFinite.Essentials;
 /// Implementation of <see cref="IDispatcher"/> that invokes functions using the
 /// same synchronization context from the thread that this class was created on.
 /// </summary>
-public sealed class ContinuationDispatcher :
-    IDispatcher,
-    IDisposable,
-    IDisposeObservable
+public sealed class ContinuationDispatcher : IDispatcher
 {
     #region Fields
-
-    /// <summary>
-    /// Holds the dispose state for this object.
-    /// </summary>
-    private readonly DisposeState _disposeState;
-
-    /// <summary>
-    /// Holds the exception handler for the dispatcher.
-    /// </summary>
-    private readonly Action<Exception>? _onError;
 
     /// <summary>
     /// Holds the task scheduler used to invoke functions.
@@ -54,27 +41,10 @@ public sealed class ContinuationDispatcher :
     /// <summary>
     /// Constructor.
     /// </summary>
-    /// <param name="onError">
-    /// Optional exception handler that is invoked when the OnError method is
-    /// invoked.
-    /// </param>
-    public ContinuationDispatcher(Action<Exception>? onError = default)
+    public ContinuationDispatcher()
     {
-        _onError = onError;
-        _disposeState = new(this);
         _taskScheduler = TaskScheduler.Current;
     }
-
-    #endregion
-
-    #region Properties
-
-    /// <inheritdoc/>
-    public bool IsDisposed => _disposeState.IsDisposed;
-
-    /// <inheritdoc/>
-    public CancellationToken CancellationToken =>
-        _disposeState.CancellationToken;
 
     #endregion
 
@@ -97,8 +67,6 @@ public sealed class ContinuationDispatcher :
         CancellationToken cancellationToken = default
     )
     {
-        _disposeState.ThrowIfDisposed();
-
         var taskCompletionSource = new TaskCompletionSource<TResult>();
 
         Task.Factory.StartNew(
@@ -121,19 +89,6 @@ public sealed class ContinuationDispatcher :
 
         return taskCompletionSource.Task;
     }
-
-    /// <inheritdoc/>
-    public void OnError(Exception ex) => _onError?.Invoke(ex);
-
-    /// <inheritdoc/>
-    public void Dispose() => _disposeState.Dispose();
-
-    #endregion
-
-    #region Events
-
-    /// <inheritdoc/>
-    public Observable Disposed => _disposeState.Disposed;
 
     #endregion
 }

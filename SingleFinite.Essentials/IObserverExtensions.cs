@@ -152,20 +152,15 @@ public static class IObserverExtensions
         /// <param name="dispatcher">
         /// The dispatcher to invoke the next observers with.
         /// </param>
-        /// <param name="onError">
-        /// Optional action invoked if the next observers throw an exception.
-        /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IObserver Dispatch(
-            IDispatcher dispatcher,
-            Action<Exception>? onError = default
+            IDispatcher dispatcher
         ) =>
             new ObserverDispatch(
                 parent: observer,
-                dispatcher: dispatcher,
-                onError: onError
+                dispatcher: dispatcher
             );
 
         /// <summary>
@@ -177,22 +172,17 @@ public static class IObserverExtensions
         /// If not set the debounce will be run under the synchronization
         /// context of the thread this method was called on.
         /// </param>
-        /// <param name="onError">
-        /// Optional action invoked if the debounced action throws an exception.
-        /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IObserver Debounce(
             TimeSpan delay,
-            IDispatcher? dispatcher = default,
-            Action<Exception>? onError = default
+            IDispatcher? dispatcher = default
         ) =>
             new ObserverDebounce(
                 parent: observer,
                 delay: delay,
-                dispatcher: dispatcher,
-                onError: onError
+                dispatcher: dispatcher
             );
 
         /// <summary>
@@ -217,23 +207,17 @@ public static class IObserverExtensions
         /// if it was throttled.  If not set the action will be run under the
         /// synchronization context of the thread this method was called on.
         /// </param>
-        /// <param name="onError">
-        /// Optional handler for any exceptions that are thrown by the action
-        /// when it is invoked through the dispatcher.
-        /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IObserver ThrottleLatest(
             TimeSpan limit,
-            IDispatcher? dispatcher = default,
-            Action<Exception>? onError = default
+            IDispatcher? dispatcher = default
         ) =>
             new ObserverThrottleLatest(
                 parent: observer,
                 limit: limit,
-                dispatcher: dispatcher,
-                onError: onError
+                dispatcher: dispatcher
             );
 
         /// <summary>
@@ -263,21 +247,15 @@ public static class IObserverExtensions
         /// <param name="dispatcher">
         /// The dispatcher the async events will be run with.
         /// </param>
-        /// <param name="onError">
-        /// Optional action that is invoked if an exception is thrown from the
-        /// async observers.
-        /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IAsyncObserver ToAsync(
-            IDispatcher dispatcher,
-            Action<Exception>? onError = default
+            IDispatcher dispatcher
         ) =>
             new ObserverToAsync(
                 parent: observer,
-                dispatcher: dispatcher,
-                onError: onError
+                dispatcher: dispatcher
             );
 
         /// <summary>
@@ -428,20 +406,15 @@ public static class IObserverExtensions
         /// <param name="dispatcher">
         /// The dispatcher to invoke the next observers with.
         /// </param>
-        /// <param name="onError">
-        /// Optional action invoked if the next observers throw an exception.
-        /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IObserver<TArgs> Dispatch(
-            IDispatcher dispatcher,
-            Action<Exception>? onError = default
+            IDispatcher dispatcher
         ) =>
             new ObserverDispatch<TArgs>(
                 parent: observer,
-                dispatcher: dispatcher,
-                onError: onError
+                dispatcher: dispatcher
             );
 
         /// <summary>
@@ -453,22 +426,17 @@ public static class IObserverExtensions
         /// If not set the debounce will be run under the synchronization
         /// context of the thread this method was called on.
         /// </param>
-        /// <param name="onError">
-        /// Optional action invoked if the debounced action throws an exception.
-        /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IObserver<TArgs> Debounce(
             TimeSpan delay,
-            IDispatcher? dispatcher = default,
-            Action<Exception>? onError = default
+            IDispatcher? dispatcher = default
         ) =>
             new ObserverDebounce<TArgs>(
                 parent: observer,
                 delay: delay,
-                dispatcher: dispatcher,
-                onError: onError
+                dispatcher: dispatcher
             );
 
         /// <summary>
@@ -493,23 +461,17 @@ public static class IObserverExtensions
         /// if it was throttled.  If not set the action will be run under the
         /// synchronization context of the thread this method was called on.
         /// </param>
-        /// <param name="onError">
-        /// Optional handler for any exceptions that are thrown by the action
-        /// when it is invoked through the dispatcher.
-        /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IObserver<TArgs> ThrottleLatest(
             TimeSpan limit,
-            IDispatcher? dispatcher = default,
-            Action<Exception>? onError = default
+            IDispatcher? dispatcher = default
         ) =>
             new ObserverThrottleLatest<TArgs>(
                 parent: observer,
                 limit: limit,
-                dispatcher: dispatcher,
-                onError: onError
+                dispatcher: dispatcher
             );
 
         /// <summary>
@@ -539,21 +501,15 @@ public static class IObserverExtensions
         /// <param name="dispatcher">
         /// The dispatcher the async events will be run with.
         /// </param>
-        /// <param name="onError">
-        /// Optional action that is invoked if an exception is thrown from the
-        /// async observers.
-        /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IAsyncObserver<TArgs> ToAsync(
-            IDispatcher dispatcher,
-            Action<Exception>? onError = default
+            IDispatcher dispatcher
         ) =>
             new ObserverToAsync<TArgs>(
                 parent: observer,
-                dispatcher: dispatcher,
-                onError: onError
+                dispatcher: dispatcher
             );
 
         /// <summary>

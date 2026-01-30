@@ -43,11 +43,6 @@ public sealed class DedicatedThreadDispatcher :
     private readonly DisposeState _disposeState;
 
     /// <summary>
-    /// Holds the exception handler for the dispatcher.
-    /// </summary>
-    private readonly Action<Exception>? _onError;
-
-    /// <summary>
     /// The single thread that dispatched functions will be run on.
     /// </summary>
     private readonly Thread _thread;
@@ -68,17 +63,8 @@ public sealed class DedicatedThreadDispatcher :
     /// The thread the dispatcher will run actions and functions on.  If not set
     /// a new Thread will be created and used.
     /// </param>
-    /// <param name="onError">
-    /// Optional exception handler that is invoked when the OnError method is
-    /// invoked.
-    /// </param>
-    public DedicatedThreadDispatcher(
-        Thread? thread = default,
-        Action<Exception>? onError = default
-    )
+    public DedicatedThreadDispatcher(Thread? thread = default)
     {
-        _onError = onError;
-
         _disposeState = new(
             owner: this,
             onDispose: OnDispose
@@ -97,10 +83,6 @@ public sealed class DedicatedThreadDispatcher :
 
     /// <inheritdoc/>
     public bool IsDisposed => _disposeState.IsDisposed;
-
-    /// <inheritdoc/>
-    public CancellationToken CancellationToken =>
-        _disposeState.CancellationToken;
 
     #endregion
 
@@ -174,9 +156,6 @@ public sealed class DedicatedThreadDispatcher :
 
         return taskCompletionSource.Task;
     }
-
-    /// <inheritdoc/>
-    public void OnError(Exception ex) => _onError?.Invoke(ex);
 
     /// <inheritdoc/>
     public void Dispose() => _disposeState.Dispose();

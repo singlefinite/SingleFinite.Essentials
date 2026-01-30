@@ -84,17 +84,12 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
     /// If not set the debounce will be run under the synchronization context
     /// of the thread this method was called on.
     /// </param>
-    /// <param name="onError">
-    /// Optional handler for any exceptions that are thrown by the action when
-    /// it is invoked.
-    /// </param>
-    /// <param name="cancellationTokens">Optional cancellation tokens.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
     public void Debounce(
         Action action,
         TimeSpan delay,
         IDispatcher? dispatcher = default,
-        Action<Exception>? onError = default,
-        params IEnumerable<CancellationToken> cancellationTokens
+        CancellationToken cancellationToken = default
     )
     {
         _disposeState.ThrowIfDisposed();
@@ -110,8 +105,7 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
                 {
                     resolvedDispatcher.Run(
                         action: action,
-                        onError: onError,
-                        cancellationTokens: cancellationTokens
+                        cancellationToken: cancellationToken
                     );
                 },
                 dueTime: delay,
@@ -135,17 +129,12 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
     /// If not set the debounce will be run under the synchronization context
     /// of the thread this method was called on.
     /// </param>
-    /// <param name="onError">
-    /// Optional handler for any exceptions that are thrown by the Func when it
-    /// is invoked.
-    /// </param>
-    /// <param name="cancellationTokens">Optional cancellation tokens.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
     public void Debounce(
         Func<Task> function,
         TimeSpan delay,
         IDispatcher? dispatcher = default,
-        Action<Exception>? onError = default,
-        params IEnumerable<CancellationToken> cancellationTokens
+        CancellationToken cancellationToken = default
     )
     {
         _disposeState.ThrowIfDisposed();
@@ -161,8 +150,7 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
                 {
                     resolvedDispatcher.Run(
                         function: function,
-                        onError: onError,
-                        cancellationTokens: cancellationTokens
+                        cancellationToken: cancellationToken
                     );
                 },
                 dueTime: delay,

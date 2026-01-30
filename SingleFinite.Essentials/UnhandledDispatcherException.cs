@@ -19,39 +19,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace SingleFinite.Essentials.UnitTests;
+namespace SingleFinite.Essentials;
 
-[TestClass]
-public class ThreadPoolDispatcherTests
+/// <summary>
+/// Arguments for an unhandled dispatcher exception event.
+/// </summary>
+/// <remarks>
+/// Constructor.
+/// </remarks>
+/// <param name="dispatcher">
+/// The dispatcher that the unhandled exception occured in.
+/// </param>
+/// <param name="exception">The unhandled exception.</param>
+public class UnhandledDispatcherException(
+    IDispatcher dispatcher,
+    Exception exception
+) : EventArgs
 {
-    [TestMethod]
-    public void Cancel_Passed_In_Cancellation_Token_Cancels_Dispatcher_Provided_Cancellation_Token()
-    {
-        var counter = 0;
-        var waitHandle = new ManualResetEvent(false);
-        var startWaitHandle = new ManualResetEvent(false);
-        using var cancellationTokenSource = new CancellationTokenSource();
+    #region Properties
 
-        var dispatcher = new ThreadPoolDispatcher();
+    /// <summary>
+    /// The dispatcher that the unhandled exception occured in.
+    /// </summary>
+    public IDispatcher Dispatcher { get; } = dispatcher;
 
-        dispatcher.Run(
-            action: cancellationToken =>
-            {
-                startWaitHandle.Set();
-                cancellationToken.WaitHandle.WaitOne();
-                counter++;
-                waitHandle.Set();
-            },
-            cancellationTokens: cancellationTokenSource.Token
-        );
+    /// <summary>
+    /// The unhandled exception.
+    /// </summary>
+    public Exception Exception { get; } = exception;
 
-        startWaitHandle.WaitOne();
-        cancellationTokenSource.Cancel();
-
-        waitHandle.WaitOne();
-
-        Assert.AreEqual(1, counter);
-        Assert.IsTrue(cancellationTokenSource.Token.IsCancellationRequested);
-        Assert.IsFalse(dispatcher.CancellationToken.IsCancellationRequested);
-    }
+    #endregion
 }

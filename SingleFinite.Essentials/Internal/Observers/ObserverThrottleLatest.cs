@@ -31,15 +31,10 @@ namespace SingleFinite.Essentials.Internal.Observers;
 /// it was throttled.  If not set the action will be run under the
 /// synchronization context of the thread this method was called on.
 /// </param>
-/// <param name="onError">
-/// Optional handler for any exceptions that are thrown by the action when
-/// it is invoked through the dispatcher.
-/// </param>
 internal class ObserverThrottleLatest(
     IObserver parent,
     TimeSpan limit,
-    IDispatcher? dispatcher,
-    Action<Exception>? onError
+    IDispatcher? dispatcher
 ) : ObserverBase(parent)
 {
     #region Fields
@@ -67,8 +62,7 @@ internal class ObserverThrottleLatest(
                     RaiseNextEvent();
             },
             limit: limit,
-            dispatcher: dispatcher,
-            onError: onError
+            dispatcher: dispatcher
         );
 
         return !isThrottled;
@@ -90,15 +84,10 @@ internal class ObserverThrottleLatest(
 /// it was throttled.  If not set the action will be run under the
 /// synchronization context of the thread this method was called on.
 /// </param>
-/// <param name="onError">
-/// Optional handler for any exceptions that are thrown by the action when
-/// it is invoked through the dispatcher.
-/// </param>
 internal class ObserverThrottleLatest<TArgs>(
     IObserver<TArgs> parent,
     TimeSpan limit,
-    IDispatcher? dispatcher,
-    Action<Exception>? onError
+    IDispatcher? dispatcher
 ) : ObserverBase<TArgs>(parent)
 {
     #region Fields
@@ -127,8 +116,7 @@ internal class ObserverThrottleLatest<TArgs>(
                     RaiseNextEvent(args);
             },
             limit: limit,
-            dispatcher: dispatcher,
-            onError: onError
+            dispatcher: dispatcher
         );
 
         return !isThrottled;

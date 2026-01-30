@@ -249,22 +249,17 @@ public static class IAsyncObserverExtensions
         /// If not set the debounce will be run under the synchronization
         /// context of the thread this method was called on.
         /// </param>
-        /// <param name="onError">
-        /// Optional action invoked if the debounced action throws an exception.
-        /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IAsyncObserver Debounce(
             TimeSpan delay,
-            IDispatcher? dispatcher = default,
-            Action<Exception>? onError = default
+            IDispatcher? dispatcher = default
         ) =>
             new AsyncObserverDebounce(
                 parent: observer,
                 delay: delay,
-                dispatcher: dispatcher,
-                onError: onError
+                dispatcher: dispatcher
             );
 
         /// <summary>
@@ -289,23 +284,17 @@ public static class IAsyncObserverExtensions
         /// if it was throttled.  If not set the action will be run under the
         /// synchronization context of the thread this method was called on.
         /// </param>
-        /// <param name="onError">
-        /// Optional handler for any exceptions that are thrown by the action
-        /// when it is invoked through the dispatcher.
-        /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IAsyncObserver ThrottleLatest(
             TimeSpan limit,
-            IDispatcher? dispatcher = default,
-            Action<Exception>? onError = default
+            IDispatcher? dispatcher = default
         ) =>
             new AsyncObserverThrottleLatest(
                 parent: observer,
                 limit: limit,
-                dispatcher: dispatcher,
-                onError: onError
+                dispatcher: dispatcher
             );
 
         /// <summary>
@@ -631,22 +620,17 @@ public static class IAsyncObserverExtensions
         /// If not set the debounce will be run under the synchronization
         /// context of the thread this method was called on.
         /// </param>
-        /// <param name="onError">
-        /// Optional action invoked if the debounced action throws an exception.
-        /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IAsyncObserver<TArgs> Debounce(
             TimeSpan delay,
-            IDispatcher? dispatcher = default,
-            Action<Exception>? onError = default
+            IDispatcher? dispatcher = default
         ) =>
             new AsyncObserverDebounce<TArgs>(
                 parent: observer,
                 delay: delay,
-                dispatcher: dispatcher,
-                onError: onError
+                dispatcher: dispatcher
             );
 
         /// <summary>
@@ -671,23 +655,17 @@ public static class IAsyncObserverExtensions
         /// if it was throttled.  If not set the action will be run under the
         /// synchronization context of the thread this method was called on.
         /// </param>
-        /// <param name="onError">
-        /// Optional handler for any exceptions that are thrown by the action
-        /// when it is invoked through the dispatcher.
-        /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IAsyncObserver<TArgs> ThrottleLatest(
             TimeSpan limit,
-            IDispatcher? dispatcher = default,
-            Action<Exception>? onError = default
+            IDispatcher? dispatcher = default
         ) =>
             new AsyncObserverThrottleLatest<TArgs>(
                 parent: observer,
                 limit: limit,
-                dispatcher: dispatcher,
-                onError: onError
+                dispatcher: dispatcher
             );
 
         /// <summary>

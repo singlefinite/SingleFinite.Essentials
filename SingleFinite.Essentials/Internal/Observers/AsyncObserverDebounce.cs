@@ -31,14 +31,10 @@ namespace SingleFinite.Essentials.Internal.Observers;
 /// If not set the debounce will be run under the synchronization context
 /// of the thread this method was called on.
 /// </param>
-/// <param name="onError">
-/// Optional action invoked if the debounced action throws an exception.
-/// </param>
 internal class AsyncObserverDebounce(
     IAsyncObserver parent,
     TimeSpan delay,
-    IDispatcher? dispatcher,
-    Action<Exception>? onError
+    IDispatcher? dispatcher
 ) : AsyncObserverBase(parent), IAsyncObserver
 {
     #region Fields
@@ -65,8 +61,7 @@ internal class AsyncObserverDebounce(
         _debouncer.Debounce(
             function: () => BranchNext?.Invoke() ?? Task.CompletedTask,
             delay: delay,
-            dispatcher: dispatcher,
-            onError: onError
+            dispatcher: dispatcher
         );
 
         return Task.FromResult(false);
@@ -102,14 +97,10 @@ internal class AsyncObserverDebounce(
 /// If not set the debounce will be run under the synchronization context
 /// of the thread this method was called on.
 /// </param>
-/// <param name="onError">
-/// Optional action invoked if the debounced action throws an exception.
-/// </param>
 internal class AsyncObserverDebounce<TArgs>(
     IAsyncObserver<TArgs> parent,
     TimeSpan delay,
-    IDispatcher? dispatcher,
-    Action<Exception>? onError
+    IDispatcher? dispatcher
 ) : AsyncObserverBase<TArgs>(parent), IAsyncObserver<TArgs>
 {
     #region Fields
@@ -137,8 +128,7 @@ internal class AsyncObserverDebounce<TArgs>(
         _debouncer.Debounce(
             function: () => BranchNext?.Invoke(args) ?? Task.CompletedTask,
             delay: delay,
-            dispatcher: dispatcher,
-            onError: onError
+            dispatcher: dispatcher
         );
 
         return Task.FromResult(false);

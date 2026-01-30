@@ -363,7 +363,7 @@ public class AsyncObserverTests(TestContext testContext)
         var dispatcher = new DedicatedThreadDispatcher();
         await dispatcher.RunAsync(
             action: () => dispatcherThreadId = Environment.CurrentManagedThreadId,
-            cancellationTokens: testContext.CancellationToken
+            cancellationToken: testContext.CancellationToken
         );
 
         var currentThreadId = Environment.CurrentManagedThreadId;

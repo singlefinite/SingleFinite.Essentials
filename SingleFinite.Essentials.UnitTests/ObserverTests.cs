@@ -306,7 +306,7 @@ public class ObserverTests(TestContext testContext)
         var dispatcher = new DedicatedThreadDispatcher();
         await dispatcher.RunAsync(
             action: () => dispatcherThreadId = Environment.CurrentManagedThreadId,
-            cancellationTokens: testContext.CancellationToken
+            cancellationToken: testContext.CancellationToken
         );
 
         var currentThreadId = Environment.CurrentManagedThreadId;
@@ -592,43 +592,6 @@ public class ObserverTests(TestContext testContext)
         );
 
         Assert.AreEqual(0, observedCount);
-    }
-
-    [TestMethod]
-    public void ToAsync_Catches_Exceptions()
-    {
-        var observedCount = 0;
-        var observedErrors = new List<Exception>();
-
-        var observableSource = new ObservableSource();
-        var observable = observableSource.Observable;
-        var dispatcher = new ThreadPoolDispatcher();
-
-        var waitHandle = new ManualResetEvent(false);
-
-        var observer = observable
-            .Observe()
-            .ToAsync(
-                dispatcher: dispatcher,
-                onError: ex =>
-                {
-                    observedErrors.Add(ex);
-                    waitHandle.Set();
-                }
-            )
-            .OnEach(async () =>
-            {
-                await Task.Run(() => observedCount++);
-                throw new InvalidOperationException("Test");
-            });
-
-        observableSource.Emit();
-
-        waitHandle.WaitOne(1000);
-
-        Assert.AreEqual(1, observedCount);
-        Assert.HasCount(1, observedErrors);
-        Assert.IsInstanceOfType<InvalidOperationException>(observedErrors[0]);
     }
 
     [TestMethod]

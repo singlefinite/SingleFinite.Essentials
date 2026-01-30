@@ -65,10 +65,6 @@ public sealed class ThrottlerLatest : IDisposable, IDisposeObservable
     /// it was throttled.  If not set the action will be run under the
     /// synchronization context of the thread this method was called on.
     /// </param>
-    /// <param name="onError">
-    /// Optional handler for any exceptions that are thrown by the action when
-    /// it is invoked through the dispatcher.
-    /// </param>
     /// <returns>
     /// true if the action was not invoked.
     /// false if the action was invoked.
@@ -76,8 +72,7 @@ public sealed class ThrottlerLatest : IDisposable, IDisposeObservable
     public bool Throttle(
         Action action,
         TimeSpan limit,
-        IDispatcher? dispatcher = default,
-        Action<Exception>? onError = default
+        IDispatcher? dispatcher = default
     )
     {
         _debouncer.Cancel();
@@ -85,10 +80,9 @@ public sealed class ThrottlerLatest : IDisposable, IDisposeObservable
         if (_throttler.Throttle(action, limit, out var elapsed))
         {
             _debouncer.Debounce(
-                action: () => Throttle(action, limit, dispatcher, onError),
+                action: () => Throttle(action, limit, dispatcher),
                 delay: limit - elapsed,
-                dispatcher: dispatcher,
-                onError: onError
+                dispatcher: dispatcher
             );
 
             return true;

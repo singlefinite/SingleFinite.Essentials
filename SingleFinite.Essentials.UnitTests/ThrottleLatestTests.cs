@@ -28,7 +28,6 @@ public class ThrottleLatestTests(TestContext testContext)
     public async Task Throttle_Invokes_Last_Action()
     {
         var observedItems = new List<string>();
-        var observedErrors = 0;
         var dispatcher = new DedicatedThreadDispatcher();
         var throttleLatest = new ThrottlerLatest();
         var limit = TimeSpan.FromMilliseconds(250);
@@ -36,22 +35,19 @@ public class ThrottleLatestTests(TestContext testContext)
         throttleLatest.Throttle(
             action: () => observedItems.Add("one"),
             limit: limit,
-            dispatcher: dispatcher,
-            onError: _ => observedErrors++
+            dispatcher: dispatcher
         );
 
         throttleLatest.Throttle(
             action: () => observedItems.Add("two"),
             limit: limit,
-            dispatcher: dispatcher,
-            onError: _ => observedErrors++
+            dispatcher: dispatcher
         );
 
         throttleLatest.Throttle(
             action: () => observedItems.Add("three"),
             limit: limit,
-            dispatcher: dispatcher,
-            onError: _ => observedErrors++
+            dispatcher: dispatcher
         );
 
         Assert.HasCount(1, observedItems);
@@ -65,8 +61,6 @@ public class ThrottleLatestTests(TestContext testContext)
         Assert.HasCount(2, observedItems);
         Assert.AreEqual("one", observedItems[0]);
         Assert.AreEqual("three", observedItems[1]);
-
-        Assert.AreEqual(0, observedErrors);
     }
 
     [TestMethod]

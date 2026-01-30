@@ -28,13 +28,9 @@ namespace SingleFinite.Essentials.Internal.Observers;
 /// <param name="dispatcher">
 /// The dispatcher to invoke the next observers with.
 /// </param>
-/// <param name="onError">
-/// Optional action invoked if the next observers throw an exception.
-/// </param>
 internal class ObserverDispatch(
     IObserver parent,
-    IDispatcher dispatcher,
-    Action<Exception>? onError
+    IDispatcher dispatcher
 ) : ObserverBase(parent)
 {
     #region Methods
@@ -46,8 +42,7 @@ internal class ObserverDispatch(
     protected override bool OnEvent()
     {
         dispatcher.Run(
-            action: RaiseNextEvent,
-            onError: onError
+            action: RaiseNextEvent
         );
 
         return false;
@@ -66,13 +61,9 @@ internal class ObserverDispatch(
 /// <param name="dispatcher">
 /// The dispatcher to invoke the next observers with.
 /// </param>
-/// <param name="onError">
-/// Optional action invoked if the next observers throw an exception.
-/// </param>
 internal class ObserverDispatch<TArgs>(
     IObserver<TArgs> parent,
-    IDispatcher dispatcher,
-    Action<Exception>? onError
+    IDispatcher dispatcher
 ) : ObserverBase<TArgs>(parent)
 {
     #region Methods
@@ -85,8 +76,7 @@ internal class ObserverDispatch<TArgs>(
     protected override bool OnEvent(TArgs args)
     {
         dispatcher.Run(
-            action: () => RaiseNextEvent(args),
-            onError: onError
+            action: () => RaiseNextEvent(args)
         );
 
         return false;

@@ -28,7 +28,6 @@ public class DebouncerTests(TestContext testContext)
     public async Task Debounce_Works_As_Expected()
     {
         var observedNames = new List<string>();
-        var observedErrors = 0;
         var dispatcher = new DedicatedThreadDispatcher();
         var debouncer = new Debouncer();
 
@@ -36,21 +35,21 @@ public class DebouncerTests(TestContext testContext)
             action: () => observedNames.Add("One"),
             delay: TimeSpan.FromMilliseconds(100),
             dispatcher: dispatcher,
-            onError: _ => observedErrors++
+            cancellationToken: testContext.CancellationToken
         );
 
         debouncer.Debounce(
             action: () => observedNames.Add("Two"),
             delay: TimeSpan.FromMilliseconds(100),
             dispatcher: dispatcher,
-            onError: _ => observedErrors++
+            cancellationToken: testContext.CancellationToken
         );
 
         debouncer.Debounce(
             action: () => observedNames.Add("Three"),
             delay: TimeSpan.FromMilliseconds(100),
             dispatcher: dispatcher,
-            onError: _ => observedErrors++
+            cancellationToken: testContext.CancellationToken
         );
 
         Assert.IsEmpty(observedNames);
@@ -62,8 +61,6 @@ public class DebouncerTests(TestContext testContext)
 
         Assert.HasCount(1, observedNames);
         Assert.AreEqual("Three", observedNames[0]);
-
-        Assert.AreEqual(0, observedErrors);
     }
 
     [TestMethod]
@@ -103,7 +100,6 @@ public class DebouncerTests(TestContext testContext)
     public async Task Cancel_Ends_Debounce()
     {
         var observedNames = new List<string>();
-        var observedErrors = 0;
         var dispatcher = new DedicatedThreadDispatcher();
         var debouncer = new Debouncer();
 
@@ -111,7 +107,7 @@ public class DebouncerTests(TestContext testContext)
             action: () => observedNames.Add("One"),
             delay: TimeSpan.FromMilliseconds(100),
             dispatcher: dispatcher,
-            onError: _ => observedErrors++
+            cancellationToken: testContext.CancellationToken
         );
 
         Assert.IsEmpty(observedNames);
@@ -124,15 +120,12 @@ public class DebouncerTests(TestContext testContext)
         );
 
         Assert.IsEmpty(observedNames);
-
-        Assert.AreEqual(0, observedErrors);
     }
 
     [TestMethod]
     public async Task Dispose_Ends_Debounce()
     {
         var observedNames = new List<string>();
-        var observedErrors = 0;
         var dispatcher = new DedicatedThreadDispatcher();
         var debouncer = new Debouncer();
 
@@ -140,7 +133,7 @@ public class DebouncerTests(TestContext testContext)
             action: () => observedNames.Add("One"),
             delay: TimeSpan.FromMilliseconds(100),
             dispatcher: dispatcher,
-            onError: _ => observedErrors++
+            cancellationToken: testContext.CancellationToken
         );
 
         Assert.IsEmpty(observedNames);
@@ -153,7 +146,5 @@ public class DebouncerTests(TestContext testContext)
         );
 
         Assert.IsEmpty(observedNames);
-
-        Assert.AreEqual(0, observedErrors);
     }
 }
