@@ -106,7 +106,7 @@ public static class IDispatcherExtensions
                     return Task.CompletedTask;
                 },
                 cancellationToken: cancellationToken
-            ).ReportOnException(dispatcher);
+            ).EmitOnException(dispatcher);
 
         /// <summary>
         /// Execute the given async Func.
@@ -126,6 +126,6 @@ public static class IDispatcherExtensions
                     return Task.CompletedTask;
                 },
                 cancellationToken: cancellationToken
-            ).ReportOnException(dispatcher);
+            ).EmitOnException(dispatcher);
     }
 }

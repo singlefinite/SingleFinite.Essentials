@@ -77,7 +77,7 @@ public static class ITaskScopeExtensions
                 },
                 dispatcher: dispatcher,
                 cancellationToken: cancellationToken
-            ).ReportOnException(dispatcher ?? scope.Dispatcher);
+            ).EmitOnException(dispatcher ?? scope.Dispatcher);
 
         /// <summary>
         /// Execute the given async Func.
@@ -103,7 +103,7 @@ public static class ITaskScopeExtensions
                 },
                 dispatcher: dispatcher,
                 cancellationToken: cancellationToken
-            ).ReportOnException(dispatcher ?? scope.Dispatcher);
+            ).EmitOnException(dispatcher ?? scope.Dispatcher);
 
         /// <summary>
         /// Execute the given cancellable async function without result.
@@ -209,7 +209,7 @@ public static class ITaskScopeExtensions
                 },
                 dispatcher: dispatcher,
                 cancellationToken: cancellationToken
-            ).ReportOnException(dispatcher ?? scope.Dispatcher);
+            ).EmitOnException(dispatcher ?? scope.Dispatcher);
 
         /// <summary>
         /// Execute the given cancellable async function.
@@ -235,6 +235,6 @@ public static class ITaskScopeExtensions
                 },
                 dispatcher: dispatcher,
                 cancellationToken: cancellationToken
-            ).ReportOnException(dispatcher ?? scope.Dispatcher);
+            ).EmitOnException(dispatcher ?? scope.Dispatcher);
     }
 }

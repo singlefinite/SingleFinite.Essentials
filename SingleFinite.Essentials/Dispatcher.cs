@@ -41,7 +41,7 @@ public static class Dispatcher
     /// </summary>
     /// <param name="task">The task to check for an exception.</param>
     /// <param name="dispatcher">The dispatcher the task is running on.</param>
-    internal static void ReportOnException(
+    internal static void EmitOnException(
         this Task task,
         IDispatcher dispatcher
     )
