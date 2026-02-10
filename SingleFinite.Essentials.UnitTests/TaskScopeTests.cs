@@ -91,7 +91,7 @@ public class TaskScopeTests(TestContext testContext)
 
         var dispatcher = new ThreadPoolDispatcher();
 
-        var observer = Dispatcher.UnhandledDispatcherException
+        var observer = Dispatcher.UnhandledException
             .Observe()
             .Where(args => args.Dispatcher == dispatcher)
             .Select(args => args.Exception)
@@ -127,7 +127,7 @@ public class TaskScopeTests(TestContext testContext)
 
         var dispatcher = new ThreadPoolDispatcher();
 
-        var observer = Dispatcher.UnhandledDispatcherException
+        var observer = Dispatcher.UnhandledException
             .Observe()
             .Where(args => args.Dispatcher == dispatcher)
             .Select(args => args.Exception)
@@ -162,7 +162,7 @@ public class TaskScopeTests(TestContext testContext)
 
         var dispatcher = new ThreadPoolDispatcher();
 
-        var observer = Dispatcher.UnhandledDispatcherException
+        var observer = Dispatcher.UnhandledException
             .Observe()
             .Where(args => args.Dispatcher == dispatcher)
             .Select(args => args.Exception)

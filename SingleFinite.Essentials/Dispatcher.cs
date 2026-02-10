@@ -115,7 +115,7 @@ public static class Dispatcher
     /// dispatcher.
     /// </summary>
     public static Observable<UnhandledDispatcherException>
-        UnhandledDispatcherException => s_unhandledExceptionSource.Observable;
+        UnhandledException => s_unhandledExceptionSource.Observable;
     private static readonly ObservableSource<UnhandledDispatcherException>
         s_unhandledExceptionSource = new();
 
