@@ -384,7 +384,7 @@ public static class IAsyncObserverExtensions
         /// <returns>
         /// A new observable.
         /// </returns>
-        public AsyncObservable ToObservable() =>
+        public IAsyncObservable ToObservable() =>
             new AsyncObserverObservable(
                 parent: observer
             ).Observable;
@@ -748,7 +748,7 @@ public static class IAsyncObserverExtensions
         /// <returns>
         /// A new observable.
         /// </returns>
-        public AsyncObservable<TArgs> ToObservable() =>
+        public IAsyncObservable<TArgs> ToObservable() =>
             new AsyncObserverObservable<TArgs>(
                 parent: observer
             ).Observable;

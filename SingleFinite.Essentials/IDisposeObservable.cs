@@ -34,5 +34,5 @@ public interface IDisposeObservable
     /// <summary>
     /// Observable that will notify observers when this object is disposed.
     /// </summary>
-    Observable Disposed { get; }
+    IObservable Disposed { get; }
 }

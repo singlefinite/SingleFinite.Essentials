@@ -48,7 +48,7 @@ internal class ObserverObservable(
     /// <summary>
     /// Observable that is raised when an event is recieved from the observer.
     /// </summary>
-    public Observable Observable => _observableSource.Observable;
+    public IObservable Observable => _observableSource.Observable;
     private readonly ObservableSource _observableSource = new();
 
     #endregion
@@ -88,7 +88,7 @@ internal class ObserverObservable<TArgs>(
     /// <summary>
     /// Observable that is raised when an event is recieved from the observer.
     /// </summary>
-    public Observable<TArgs> Observable => _observableSource.Observable;
+    public IObservable<TArgs> Observable => _observableSource.Observable;
     private readonly ObservableSource<TArgs> _observableSource = new();
 
     #endregion

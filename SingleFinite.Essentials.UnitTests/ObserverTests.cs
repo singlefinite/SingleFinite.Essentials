@@ -688,7 +688,7 @@ public class ObserverTests(TestContext testContext)
 
         public void Dispose() => _disposeState.Dispose();
 
-        public Observable Disposed => _disposeState.Disposed;
+        public IObservable Disposed => _disposeState.Disposed;
     }
 
     private class ExampleSender;

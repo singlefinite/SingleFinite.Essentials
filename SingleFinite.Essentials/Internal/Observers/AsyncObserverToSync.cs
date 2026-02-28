@@ -54,9 +54,6 @@ internal class AsyncObserverToSync : IObserver
     /// <inheritdoc/>
     public bool IsDisposed => _parent.IsDisposed;
 
-    /// <inheritdoc/>
-    public Observable Disposed => _parent.Disposed;
-
     #endregion
 
     #region Methods
@@ -68,6 +65,9 @@ internal class AsyncObserverToSync : IObserver
     #endregion
 
     #region Events
+
+    /// <inheritdoc/>
+    public IObservable Disposed => _parent.Disposed;
 
     /// <inheritdoc/>
     public event Action? Next;
@@ -109,9 +109,6 @@ internal class AsyncObserverToSync<TArgs> : IObserver<TArgs>
     /// <inheritdoc/>
     public bool IsDisposed => _parent.IsDisposed;
 
-    /// <inheritdoc/>
-    public Observable Disposed => _parent.Disposed;
-
     #endregion
 
     #region Methods
@@ -123,6 +120,9 @@ internal class AsyncObserverToSync<TArgs> : IObserver<TArgs>
     #endregion
 
     #region Events
+
+    /// <inheritdoc/>
+    public IObservable Disposed => _parent.Disposed;
 
     /// <inheritdoc/>
     public event Action? Next;

@@ -133,7 +133,7 @@ public class AsyncObservableTests(TestContext testContext)
 
         var firstObservableSource = new AsyncObservableSource<int>();
         var secondObservableSource = new AsyncObservableSource<int>();
-        var combinedObserver = AsyncObservable<int>.Combine(
+        var combinedObserver = AsyncObservable.Combine(
             firstObservableSource.Observable,
             secondObservableSource.Observable
         );
@@ -162,7 +162,7 @@ public class AsyncObservableTests(TestContext testContext)
         var firstObserver = firstObservableSource.Observable.Observe();
         var secondObserver = secondObservableSource.Observable.Observe();
 
-        var combinedObserver = AsyncObservable<int>.Combine(
+        var combinedObserver = AsyncObservable.Combine(
             firstObserver,
             secondObserver
         );
@@ -213,7 +213,7 @@ public class AsyncObservableTests(TestContext testContext)
         var firstObservableSource = new AsyncObservableSource<Parent>();
         var secondObservableSource = new AsyncObservableSource<Child>();
 
-        var firstCombinedObserver = AsyncObservable<object>.Combine(
+        var firstCombinedObserver = AsyncObservable.Combine(
             firstObservableSource.Observable,
             secondObservableSource.Observable
         );
@@ -230,7 +230,7 @@ public class AsyncObservableTests(TestContext testContext)
         observedArgs.Clear();
         firstCombinedObserver.Dispose();
 
-        var secondCombinedObserver = AsyncObservable<Parent>.Combine(
+        var secondCombinedObserver = AsyncObservable.Combine(
             firstObservableSource.Observable,
             secondObservableSource.Observable
         );

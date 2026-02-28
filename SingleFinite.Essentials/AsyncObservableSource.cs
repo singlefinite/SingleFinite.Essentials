@@ -34,7 +34,7 @@ public sealed class AsyncObservableSource
     /// <summary>
     /// The observable provided by this class.
     /// </summary>
-    public AsyncObservable Observable { get; }
+    public IAsyncObservable Observable { get; }
 
     #endregion
 
@@ -45,7 +45,7 @@ public sealed class AsyncObservableSource
     /// </summary>
     public AsyncObservableSource()
     {
-        Observable = new(this);
+        Observable = new AsyncObservable(source: this);
     }
 
     #endregion
@@ -99,7 +99,7 @@ public sealed class AsyncObservableSource<TArgs>
     /// <summary>
     /// The observable provided by this class.
     /// </summary>
-    public AsyncObservable<TArgs> Observable { get; }
+    public IAsyncObservable<TArgs> Observable { get; }
 
     #endregion
 
@@ -110,7 +110,7 @@ public sealed class AsyncObservableSource<TArgs>
     /// </summary>
     public AsyncObservableSource()
     {
-        Observable = new(this);
+        Observable = new AsyncObservable<TArgs>(source: this);
     }
 
     #endregion

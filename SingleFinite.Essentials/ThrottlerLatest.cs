@@ -101,7 +101,7 @@ public sealed class ThrottlerLatest : IDisposable, IDisposeObservable
     #region Events
 
     /// <inheritdoc/>
-    public Observable Disposed => _debouncer.Disposed;
+    public IObservable Disposed => _debouncer.Disposed;
 
     #endregion
 }

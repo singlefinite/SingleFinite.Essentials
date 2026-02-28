@@ -58,9 +58,6 @@ internal abstract class ObserverBase : IObserver
     /// <inheritdoc/>
     public bool IsDisposed => _parent.IsDisposed;
 
-    /// <inheritdoc/>
-    public Observable Disposed => _parent.Disposed;
-
     #endregion
 
     #region Methods
@@ -91,6 +88,9 @@ internal abstract class ObserverBase : IObserver
     #endregion
 
     #region Events
+
+    /// <inheritdoc/>
+    public IObservable Disposed => _parent.Disposed;
 
     /// <summary>
     /// The event that is raised when handling of the parent event should
@@ -138,9 +138,6 @@ internal abstract class ObserverBase<TArgs> : IObserver<TArgs>
     /// <inheritdoc/>
     public bool IsDisposed => _parent.IsDisposed;
 
-    /// <inheritdoc/>
-    public Observable Disposed => _parent.Disposed;
-
     #endregion
 
     #region Methods
@@ -176,6 +173,9 @@ internal abstract class ObserverBase<TArgs> : IObserver<TArgs>
     #endregion
 
     #region Events
+
+    /// <inheritdoc/>
+    public IObservable Disposed => _parent.Disposed;
 
     /// <inheritdoc/>
     public event Action? Next;

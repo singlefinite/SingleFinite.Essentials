@@ -83,7 +83,7 @@ public class ObservableTests
 
         var firstObservableSource = new ObservableSource<int>();
         var secondObservableSource = new ObservableSource<int>();
-        var combinedObserver = Observable<int>.Combine(
+        var combinedObserver = Observable.Combine(
             firstObservableSource.Observable,
             secondObservableSource.Observable
         );
@@ -112,7 +112,7 @@ public class ObservableTests
         var firstObserver = firstObservableSource.Observable.Observe();
         var secondObserver = secondObservableSource.Observable.Observe();
 
-        var combinedObserver = Observable<int>.Combine(
+        var combinedObserver = Observable.Combine(
             firstObserver,
             secondObserver
         );
@@ -163,7 +163,7 @@ public class ObservableTests
         var firstObservableSource = new ObservableSource<Parent>();
         var secondObservableSource = new ObservableSource<Child>();
 
-        var firstCombinedObserver = Observable<object>.Combine(
+        var firstCombinedObserver = Observable.Combine(
             firstObservableSource.Observable,
             secondObservableSource.Observable
         );
@@ -180,7 +180,7 @@ public class ObservableTests
         observedArgs.Clear();
         firstCombinedObserver.Dispose();
 
-        var secondCombinedObserver = Observable<Parent>.Combine(
+        var secondCombinedObserver = Observable.Combine(
             firstObservableSource.Observable,
             secondObservableSource.Observable
         );

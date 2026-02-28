@@ -265,7 +265,7 @@ public static class IObserverExtensions
         /// <returns>
         /// A new observable.
         /// </returns>
-        public Observable ToObservable() =>
+        public IObservable ToObservable() =>
             new ObserverObservable(
                 parent: observer
             ).Observable;
@@ -509,7 +509,7 @@ public static class IObserverExtensions
         /// <returns>
         /// A new observable.
         /// </returns>
-        public Observable<TArgs> ToObservable() =>
+        public IObservable<TArgs> ToObservable() =>
             new ObserverObservable<TArgs>(
                 parent: observer
             ).Observable;

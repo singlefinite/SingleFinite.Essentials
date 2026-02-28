@@ -34,7 +34,7 @@ public sealed class ObservableSource
     /// <summary>
     /// The observable provided by this class.
     /// </summary>
-    public Observable Observable { get; }
+    public IObservable Observable { get; }
 
     #endregion
 
@@ -45,7 +45,7 @@ public sealed class ObservableSource
     /// </summary>
     public ObservableSource()
     {
-        Observable = new(this);
+        Observable = new Observable(source: this);
     }
 
     #endregion
@@ -85,7 +85,7 @@ public sealed class ObservableSource<TArgs>
     /// <summary>
     /// The observable provided by this class.
     /// </summary>
-    public Observable<TArgs> Observable { get; }
+    public IObservable<TArgs> Observable { get; }
 
     #endregion
 
@@ -96,7 +96,7 @@ public sealed class ObservableSource<TArgs>
     /// </summary>
     public ObservableSource()
     {
-        Observable = new(this);
+        Observable = new Observable<TArgs>(source: this);
     }
 
     #endregion

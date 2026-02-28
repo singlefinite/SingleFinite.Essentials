@@ -54,6 +54,6 @@ public class IDisposeObservableTests
             ObservedDisposeCount++;
         }
 
-        public Observable Disposed => _disposeState.Disposed;
+        public IObservable Disposed => _disposeState.Disposed;
     }
 }

@@ -114,7 +114,7 @@ public static class Dispatcher
     /// Observable that emits when an unhandled exception occurs in a
     /// dispatcher.
     /// </summary>
-    public static Observable<UnhandledDispatcherException>
+    public static IObservable<UnhandledDispatcherException>
         UnhandledException => s_unhandledExceptionSource.Observable;
     private static readonly ObservableSource<UnhandledDispatcherException>
         s_unhandledExceptionSource = new();

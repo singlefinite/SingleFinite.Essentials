@@ -175,7 +175,7 @@ public sealed class DedicatedThreadDispatcher :
     #region Events
 
     /// <inheritdoc/>
-    public Observable Disposed => _disposeState.Disposed;
+    public IObservable Disposed => _disposeState.Disposed;
 
     #endregion
 }

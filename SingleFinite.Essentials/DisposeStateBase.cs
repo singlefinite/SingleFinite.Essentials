@@ -79,7 +79,7 @@ public abstract class DisposeStateBase : IDisposable
     /// <summary>
     /// Observable that will notify observers when this object is disposed.
     /// </summary>
-    public Observable Disposed =>
+    public IObservable Disposed =>
         _disposedSource.Observable;
 
     /// <summary>

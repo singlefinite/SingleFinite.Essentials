@@ -58,9 +58,6 @@ internal abstract class AsyncObserverBase : IAsyncObserver
     /// <inheritdoc/>
     public bool IsDisposed => _parent.IsDisposed;
 
-    /// <inheritdoc/>
-    public Observable Disposed => _parent.Disposed;
-
     #endregion
 
     #region Methods
@@ -93,6 +90,9 @@ internal abstract class AsyncObserverBase : IAsyncObserver
     #endregion
 
     #region Events
+
+    /// <inheritdoc/>
+    public IObservable Disposed => _parent.Disposed;
 
     /// <inheritdoc/>
     public event Func<Task>? Next;
@@ -137,9 +137,6 @@ internal abstract class AsyncObserverBase<TArgs> : IAsyncObserver<TArgs>
     /// <inheritdoc/>
     public bool IsDisposed => _parent.IsDisposed;
 
-    /// <inheritdoc/>
-    public Observable Disposed => _parent.Disposed;
-
     #endregion
 
     #region Methods
@@ -179,6 +176,9 @@ internal abstract class AsyncObserverBase<TArgs> : IAsyncObserver<TArgs>
     #endregion
 
     #region Events
+
+    /// <inheritdoc/>
+    public IObservable Disposed => _parent.Disposed;
 
     /// <inheritdoc/>
     public event Func<Task>? Next;

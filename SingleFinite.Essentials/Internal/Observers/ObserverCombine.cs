@@ -61,7 +61,7 @@ internal class ObserverCombine : IObserver
     public bool IsDisposed => _disposeState.IsDisposed;
 
     /// <inheritdoc/>
-    public Observable Disposed => _disposeState.Disposed;
+    public IObservable Disposed => _disposeState.Disposed;
 
     #endregion
 
@@ -125,7 +125,7 @@ internal class ObserverCombine<TArgs> : IObserver<TArgs>
     public bool IsDisposed => _disposeState.IsDisposed;
 
     /// <inheritdoc/>
-    public Observable Disposed => _disposeState.Disposed;
+    public IObservable Disposed => _disposeState.Disposed;
 
     #endregion
 

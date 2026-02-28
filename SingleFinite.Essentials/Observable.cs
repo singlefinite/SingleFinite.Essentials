@@ -82,6 +82,30 @@ public sealed class Observable : IObservable
     );
 
     /// <summary>
+    /// Create an observer for a generic event.
+    /// </summary>
+    /// <typeparam name="TEventDelegate">The event delegate type.</typeparam>
+    /// <typeparam name="TArgs">The type of args passed through.</typeparam>
+    /// <param name="register">Action used to register event handler.</param>
+    /// <param name="unregister">
+    /// Action used to unregister event handler.
+    /// </param>
+    /// <param name="handler">
+    /// Func used to get handler.  The action that raises the Next event
+    /// of this observer is passed into the Func.
+    /// </param>
+    /// <returns>An observer that observes from the event.</returns>
+    public static IObserver<TArgs> Observe<TEventDelegate, TArgs>(
+        Action<TEventDelegate> register,
+        Action<TEventDelegate> unregister,
+        Func<Action<TArgs>, TEventDelegate> handler
+    ) => new ObserverEventSource<TEventDelegate, TArgs>(
+        register,
+        unregister,
+        handler
+    );
+
+    /// <summary>
     /// Combine the given observables into a single observer.
     /// </summary>
     /// <param name="observables">The observables to combine.</param>
@@ -104,6 +128,34 @@ public sealed class Observable : IObservable
     /// </returns>
     public static IObserver Combine(params IObserver[] observers) =>
         new ObserverCombine(observers);
+
+    /// <summary>
+    /// Combine the given observables into a single observer.
+    /// </summary>
+    /// <typeparam name="TArgs">The type of args passed through.</typeparam>
+    /// <param name="observables">The observables to combine.</param>
+    /// <returns>
+    /// A new observer that emits when any of the observers emit.
+    /// </returns>
+    public static IObserver<TArgs> Combine<TArgs>(
+        params IObservable<TArgs>[] observables
+    ) =>
+        new ObserverCombine<TArgs>(
+            [.. observables.Select(observable => observable.Observe())]
+        );
+
+    /// <summary>
+    /// Combine the given event providers into a single observer.
+    /// </summary>
+    /// <typeparam name="TArgs">The type of args passed through.</typeparam>
+    /// <param name="observers">The observers to combine.</param>
+    /// <returns>
+    /// A new observer that emits when any of the observers emits.
+    /// </returns>
+    public static IObserver<TArgs> Combine<TArgs>(
+        params IObserver<TArgs>[] observers
+    ) =>
+        new ObserverCombine<TArgs>(observers);
 
     #endregion
 
@@ -154,55 +206,6 @@ public sealed class Observable<TArgs> : IObservable<TArgs>
     /// </summary>
     /// <param name="args">The args included with the event.</param>
     private void Emit(TArgs args) => Event?.Invoke(args);
-
-    /// <summary>
-    /// Create an observer for a generic event.
-    /// </summary>
-    /// <typeparam name="TEventDelegate">The event delegate type.</typeparam>
-    /// <param name="register">Action used to register event handler.</param>
-    /// <param name="unregister">
-    /// Action used to unregister event handler.
-    /// </param>
-    /// <param name="handler">
-    /// Func used to get handler.  The action that raises the Next event
-    /// of this observer is passed into the Func.
-    /// </param>
-    /// <returns>An observer that observes from the event.</returns>
-    public static IObserver<TArgs> Observe<TEventDelegate>(
-        Action<TEventDelegate> register,
-        Action<TEventDelegate> unregister,
-        Func<Action<TArgs>, TEventDelegate> handler
-    ) => new ObserverEventSource<TEventDelegate, TArgs>(
-        register,
-        unregister,
-        handler
-    );
-
-    /// <summary>
-    /// Combine the given observables into a single observer.
-    /// </summary>
-    /// <param name="observables">The observables to combine.</param>
-    /// <returns>
-    /// A new observer that emits when any of the observers emit.
-    /// </returns>
-    public static IObserver<TArgs> Combine(
-        params IObservable<TArgs>[] observables
-    ) =>
-        new ObserverCombine<TArgs>(
-            [.. observables.Select(observable => observable.Observe())]
-        );
-
-    /// <summary>
-    /// Combine the given event providers into a single observer.
-    /// </summary>
-    /// <param name="observers">The observers to combine.</param>
-    /// <returns>
-    /// A new observer that emits when any of the observers emits.
-    /// </returns>
-    public static IObserver<TArgs?> Combine(
-        params IObserver<TArgs>[] observers
-    ) =>
-        new ObserverCombine<TArgs>(observers);
 
     #endregion
 

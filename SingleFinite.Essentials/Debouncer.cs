@@ -194,7 +194,7 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
     #region Events
 
     /// <inheritdoc/>
-    public Observable Disposed => _disposeState.Disposed;
+    public IObservable Disposed => _disposeState.Disposed;
 
     #endregion
 }
