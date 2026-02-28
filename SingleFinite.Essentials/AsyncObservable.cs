@@ -24,12 +24,9 @@ using SingleFinite.Essentials.Internal.Observers;
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// This class wraps an event to make registering and unregistering callbacks 
-/// for the event more convenient when working with dependency injection scopes.
-/// Observable instances are created by instances of the 
-/// <see cref="AsyncObservableSource"/> class.
+/// Implementation of <see cref="IAsyncObservable"/>.
 /// </summary>
-public sealed class AsyncObservable : IEventProvider
+public sealed class AsyncObservable : IAsyncObservable
 {
     #region Constructors
 
@@ -49,20 +46,7 @@ public sealed class AsyncObservable : IEventProvider
 
     #region Methods
 
-    /// <inheritdoc/>
-    void IEventProvider.Provide(EventReceiver receiver)
-    {
-        async Task OnEvent() => await receiver.OnEventAsync();
-        Event += OnEvent;
-        receiver.OnDispose(() => Event -= OnEvent);
-    }
-
-    /// <summary>
-    /// Create an observer for this observable.
-    /// </summary>
-    /// <returns>
-    /// An observer that runs when the event for this observable is raised.
-    /// </returns>
+    /// <inhertidoc/>
     public IAsyncObserver Observe() => new AsyncObserverEventSource<Func<Task>>(
         register: handler => Event += handler,
         unregister: handler => Event -= handler,
@@ -99,40 +83,46 @@ public sealed class AsyncObservable : IEventProvider
     );
 
     /// <summary>
-    /// Combine the given event providers into a single observer.
+    /// Combine the given observables into a single observer.
     /// </summary>
-    /// <param name="eventProviders">The event providers to combine.</param>
+    /// <param name="observables">The observables to combine.</param>
     /// <returns>
-    /// A new observer that emits when any of the provided event providers raise
-    /// an event.
+    /// A new observer that emits when any of the observers emit.
     /// </returns>
     public static IAsyncObserver Combine(
-        params IEventProvider[] eventProviders
+        params IAsyncObservable[] observables
     ) =>
-        new AsyncObserverCombine(eventProviders);
+        new AsyncObserverCombine(
+            [.. observables.Select(observable => observable.Observe())]
+        );
+
+    /// <summary>
+    /// Combine the given observers into a single observer.
+    /// </summary>
+    /// <param name="observers">The observers to combine.</param>
+    /// <returns>
+    /// A new observer that emits when any of the provided observers emits.
+    /// </returns>
+    public static IAsyncObserver Combine(params IAsyncObserver[] observers) =>
+        new AsyncObserverCombine(observers);
 
     #endregion
 
     #region Events
 
-    /// <summary>
-    /// The underlying event.
-    /// </summary>
+    /// <inhertidoc/>
     public event Func<Task>? Event;
 
     #endregion
 }
 
 /// <summary>
-/// This class wraps an event to make registering and unregistering callbacks 
-/// for the event more convenient when working with dependency injection scopes.
-/// Observable instances are created by instances of the 
-/// <see cref="AsyncObservableSource{TArgs}"/> class.
+/// Implementation of <see cref="IAsyncObservable"/>.
 /// </summary>
 /// <typeparam name="TArgs">
 /// The type of arguments passed with the event.
 /// </typeparam>
-public sealed class AsyncObservable<TArgs> : IEventProvider
+public sealed class AsyncObservable<TArgs> : IAsyncObservable<TArgs>
 {
     #region Constructors
 
@@ -152,20 +142,7 @@ public sealed class AsyncObservable<TArgs> : IEventProvider
 
     #region Methods
 
-    /// <inheritdoc/>
-    void IEventProvider.Provide(EventReceiver receiver)
-    {
-        async Task OnEvent(TArgs args) => await receiver.OnEventAsync(args);
-        Event += OnEvent;
-        receiver.OnDispose(() => Event -= OnEvent);
-    }
-
-    /// <summary>
-    /// Create an observer for this observable.
-    /// </summary>
-    /// <returns>
-    /// An observer that runs when the event for this observable is raised.
-    /// </returns>
+    /// <inhertidoc/>
     public IAsyncObserver<TArgs> Observe() =>
         new AsyncObserverEventSource<Func<TArgs, Task>, TArgs>(
             register: handler => Event += handler,
@@ -205,27 +182,36 @@ public sealed class AsyncObservable<TArgs> : IEventProvider
     );
 
     /// <summary>
-    /// Combine the given event providers into a single observer.
+    /// Combine the given observables into a single observer.
     /// </summary>
-    /// <param name="eventProviders">The event providers to combine.</param>
+    /// <param name="observables">The observables to combine.</param>
     /// <returns>
-    /// A new observer that emits when any of the event providers raise an
-    /// event.  If an event provider raises an event that doesn't have any
-    /// arguments or the arguments can't be cast to the specified type the
-    /// resulting observer will emit with null for the arguments.
+    /// A new observer that emits when any of the observers emit.
     /// </returns>
-    public static IAsyncObserver<TArgs?> Combine(
-        params IEventProvider[] eventProviders
+    public static IAsyncObserver<TArgs> Combine(
+        params IAsyncObservable<TArgs>[] observables
     ) =>
-        new AsyncObserver<TArgs>(eventProviders);
+        new AsyncObserverCombine<TArgs>(
+            [.. observables.Select(observable => observable.Observe())]
+        );
+
+    /// <summary>
+    /// Combine the given observers into a single observer.
+    /// </summary>
+    /// <param name="observers">The observers to combine.</param>
+    /// <returns>
+    /// A new observer that emits when any of the observers emit.
+    /// </returns>
+    public static IAsyncObserver<TArgs> Combine(
+        params IAsyncObserver<TArgs>[] observers
+    ) =>
+        new AsyncObserverCombine<TArgs>(observers);
 
     #endregion
 
     #region Events
 
-    /// <summary>
-    /// The underlying event.
-    /// </summary>
+    /// <inhertidoc/>
     public event Func<TArgs, Task>? Event;
 
     #endregion

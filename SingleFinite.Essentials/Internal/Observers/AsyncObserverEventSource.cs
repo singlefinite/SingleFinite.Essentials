@@ -105,9 +105,7 @@ internal class AsyncObserverEventSource<TEventDelegate> : IAsyncObserver
 
     #region Events
 
-    /// <summary>
-    /// Raised when the underlying event is raised. 
-    /// </summary>
+    /// <inheritdoc/>
     public event Func<Task>? Next;
 
     #endregion
@@ -193,17 +191,23 @@ internal class AsyncObserverEventSource<TEventDelegate, TArgs> : IAsyncObserver<
     /// </summary>
     /// <param name="args">Arguments passed with the event.</param>
     /// <returns>The task from invoking the Next event.</returns>
-    private Task RaiseNextAsync(TArgs args) =>
-        Next?.Invoke(args) ?? Task.CompletedTask;
+    private async Task RaiseNextAsync(TArgs args)
+    {
+        if (NextWithArgs is not null)
+            await NextWithArgs.Invoke(args);
+        if (Next is not null)
+            await Next.Invoke();
+    }
 
     #endregion
 
     #region Events
 
-    /// <summary>
-    /// Raised when the underlying event is raised. 
-    /// </summary>
-    public event Func<TArgs, Task>? Next;
+    /// <inheritdoc/>
+    public event Func<Task>? Next;
+
+    /// <inheritdoc/>
+    public event Func<TArgs, Task>? NextWithArgs;
 
     #endregion
 }

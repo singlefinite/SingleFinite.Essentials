@@ -55,7 +55,7 @@ internal class ObserverOfType<TArgsIn, TArgsOut>(
     protected override bool OnEvent(TArgsIn args)
     {
         if (args is TArgsOut outArgs)
-            BranchNext?.Invoke(outArgs);
+            BranchNextWithArgs?.Invoke(outArgs);
 
         return false;
     }
@@ -64,16 +64,13 @@ internal class ObserverOfType<TArgsIn, TArgsOut>(
 
     #region Events
 
-    /// <summary>
-    /// This event is raised when arguments for an observed event are
-    /// successfully cast into the specified type.
-    /// </summary>
-    event Action<TArgsOut> IObserver<TArgsOut>.Next
+    /// <inheritdoc/>
+    event Action<TArgsOut> IObserver<TArgsOut>.NextWithArgs
     {
-        add => BranchNext += value;
-        remove => BranchNext -= value;
+        add => BranchNextWithArgs += value;
+        remove => BranchNextWithArgs -= value;
     }
-    private event Action<TArgsOut>? BranchNext;
+    private event Action<TArgsOut>? BranchNextWithArgs;
 
     #endregion
 }

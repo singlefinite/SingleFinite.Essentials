@@ -246,20 +246,6 @@ public class AsyncObservableTests(TestContext testContext)
 
         observedArgs.Clear();
         secondCombinedObserver.Dispose();
-
-        var thirdCombinedObserver = Observable<Child>.Combine(
-            firstObservableSource.Observable,
-            secondObservableSource.Observable
-        );
-
-        thirdCombinedObserver.OnEach(observedArgs.Add);
-
-        await firstObservableSource.EmitAsync(new Parent());
-        await secondObservableSource.EmitAsync(new Child());
-
-        Assert.HasCount(2, observedArgs);
-        Assert.IsNull(observedArgs[0]);
-        Assert.IsInstanceOfType<Child>(observedArgs[1]);
     }
 
     #region Types

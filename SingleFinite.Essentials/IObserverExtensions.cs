@@ -41,7 +41,7 @@ public static class IObserverExtensions
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IObserver OnEach(Action callback) =>
-            new ObserverForEach(
+            new ObserverOnEach(
                 parent: observer,
                 callback: callback
             );
@@ -283,7 +283,7 @@ public static class IObserverExtensions
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IObserver<TArgs> OnEach(Action<TArgs> callback) =>
-            new ObserverForEach<TArgs>(
+            new ObserverOnEach<TArgs>(
                 parent: observer,
                 callback: callback
             );
@@ -307,16 +307,6 @@ public static class IObserverExtensions
             new ObserverSelect<TArgs, TArgsOut>(
                 parent: observer,
                 selector: selector
-            );
-
-        /// <summary>
-        /// Turn the observer that has an argument into an observer that doesn't
-        /// have an argument.
-        /// </summary>
-        /// <returns>A new observer that doesn't have an argument.</returns>
-        public IObserver Select() =>
-            new ObserverSelectNone<TArgs>(
-                parent: observer
             );
 
         /// <summary>

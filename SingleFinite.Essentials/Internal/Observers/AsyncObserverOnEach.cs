@@ -28,7 +28,7 @@ namespace SingleFinite.Essentials.Internal.Observers;
 /// <param name="callback">
 /// The callback to invoke whenever an event is observed.
 /// </param>
-internal class AsyncObserverForEach(
+internal class AsyncObserverOnEach(
     IAsyncObserver parent,
     Func<Task> callback
 ) : AsyncObserverBase(parent)
@@ -58,7 +58,7 @@ internal class AsyncObserverForEach(
 /// <param name="callback">
 /// The callback to invoke whenever an event is observed.
 /// </param>
-internal class AsyncObserverForEach<TArgs>(
+internal class AsyncObserverOnEach<TArgs>(
     IAsyncObserver<TArgs> parent,
     Func<TArgs, Task> callback
 ) : AsyncObserverBase<TArgs>(parent)

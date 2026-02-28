@@ -141,7 +141,7 @@ internal class AsyncObserverDebounce<TArgs>(
     /// <summary>
     /// This event is raised when an event has been debounced.
     /// </summary>
-    event Func<TArgs, Task> IAsyncObserver<TArgs>.Next
+    event Func<TArgs, Task> IAsyncObserver<TArgs>.NextWithArgs
     {
         add => BranchNext += value;
         remove => BranchNext -= value;

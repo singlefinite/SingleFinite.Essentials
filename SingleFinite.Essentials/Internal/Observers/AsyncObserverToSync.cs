@@ -75,6 +75,9 @@ internal class AsyncObserverToSync : IObserver
     #endregion
 }
 
+/// <summary>
+/// Turn an async observer into a synchronous observer.
+/// </summary>
 internal class AsyncObserverToSync<TArgs> : IObserver<TArgs>
 {
     #region Fields
@@ -95,7 +98,8 @@ internal class AsyncObserverToSync<TArgs> : IObserver<TArgs>
     public AsyncObserverToSync(IAsyncObserver<TArgs> parent)
     {
         _parent = parent;
-        parent.Next += async args => Next?.Invoke(args);
+        parent.NextWithArgs += async args => NextWithArgs?.Invoke(args);
+        parent.Next += async () => Next?.Invoke();
     }
 
     #endregion
@@ -121,7 +125,10 @@ internal class AsyncObserverToSync<TArgs> : IObserver<TArgs>
     #region Events
 
     /// <inheritdoc/>
-    public event Action<TArgs>? Next;
+    public event Action? Next;
+
+    /// <inheritdoc/>
+    public event Action<TArgs>? NextWithArgs;
 
     #endregion
 }

@@ -61,7 +61,7 @@ internal class ObserverSelect<TArgsOut>(
     /// This event is raised when a value is selected for an observed event to
     /// pass down the observer chain.
     /// </summary>
-    event Action<TArgsOut> IObserver<TArgsOut>.Next
+    event Action<TArgsOut> IObserver<TArgsOut>.NextWithArgs
     {
         add => BranchNext += value;
         remove => BranchNext -= value;
@@ -118,7 +118,7 @@ internal class ObserverSelect<TArgsIn, TArgsOut>(
     /// This event is raised when a value is selected for an observed event to
     /// pass down the observer chain.
     /// </summary>
-    event Action<TArgsOut> IObserver<TArgsOut>.Next
+    event Action<TArgsOut> IObserver<TArgsOut>.NextWithArgs
     {
         add => BranchNext += value;
         remove => BranchNext -= value;

@@ -25,7 +25,7 @@ using System.Runtime.CompilerServices;
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// Extensions methods for object types.
+/// Extension methods for object types.
 /// </summary>
 public static class ObjectExtensions
 {

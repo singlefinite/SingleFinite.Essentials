@@ -41,7 +41,7 @@ public static class IAsyncObserverExtensions
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IAsyncObserver OnEach(Func<Task> callback) =>
-            new AsyncObserverForEach(
+            new AsyncObserverOnEach(
                 parent: observer,
                 callback: callback
             );
@@ -56,7 +56,7 @@ public static class IAsyncObserverExtensions
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IAsyncObserver OnEach(Action callback) =>
-            new AsyncObserverForEach(
+            new AsyncObserverOnEach(
                 parent: observer,
                 callback: () =>
                 {
@@ -402,7 +402,7 @@ public static class IAsyncObserverExtensions
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IAsyncObserver<TArgs> OnEach(Func<TArgs, Task> callback) =>
-            new AsyncObserverForEach<TArgs>(
+            new AsyncObserverOnEach<TArgs>(
                 parent: observer,
                 callback: callback
             );
@@ -417,7 +417,7 @@ public static class IAsyncObserverExtensions
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IAsyncObserver<TArgs> OnEach(Action<TArgs> callback) =>
-            new AsyncObserverForEach<TArgs>(
+            new AsyncObserverOnEach<TArgs>(
                 parent: observer,
                 callback: args =>
                 {
@@ -466,16 +466,6 @@ public static class IAsyncObserverExtensions
             new AsyncObserverSelect<TArgs, TArgsOut>(
                 parent: observer,
                 selector: (args) => Task.FromResult(selector(args))
-            );
-
-        /// <summary>
-        /// Turn the observer that has an argument into an observer that doesn't
-        /// have an argument.
-        /// </summary>
-        /// <returns>A new observer that doesn't have an argument.</returns>
-        public IAsyncObserver Select() =>
-            new AsyncObserverSelectNone<TArgs>(
-                parent: observer
             );
 
         /// <summary>

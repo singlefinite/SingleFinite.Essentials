@@ -104,9 +104,7 @@ internal class ObserverEventSource<TEventDelegate> : IObserver
 
     #region Events
 
-    /// <summary>
-    /// Raised when the underlying event is raised. 
-    /// </summary>
+    /// <inheritdoc/>
     public event Action? Next;
 
     #endregion
@@ -191,16 +189,21 @@ internal class ObserverEventSource<TEventDelegate, TArgs> : IObserver<TArgs>
     /// Raise the Next event.
     /// </summary>
     /// <param name="args">Arguments passed with the event.</param>
-    private void RaiseNext(TArgs args) => Next?.Invoke(args);
+    private void RaiseNext(TArgs args)
+    {
+        NextWithArgs?.Invoke(args);
+        Next?.Invoke();
+    }
 
     #endregion
 
     #region Events
 
-    /// <summary>
-    /// Raised when the underlying event is raised. 
-    /// </summary>
-    public event Action<TArgs>? Next;
+    /// <inheritdoc/>
+    public event Action? Next;
+
+    /// <inheritdoc/>
+    public event Action<TArgs>? NextWithArgs;
 
     #endregion
 }

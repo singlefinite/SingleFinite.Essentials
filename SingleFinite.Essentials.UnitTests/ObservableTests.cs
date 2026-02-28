@@ -196,20 +196,6 @@ public class ObservableTests
 
         observedArgs.Clear();
         secondCombinedObserver.Dispose();
-
-        var thirdCombinedObserver = Observable<Child>.Combine(
-            firstObservableSource.Observable,
-            secondObservableSource.Observable
-        );
-
-        thirdCombinedObserver.OnEach(observedArgs.Add);
-
-        firstObservableSource.Emit(new Parent());
-        secondObservableSource.Emit(new Child());
-
-        Assert.HasCount(2, observedArgs);
-        Assert.IsNull(observedArgs[0]);
-        Assert.IsInstanceOfType<Child>(observedArgs[1]);
     }
 
     #region Types

@@ -65,14 +65,6 @@ internal abstract class AsyncObserverBase : IAsyncObserver
 
     #region Methods
 
-    /// <inheritdoc/>
-    void IEventProvider.Provide(EventReceiver receiver)
-    {
-        async Task OnNext() => await receiver.OnEventAsync();
-        Next += OnNext;
-        receiver.OnDispose(() => Next -= OnNext);
-    }
-
     /// <summary>
     /// This method is invoked when the parent event is raised.
     /// </summary>
@@ -102,10 +94,7 @@ internal abstract class AsyncObserverBase : IAsyncObserver
 
     #region Events
 
-    /// <summary>
-    /// The event that is raised when handling of the parent event should
-    /// continue the next observers down the chain of observers.
-    /// </summary>
+    /// <inheritdoc/>
     public event Func<Task>? Next;
 
     #endregion
@@ -134,7 +123,7 @@ internal abstract class AsyncObserverBase<TArgs> : IAsyncObserver<TArgs>
     public AsyncObserverBase(IAsyncObserver<TArgs> parent)
     {
         _parent = parent;
-        _parent.Next += async args =>
+        _parent.NextWithArgs += async args =>
         {
             if (await OnEventAsync(args))
                 await RaiseNextEventAsync(args);
@@ -155,14 +144,6 @@ internal abstract class AsyncObserverBase<TArgs> : IAsyncObserver<TArgs>
 
     #region Methods
 
-    /// <inheritdoc/>
-    void IEventProvider.Provide(EventReceiver receiver)
-    {
-        async Task OnNext(TArgs args) => await receiver.OnEventAsync(args);
-        Next += OnNext;
-        receiver.OnDispose(() => Next -= OnNext);
-    }
-
     /// <summary>
     /// This method is invoked when the parent event is raised.
     /// </summary>
@@ -179,8 +160,14 @@ internal abstract class AsyncObserverBase<TArgs> : IAsyncObserver<TArgs>
     /// </summary>
     /// <param name="args">The args to pass with the event.</param>
     /// <returns>The running task.</returns>
-    protected Task RaiseNextEventAsync(TArgs args) =>
-        Next?.Invoke(args) ?? Task.CompletedTask;
+    protected async Task RaiseNextEventAsync(TArgs args)
+    {
+        if (NextWithArgs is not null)
+            await NextWithArgs.Invoke(args);
+
+        if (Next is not null)
+            await Next.Invoke();
+    }
 
     /// <summary>
     /// Invoke the parent Dispose method.  The expectation is that the dispose
@@ -193,11 +180,11 @@ internal abstract class AsyncObserverBase<TArgs> : IAsyncObserver<TArgs>
 
     #region Events
 
-    /// <summary>
-    /// The event that is raised when handling of the parent event should
-    /// continue the next observers down the chain of observers.
-    /// </summary>
-    public event Func<TArgs, Task>? Next;
+    /// <inheritdoc/>
+    public event Func<Task>? Next;
+
+    /// <inheritdoc/>
+    public event Func<TArgs, Task>? NextWithArgs;
 
     #endregion
 }

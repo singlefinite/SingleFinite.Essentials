@@ -33,11 +33,6 @@ internal class ObserverCombine : IObserver
     /// </summary>
     private readonly ConcurrentDisposeState _disposeState;
 
-    /// <summary>
-    /// The event receiver used by this object.
-    /// </summary>
-    private readonly EventReceiver _eventReceiver;
-
     #endregion
 
     #region Constructors
@@ -45,23 +40,17 @@ internal class ObserverCombine : IObserver
     /// <summary>
     /// Constructor.
     /// </summary>
-    /// <param name="eventProviders">Event providers to combine.</param>
-    public ObserverCombine(params IEnumerable<IEventProvider> eventProviders)
+    /// <param name="observers">The observers to combine.</param>
+    public ObserverCombine(params IObserver[] observers)
     {
-        _eventReceiver = new(() => Next?.Invoke());
+        _disposeState = new(owner: this);
 
-        foreach (var eventProvider in eventProviders)
-            eventProvider.Provide(_eventReceiver);
-
-        _disposeState = new(
-            owner: this,
-            onDispose: () =>
-            {
-                _eventReceiver.Dispose();
-                foreach (var eventProvider in eventProviders)
-                    (eventProvider as IDisposable)?.Dispose();
-            }
-        );
+        foreach (var observer in observers)
+        {
+            observer
+                .OnEach(() => Next?.Invoke())
+                .Until(_disposeState.CancellationToken);
+        }
     }
 
     #endregion
@@ -85,10 +74,7 @@ internal class ObserverCombine : IObserver
 
     #region Events
 
-    /// <summary>
-    /// Event that is raised whenever any of the event providers raises an
-    /// event.
-    /// </summary>
+    /// <inheritdoc/>
     public event Action? Next;
 
     #endregion
@@ -97,12 +83,8 @@ internal class ObserverCombine : IObserver
 /// <summary>
 /// An observer that combines multipe observers into a single observer.
 /// </summary>
-/// <typeparam name="TArgs">
-/// The type to cast event arguments to.  If an event provider doesn't have any
-/// arguments or can't be cast to the given type this observer will emit with
-/// null for the arguments.
-/// </typeparam>
-internal class Observer<TArgs> : IObserver<TArgs?>
+/// <typeparam name="TArgs">The type of arguments for the combine.</typeparam>
+internal class ObserverCombine<TArgs> : IObserver<TArgs>
 {
     #region Fields
 
@@ -111,11 +93,6 @@ internal class Observer<TArgs> : IObserver<TArgs?>
     /// </summary>
     private readonly ConcurrentDisposeState _disposeState;
 
-    /// <summary>
-    /// The event receiver used by this object.
-    /// </summary>
-    private readonly EventReceiver _eventReceiver;
-
     #endregion
 
     #region Constructors
@@ -123,32 +100,21 @@ internal class Observer<TArgs> : IObserver<TArgs?>
     /// <summary>
     /// Constructor.
     /// </summary>
-    /// <param name="eventProviders">Event providers to combine.</param>
-    public Observer(params IEnumerable<IEventProvider> eventProviders)
+    /// <param name="observers">The observers to combine.</param>
+    public ObserverCombine(params IObserver<TArgs>[] observers)
     {
-        _eventReceiver = new(args =>
+        _disposeState = new(owner: this);
+
+        foreach (var observer in observers)
         {
-            if (Next is not null)
-            {
-                if (args is not null && typeof(TArgs).IsAssignableFrom(args.GetType()))
-                    Next((TArgs)args);
-                else
-                    Next(default);
-            }
-        });
-
-        foreach (var eventProvider in eventProviders)
-            eventProvider.Provide(_eventReceiver);
-
-        _disposeState = new(
-            owner: this,
-            onDispose: () =>
-            {
-                _eventReceiver.Dispose();
-                foreach (var eventProvider in eventProviders)
-                    (eventProvider as IDisposable)?.Dispose();
-            }
-        );
+            observer
+                .OnEach(args =>
+                {
+                    NextWithArgs?.Invoke(args);
+                    Next?.Invoke();
+                })
+                .Until(_disposeState.CancellationToken);
+        }
     }
 
     #endregion
@@ -172,11 +138,11 @@ internal class Observer<TArgs> : IObserver<TArgs?>
 
     #region Events
 
-    /// <summary>
-    /// Event that is raised whenever any of the event providers raises an
-    /// event.
-    /// </summary>
-    public event Action<TArgs?>? Next;
+    /// <inheritdoc/>
+    public event Action? Next;
+
+    /// <inheritdoc/>
+    public event Action<TArgs>? NextWithArgs;
 
     #endregion
 }

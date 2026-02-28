@@ -28,7 +28,7 @@ namespace SingleFinite.Essentials.Internal.Observers;
 /// <param name="callback">
 /// The callback to invoke whenever an event is observed.
 /// </param>
-internal class ObserverForEach(
+internal class ObserverOnEach(
     IObserver parent,
     Action callback
 ) : ObserverBase(parent)
@@ -58,7 +58,7 @@ internal class ObserverForEach(
 /// <param name="callback">
 /// The callback to invoke whenever an event is observed.
 /// </param>
-internal class ObserverForEach<TArgs>(
+internal class ObserverOnEach<TArgs>(
     IObserver<TArgs> parent,
     Action<TArgs> callback
 ) : ObserverBase<TArgs>(parent)

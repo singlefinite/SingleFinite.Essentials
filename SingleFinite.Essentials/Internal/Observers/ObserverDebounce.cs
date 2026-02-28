@@ -141,7 +141,7 @@ internal class ObserverDebounce<TArgs>(
     /// <summary>
     /// This event is raised when an event has been debounced.
     /// </summary>
-    event Action<TArgs> IObserver<TArgs>.Next
+    event Action<TArgs> IObserver<TArgs>.NextWithArgs
     {
         add => BranchNext += value;
         remove => BranchNext -= value;

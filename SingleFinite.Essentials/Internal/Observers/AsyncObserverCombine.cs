@@ -33,11 +33,6 @@ internal class AsyncObserverCombine : IAsyncObserver
     /// </summary>
     private readonly ConcurrentDisposeState _disposeState;
 
-    /// <summary>
-    /// The event receiver used by this object.
-    /// </summary>
-    private readonly EventReceiver _eventReceiver;
-
     #endregion
 
     #region Constructors
@@ -45,29 +40,21 @@ internal class AsyncObserverCombine : IAsyncObserver
     /// <summary>
     /// Constructor.
     /// </summary>
-    /// <param name="eventProviders">Event providers to combine.</param>
-    public AsyncObserverCombine(
-        params IEnumerable<IEventProvider> eventProviders
-    )
+    /// <param name="observers">The observers to combine.</param>
+    public AsyncObserverCombine(params IAsyncObserver[] observers)
     {
-        _eventReceiver = new(async () =>
+        _disposeState = new(owner: this);
+
+        foreach (var observer in observers)
         {
-            if (Next is not null)
-                await Next();
-        });
-
-        foreach (var eventProvider in eventProviders)
-            eventProvider.Provide(_eventReceiver);
-
-        _disposeState = new(
-            owner: this,
-            onDispose: () =>
-            {
-                _eventReceiver.Dispose();
-                foreach (var eventProvider in eventProviders)
-                    (eventProvider as IDisposable)?.Dispose();
-            }
-        );
+            observer
+                .OnEach(async () =>
+                {
+                    if (Next is not null)
+                        await Next.Invoke();
+                })
+                .Until(_disposeState.CancellationToken);
+        }
     }
 
     #endregion
@@ -91,10 +78,7 @@ internal class AsyncObserverCombine : IAsyncObserver
 
     #region Events
 
-    /// <summary>
-    /// Event that is raised whenever any of the event providers raises an
-    /// event.
-    /// </summary>
+    /// <inheritdoc/>
     public event Func<Task>? Next;
 
     #endregion
@@ -103,12 +87,8 @@ internal class AsyncObserverCombine : IAsyncObserver
 /// <summary>
 /// An observer that combines multipe observers into a single observer.
 /// </summary>
-/// <typeparam name="TArgs">
-/// The type to cast event arguments to.  If an event provider doesn't have any
-/// arguments or can't be cast to the given type this observer will emit with
-/// null for the arguments.
-/// </typeparam>
-internal class AsyncObserver<TArgs> : IAsyncObserver<TArgs?>
+/// <typeparam name="TArgs">The type of arguments for the combine.</typeparam>
+internal class AsyncObserverCombine<TArgs> : IAsyncObserver<TArgs>
 {
     #region Fields
 
@@ -117,11 +97,6 @@ internal class AsyncObserver<TArgs> : IAsyncObserver<TArgs?>
     /// </summary>
     private readonly ConcurrentDisposeState _disposeState;
 
-    /// <summary>
-    /// The event receiver used by this object.
-    /// </summary>
-    private readonly EventReceiver _eventReceiver;
-
     #endregion
 
     #region Constructors
@@ -129,32 +104,23 @@ internal class AsyncObserver<TArgs> : IAsyncObserver<TArgs?>
     /// <summary>
     /// Constructor.
     /// </summary>
-    /// <param name="eventProviders">Event providers to combine.</param>
-    public AsyncObserver(params IEnumerable<IEventProvider> eventProviders)
+    /// <param name="observers">The observers to combine.</param>
+    public AsyncObserverCombine(params IAsyncObserver<TArgs>[] observers)
     {
-        _eventReceiver = new(async args =>
+        _disposeState = new(owner: this);
+
+        foreach (var observer in observers)
         {
-            if (Next is not null)
-            {
-                if (args is not null && typeof(TArgs).IsAssignableFrom(args.GetType()))
-                    await Next((TArgs)args);
-                else
-                    await Next(default);
-            }
-        });
-
-        foreach (var eventProvider in eventProviders)
-            eventProvider.Provide(_eventReceiver);
-
-        _disposeState = new(
-            owner: this,
-            onDispose: () =>
-            {
-                _eventReceiver.Dispose();
-                foreach (var eventProvider in eventProviders)
-                    (eventProvider as IDisposable)?.Dispose();
-            }
-        );
+            observer
+                .OnEach(async args =>
+                {
+                    if (NextWithArgs is not null)
+                        await NextWithArgs.Invoke(args);
+                    if (Next is not null)
+                        await Next.Invoke();
+                })
+                .Until(_disposeState.CancellationToken);
+        }
     }
 
     #endregion
@@ -178,11 +144,11 @@ internal class AsyncObserver<TArgs> : IAsyncObserver<TArgs?>
 
     #region Events
 
-    /// <summary>
-    /// Event that is raised whenever any of the event providers raises an
-    /// event.
-    /// </summary>
-    public event Func<TArgs?, Task>? Next;
+    /// <inheritdoc/>
+    public event Func<Task>? Next;
+
+    /// <inheritdoc/>
+    public event Func<TArgs, Task>? NextWithArgs;
 
     #endregion
 }

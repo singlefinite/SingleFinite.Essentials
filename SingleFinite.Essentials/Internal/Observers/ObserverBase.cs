@@ -65,14 +65,6 @@ internal abstract class ObserverBase : IObserver
 
     #region Methods
 
-    /// <inheritdoc/>
-    void IEventProvider.Provide(EventReceiver receiver)
-    {
-        void OnNext() => receiver.OnEvent();
-        Next += OnNext;
-        receiver.OnDispose(() => Next -= OnNext);
-    }
-
     /// <summary>
     /// This method is invoked when the parent event is raised.
     /// </summary>
@@ -132,7 +124,7 @@ internal abstract class ObserverBase<TArgs> : IObserver<TArgs>
     public ObserverBase(IObserver<TArgs> parent)
     {
         _parent = parent;
-        _parent.Next += args =>
+        _parent.NextWithArgs += args =>
         {
             if (OnEvent(args))
                 RaiseNextEvent(args);
@@ -153,14 +145,6 @@ internal abstract class ObserverBase<TArgs> : IObserver<TArgs>
 
     #region Methods
 
-    /// <inheritdoc/>
-    void IEventProvider.Provide(EventReceiver receiver)
-    {
-        void OnNext(TArgs args) => receiver.OnEvent(args);
-        Next += OnNext;
-        receiver.OnDispose(() => Next -= OnNext);
-    }
-
     /// <summary>
     /// This method is invoked when the parent event is raised.
     /// </summary>
@@ -176,7 +160,11 @@ internal abstract class ObserverBase<TArgs> : IObserver<TArgs>
     /// Raise the Event for this observer which moves execution down the chain.
     /// </summary>
     /// <param name="args">The args to pass with the event.</param>
-    protected void RaiseNextEvent(TArgs args) => Next?.Invoke(args);
+    protected void RaiseNextEvent(TArgs args)
+    {
+        NextWithArgs?.Invoke(args);
+        Next?.Invoke();
+    }
 
     /// <summary>
     /// Invoke the parent Dispose method.  The expectation is that the dispose
@@ -189,11 +177,11 @@ internal abstract class ObserverBase<TArgs> : IObserver<TArgs>
 
     #region Events
 
-    /// <summary>
-    /// The event that is raised when handling of the parent event should
-    /// continue the next observers down the chain of observers.
-    /// </summary>
-    public event Action<TArgs>? Next;
+    /// <inheritdoc/>
+    public event Action? Next;
+
+    /// <inheritdoc/>
+    public event Action<TArgs>? NextWithArgs;
 
     #endregion
 }

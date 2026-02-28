@@ -54,8 +54,8 @@ internal class AsyncObserverOfType<TArgsIn, TArgsOut>(
     /// </returns>
     protected async override Task<bool> OnEventAsync(TArgsIn args)
     {
-        if (args is TArgsOut outArgs && BranchNext is not null)
-            await BranchNext.Invoke(outArgs);
+        if (args is TArgsOut outArgs && BranchNextWithArgs is not null)
+            await BranchNextWithArgs.Invoke(outArgs);
 
         return false;
     }
@@ -64,16 +64,13 @@ internal class AsyncObserverOfType<TArgsIn, TArgsOut>(
 
     #region Events
 
-    /// <summary>
-    /// This event is raised when arguments for an observed event are
-    /// successfully cast into the specified type.
-    /// </summary>
-    event Func<TArgsOut, Task> IAsyncObserver<TArgsOut>.Next
+    /// <inheritdoc/>
+    event Func<TArgsOut, Task> IAsyncObserver<TArgsOut>.NextWithArgs
     {
-        add => BranchNext += value;
-        remove => BranchNext -= value;
+        add => BranchNextWithArgs += value;
+        remove => BranchNextWithArgs -= value;
     }
-    private event Func<TArgsOut, Task>? BranchNext;
+    private event Func<TArgsOut, Task>? BranchNextWithArgs;
 
     #endregion
 }

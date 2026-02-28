@@ -30,21 +30,13 @@ namespace SingleFinite.Essentials;
 /// will unregister all observers in the chain so any future observable events
 /// will not be observed.
 /// </summary>
-public interface IObserver : IDisposable, IDisposeObservable, IEventProvider
+public interface IObserver : IDisposable, IDisposeObservable
 {
     /// <summary>
     /// An event that is raised when the next observer(s) in the chain should
     /// handle the observed event.
     /// </summary>
     event Action Next;
-
-    /// <inheritdoc/>
-    void IEventProvider.Provide(EventReceiver receiver)
-    {
-        void OnNext() => receiver.OnEvent();
-        Next += OnNext;
-        receiver.OnDispose(() => Next -= OnNext);
-    }
 }
 
 /// <summary>
@@ -57,7 +49,7 @@ public interface IObserver : IDisposable, IDisposeObservable, IEventProvider
 /// <typeparam name="TArgs">
 /// The type of event arguments passed with observed events.
 /// </typeparam>
-public interface IObserver<TArgs> : IDisposable, IDisposeObservable, IEventProvider
+public interface IObserver<out TArgs> : IObserver
 {
     /// <summary>
     /// Create an observer that will filter out events that don't have arguments
@@ -76,13 +68,5 @@ public interface IObserver<TArgs> : IDisposable, IDisposeObservable, IEventProvi
     /// An event that is raised when the next observer(s) in the chain should
     /// handle the observed event.
     /// </summary>
-    event Action<TArgs> Next;
-
-    /// <inheritdoc/>
-    void IEventProvider.Provide(EventReceiver receiver)
-    {
-        void OnNext(TArgs args) => receiver.OnEvent(args);
-        Next += OnNext;
-        receiver.OnDispose(() => Next -= OnNext);
-    }
+    event Action<TArgs> NextWithArgs;
 }

@@ -24,12 +24,9 @@ using SingleFinite.Essentials.Internal.Observers;
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// This class wraps an event to make registering and unregistering callbacks 
-/// for the event more convenient when working with dependency injection scopes.
-/// Observable instances are created by instances of the 
-/// <see cref="ObservableSource"/> class.
+/// Implementation of <see cref="AsyncObservable"/>.
 /// </summary>
-public sealed class Observable : IEventProvider
+public sealed class Observable : IObservable
 {
     #region Constructors
 
@@ -50,19 +47,6 @@ public sealed class Observable : IEventProvider
     #region Methods
 
     /// <inheritdoc/>
-    void IEventProvider.Provide(EventReceiver receiver)
-    {
-        void OnEvent() => receiver.OnEvent();
-        Event += OnEvent;
-        receiver.OnDispose(() => Event -= OnEvent);
-    }
-
-    /// <summary>
-    /// Create an observer for this observable.
-    /// </summary>
-    /// <returns>
-    /// An observer that runs when the event for this observable is raised.
-    /// </returns>
     public IObserver Observe() => new ObserverEventSource<Action>(
         register: handler => Event += handler,
         unregister: handler => Event -= handler,
@@ -98,38 +82,46 @@ public sealed class Observable : IEventProvider
     );
 
     /// <summary>
-    /// Combine the given event providers into a single observer.
+    /// Combine the given observables into a single observer.
     /// </summary>
-    /// <param name="eventProviders">The event providers to combine.</param>
+    /// <param name="observables">The observables to combine.</param>
     /// <returns>
-    /// A new observer that emits when any of the provided event providers raise
-    /// an event.
+    /// A new observer that emits when any of the observers emit.
     /// </returns>
-    public static IObserver Combine(params IEventProvider[] eventProviders) =>
-        new ObserverCombine(eventProviders);
+    public static IObserver Combine(
+        params Observable[] observables
+    ) =>
+        new ObserverCombine(
+            [.. observables.Select(observable => observable.Observe())]
+        );
+
+    /// <summary>
+    /// Combine the given observers into a single observer.
+    /// </summary>
+    /// <param name="observers">The observers to combine.</param>
+    /// <returns>
+    /// A new observer that emits when any of the provided observers emit.
+    /// </returns>
+    public static IObserver Combine(params IObserver[] observers) =>
+        new ObserverCombine(observers);
 
     #endregion
 
     #region Events
 
-    /// <summary>
-    /// The underlying event.
-    /// </summary>
+    /// <inheritdoc/>
     public event Action? Event;
 
     #endregion
 }
 
 /// <summary>
-/// This class wraps an event to make registering and unregistering callbacks 
-/// for the event more convenient when working with dependency injection scopes.
-/// Observable instances are created by instances of the 
-/// <see cref="ObservableSource{TArgs}"/> class.
+/// Implementation of <see cref="AsyncObservable"/>.
 /// </summary>
 /// <typeparam name="TArgs">
 /// The type of arguments passed with the event.
 /// </typeparam>
-public sealed class Observable<TArgs> : IEventProvider
+public sealed class Observable<TArgs> : IObservable<TArgs>
 {
     #region Constructors
 
@@ -150,19 +142,6 @@ public sealed class Observable<TArgs> : IEventProvider
     #region Methods
 
     /// <inheritdoc/>
-    void IEventProvider.Provide(EventReceiver receiver)
-    {
-        void OnEvent(TArgs args) => receiver.OnEvent(args);
-        Event += OnEvent;
-        receiver.OnDispose(() => Event -= OnEvent);
-    }
-
-    /// <summary>
-    /// Create an observer for this observable.
-    /// </summary>
-    /// <returns>
-    /// An observer that runs when the event for this observable is raised.
-    /// </returns>
     public IObserver<TArgs> Observe() =>
         new ObserverEventSource<Action<TArgs>, TArgs>(
             register: handler => Event += handler,
@@ -200,27 +179,36 @@ public sealed class Observable<TArgs> : IEventProvider
     );
 
     /// <summary>
+    /// Combine the given observables into a single observer.
+    /// </summary>
+    /// <param name="observables">The observables to combine.</param>
+    /// <returns>
+    /// A new observer that emits when any of the observers emit.
+    /// </returns>
+    public static IObserver<TArgs> Combine(
+        params IObservable<TArgs>[] observables
+    ) =>
+        new ObserverCombine<TArgs>(
+            [.. observables.Select(observable => observable.Observe())]
+        );
+
+    /// <summary>
     /// Combine the given event providers into a single observer.
     /// </summary>
-    /// <param name="eventProviders">The event providers to combine.</param>
+    /// <param name="observers">The observers to combine.</param>
     /// <returns>
-    /// A new observer that emits when any of the event providers raise an
-    /// event.  If an event provider raises an event that doesn't have any
-    /// arguments or the arguments can't be cast to the specified type the
-    /// resulting observer will emit with null for the arguments.
+    /// A new observer that emits when any of the observers emits.
     /// </returns>
     public static IObserver<TArgs?> Combine(
-        params IEventProvider[] eventProviders
+        params IObserver<TArgs>[] observers
     ) =>
-        new Observer<TArgs>(eventProviders);
+        new ObserverCombine<TArgs>(observers);
 
     #endregion
 
     #region Events
 
-    /// <summary>
-    /// The underlying event.
-    /// </summary>
+    /// <inheritdoc/>
     public event Action<TArgs>? Event;
 
     #endregion

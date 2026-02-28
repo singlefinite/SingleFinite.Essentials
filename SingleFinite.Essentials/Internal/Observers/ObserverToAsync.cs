@@ -97,8 +97,10 @@ internal class ObserverToAsync<TArgs>(
         dispatcher.Run(
             function: async () =>
             {
+                if (BranchNextWithArgs is not null)
+                    await BranchNextWithArgs.Invoke(args);
                 if (BranchNext is not null)
-                    await BranchNext.Invoke(args);
+                    await BranchNext.Invoke();
             }
         );
         return false;
@@ -112,12 +114,23 @@ internal class ObserverToAsync<TArgs>(
     /// This event is raised on the dispatcher for an observed event to pass
     /// down the observer chain.
     /// </summary>
-    event Func<TArgs, Task> IAsyncObserver<TArgs>.Next
+    event Func<TArgs, Task> IAsyncObserver<TArgs>.NextWithArgs
+    {
+        add => BranchNextWithArgs += value;
+        remove => BranchNextWithArgs -= value;
+    }
+    private event Func<TArgs, Task>? BranchNextWithArgs;
+
+    /// <summary>
+    /// This event is raised on the dispatcher for an observed event to pass
+    /// down the observer chain.
+    /// </summary>
+    event Func<Task> IAsyncObserver.Next
     {
         add => BranchNext += value;
         remove => BranchNext -= value;
     }
-    private event Func<TArgs, Task>? BranchNext;
+    private event Func<Task>? BranchNext;
 
     #endregion
 }
