@@ -22,11 +22,10 @@
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// Class used to execute an action when disposed.  This is useful when 
-/// implementing transaction and register/unregister type patterns.
+/// Class used to invoke an action when disposed.
 /// </summary>
 /// <param name="onDispose">
-/// The action to execute when this class has been disposed.
+/// The action to invoke when this class has been disposed.
 /// </param>
 public sealed class ActionOnDispose(Action onDispose) : IDisposable
 {

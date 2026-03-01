@@ -56,7 +56,7 @@ public interface IAsyncObserver<out TArgs> : IAsyncObserver
     /// of the given type.
     /// </summary>
     /// <typeparam name="TArgsOut">
-    /// The type of arguments to filter out.
+    /// Arguments that can't be cast to this type are filtered out.
     /// </typeparam>
     /// <returns>
     /// A new observer that filters out events based on arguments type.

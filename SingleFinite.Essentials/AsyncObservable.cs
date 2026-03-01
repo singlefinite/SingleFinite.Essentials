@@ -56,8 +56,8 @@ public sealed class AsyncObservable : IAsyncObservable
     /// <summary>
     /// Raise the event for this observable.
     /// </summary>
-    /// <returns>The running task.</returns>
-    private Task EmitAsync() => Event?.Invoke() ?? Task.CompletedTask;
+    /// <returns>A task that completes when the event handlers finish.</returns>
+    private Task EmitAsync() => Event.TryInvoke();
 
     /// <summary>
     /// Create an observer for a generic event.
@@ -206,9 +206,8 @@ public sealed class AsyncObservable<TArgs> : IAsyncObservable<TArgs>
     /// Raise the event for this observable.
     /// </summary>
     /// <param name="args">The args included with the event.</param>
-    /// <returns>The running task.</returns>
-    private Task EmitAsync(TArgs args) =>
-        Event?.Invoke(args) ?? Task.CompletedTask;
+    /// <returns>A task that completes when the event handlers finish.</returns>
+    private Task EmitAsync(TArgs args) => Event.TryInvoke(args);
 
     #endregion
 

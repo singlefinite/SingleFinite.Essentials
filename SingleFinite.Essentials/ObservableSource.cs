@@ -62,7 +62,7 @@ public sealed class ObservableSource
     #region Events
 
     /// <summary>
-    /// Event that is raised when the RaiseEvent method is invoked.
+    /// Event that is raised when the Emit method is invoked.
     /// </summary>
     internal event Action? Event;
 
@@ -114,7 +114,7 @@ public sealed class ObservableSource<TArgs>
     #region Events
 
     /// <summary>
-    /// Event that is raised when the RaiseEvent method is invoked.
+    /// Event that is raised when the Emit method is invoked.
     /// </summary>
     internal event Action<TArgs>? Event;
 

@@ -32,8 +32,7 @@ namespace SingleFinite.Essentials;
 /// </summary>
 public sealed class DedicatedThreadDispatcher :
     IDispatcher,
-    IDisposable,
-    IDisposeObservable
+    IDisposable
 {
     #region Fields
 
@@ -76,13 +75,6 @@ public sealed class DedicatedThreadDispatcher :
         };
         _thread.Start();
     }
-
-    #endregion
-
-    #region Properties
-
-    /// <inheritdoc/>
-    public bool IsDisposed => _disposeState.IsDisposed;
 
     #endregion
 
@@ -169,13 +161,6 @@ public sealed class DedicatedThreadDispatcher :
         _queue.CompleteAdding();
         _thread.Join();
     }
-
-    #endregion
-
-    #region Events
-
-    /// <inheritdoc/>
-    public IObservable Disposed => _disposeState.Disposed;
 
     #endregion
 }

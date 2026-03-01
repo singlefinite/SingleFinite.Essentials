@@ -39,11 +39,6 @@ public abstract class DisposeStateBase : IDisposable
     private readonly Action? _onDispose;
 
     /// <summary>
-    /// Source for Disposed observable.
-    /// </summary>
-    private readonly ObservableSource _disposedSource = new();
-
-    /// <summary>
     /// Source for CancellationToken.
     /// </summary>
     private readonly CancellationTokenSource _cancellationTokenSource = new();
@@ -75,12 +70,6 @@ public abstract class DisposeStateBase : IDisposable
     /// Indicates if this object has been disposed.
     /// </summary>
     public bool IsDisposed { get; protected set; }
-
-    /// <summary>
-    /// Observable that will notify observers when this object is disposed.
-    /// </summary>
-    public IObservable Disposed =>
-        _disposedSource.Observable;
 
     /// <summary>
     /// A token that is canceled when this object is disposed.
@@ -132,6 +121,16 @@ public abstract class DisposeStateBase : IDisposable
             instance: _owner
         );
     }
+
+    #endregion
+
+    #region Events
+
+    /// <summary>
+    /// Observable that will notify observers when this object is disposed.
+    /// </summary>
+    public IObservable Disposed => _disposedSource.Observable;
+    private readonly ObservableSource _disposedSource = new();
 
     #endregion
 }

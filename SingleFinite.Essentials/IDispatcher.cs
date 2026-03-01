@@ -22,8 +22,9 @@
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// An abstraction of a platform specific dispatcher that is used to execute
-/// code on a different thread.
+/// Abstracts the behavior of executing code on a specific thread.  Different
+/// IDispatcher implementations can be used to provide different behaviors for
+/// executing code.
 /// </summary>
 public interface IDispatcher
 {

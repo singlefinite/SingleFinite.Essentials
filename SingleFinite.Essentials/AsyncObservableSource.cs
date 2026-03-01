@@ -56,7 +56,7 @@ public sealed class AsyncObservableSource
     /// Raise the event for the observable.
     /// </summary>
     /// <returns>The running task.</returns>
-    public Task EmitAsync() => Event?.Invoke() ?? Task.CompletedTask;
+    public Task EmitAsync() => Event.TryInvoke();
 
     /// <summary>
     /// Raise the event using the given dispatcher.
@@ -76,7 +76,7 @@ public sealed class AsyncObservableSource
     #region Events
 
     /// <summary>
-    /// Event that is raised when the RaiseEvent method is invoked.
+    /// Event that is raised when the EmitAsync method is invoked.
     /// </summary>
     internal event Func<Task>? Event;
 
@@ -122,8 +122,7 @@ public sealed class AsyncObservableSource<TArgs>
     /// </summary>
     /// <param name="args">The arguments to pass with the event.</param>
     /// <returns>The running task.</returns>
-    public Task EmitAsync(TArgs args) =>
-        Event?.Invoke(args) ?? Task.CompletedTask;
+    public Task EmitAsync(TArgs args) => Event.TryInvoke(args);
 
     /// <summary>
     /// Raise the event using the given dispatcher.
@@ -145,7 +144,7 @@ public sealed class AsyncObservableSource<TArgs>
     #region Events
 
     /// <summary>
-    /// Event that is raised when the RaiseEvent method is invoked.
+    /// Event that is raised when the EmitAsync method is invoked.
     /// </summary>
     internal event Func<TArgs, Task>? Event;
 

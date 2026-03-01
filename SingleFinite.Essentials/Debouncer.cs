@@ -24,7 +24,7 @@ namespace SingleFinite.Essentials;
 /// <summary>
 /// A debouncer service that uses a timer.
 /// </summary>
-public sealed class Debouncer : IDisposable, IDisposeObservable
+public sealed class Debouncer : IDisposable
 {
     #region Fields
 
@@ -39,7 +39,7 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
     private readonly Lock _timerLock = new();
 
     /// <summary>
-    /// The timer used to wait for the debounce delay to pass.
+    /// The timer used to wait for the debounce delay to elapse.
     /// </summary>
     private Timer? _timer = null;
 
@@ -60,13 +60,6 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
 
     #endregion
 
-    #region Properties
-
-    /// <inheritdoc/>
-    public bool IsDisposed => _disposeState.IsDisposed;
-
-    #endregion
-
     #region Methods
 
     /// <summary>
@@ -74,13 +67,13 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
     /// </summary>
     /// <param name="action">
     /// The action to invoke if a debounce method has not been called before the
-    /// given delay has passed.
+    /// given delay has elapsed.
     /// </param>
     /// <param name="delay">
     /// The amount of time to wait before invoking the given action.
     /// </param>
     /// <param name="dispatcher">
-    /// The dispatcher that will run the action after the delay has passed.
+    /// The dispatcher that will run the action after the delay has elapsed.
     /// If not set the debounce will be run under the synchronization context
     /// of the thread this method was called on.
     /// </param>
@@ -119,13 +112,13 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
     /// </summary>
     /// <param name="function">
     /// The Func to invoke if a debounce method has not been called before the
-    /// given delay has passed.
+    /// given delay has elapsed.
     /// </param>
     /// <param name="delay">
     /// The amount of time to wait before invoking the given Func.
     /// </param>
     /// <param name="dispatcher">
-    /// The dispatcher that will run the Func after the delay has passed.
+    /// The dispatcher that will run the Func after the delay has elapsed.
     /// If not set the debounce will be run under the synchronization context
     /// of the thread this method was called on.
     /// </param>
@@ -172,7 +165,7 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
     }
 
     /// <summary>
-    /// The method invoked when a debounce delay has passed.
+    /// The method invoked when a debounce delay has elapsed.
     /// </summary>
     /// <param name="state">The debounce info to process.</param>
     private void OnTimeout(object? state)
@@ -188,13 +181,6 @@ public sealed class Debouncer : IDisposable, IDisposeObservable
     /// Cancel any pending debounce and dispose of this object.
     /// </summary>
     public void Dispose() => _disposeState.Dispose();
-
-    #endregion
-
-    #region Events
-
-    /// <inheritdoc/>
-    public IObservable Disposed => _disposeState.Disposed;
 
     #endregion
 }
