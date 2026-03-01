@@ -27,7 +27,7 @@ namespace SingleFinite.Essentials.Internal.Observers;
 /// <param name="parent">The parent to this observer.</param>
 /// <param name="delay">The delay period for debouncing.</param>
 /// <param name="dispatcher">
-/// The dispatcher to run on after the delay has passed.
+/// The dispatcher to run on after the delay has elapsed.
 /// If not set the debounce will be run under the synchronization context
 /// of the thread this method was called on.
 /// </param>
@@ -50,11 +50,12 @@ internal class ObserverDebounce(
 
     /// <summary>
     /// Wait for the configured delay and if no new events have been raised
-    /// when the delay period has passed pass the event onto the next observer.
+    /// when the delay period has elapsed, pass the event onto the next
+    /// observers.
     /// </summary>
     /// <returns>
     /// This method always returns false since the next event is only raised
-    /// after the delay has passed.
+    /// after the delay has elapsed.
     /// </returns>
     protected override bool OnEvent()
     {
@@ -71,10 +72,8 @@ internal class ObserverDebounce(
 
     #region Events
 
-    /// <summary>
-    /// This event is raised when an event has been debounced.
-    /// </summary>
-    event Action IObserver.Next
+    /// <inheritdoc/>
+    public override event Action? Next
     {
         add => BranchNext += value;
         remove => BranchNext -= value;
@@ -93,7 +92,7 @@ internal class ObserverDebounce(
 /// <param name="parent">The parent to this observer.</param>
 /// <param name="delay">The delay period for debouncing.</param>
 /// <param name="dispatcher">
-/// The dispatcher to run on after the delay has passed.
+/// The dispatcher to run on after the delay has elapsed.
 /// If not set the debounce will be run under the synchronization context
 /// of the thread this method was called on.
 /// </param>
@@ -116,17 +115,22 @@ internal class ObserverDebounce<TArgs>(
 
     /// <summary>
     /// Wait for the configured delay and if no new events have been raised
-    /// when the delay period has passed pass the event onto the next observer.
+    /// when the delay period has elapsed, pass the event onto the next
+    /// observers.
     /// </summary>
     /// <param name="args">Arguments passed with the observed event.</param>
     /// <returns>
     /// This method always returns false since the next event is only raised
-    /// after the delay has passed.
+    /// after the delay has elapsed.
     /// </returns>
     protected override bool OnEvent(TArgs args)
     {
         _debouncer.Debounce(
-            action: () => BranchNext?.Invoke(args),
+            action: () =>
+            {
+                BranchNextWithArgs?.Invoke(args);
+                BranchNext?.Invoke();
+            },
             delay: delay,
             dispatcher: dispatcher
         );
@@ -138,15 +142,21 @@ internal class ObserverDebounce<TArgs>(
 
     #region Events
 
-    /// <summary>
-    /// This event is raised when an event has been debounced.
-    /// </summary>
-    event Action<TArgs> IObserver<TArgs>.NextWithArgs
+    /// <inheritdoc/>
+    public override event Action<TArgs>? NextWithArgs
+    {
+        add => BranchNextWithArgs += value;
+        remove => BranchNextWithArgs -= value;
+    }
+    private event Action<TArgs>? BranchNextWithArgs;
+
+    /// <inheritdoc/>
+    public override event Action? Next
     {
         add => BranchNext += value;
         remove => BranchNext -= value;
     }
-    private event Action<TArgs>? BranchNext;
+    private event Action? BranchNext;
 
     #endregion
 }

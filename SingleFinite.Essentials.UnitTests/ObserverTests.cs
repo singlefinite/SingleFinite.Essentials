@@ -93,6 +93,30 @@ public class ObserverTests(TestContext testContext)
     }
 
     [TestMethod]
+    public void Select_Continues_On_Next_Without_Args()
+    {
+        var observedEmitCount = 0;
+
+        var observableSource = new ObservableSource<ExampleArgs>();
+        var observable = observableSource.Observable;
+
+        var observer = observable
+            .Observe()
+            .Select(args => args.Name)
+            .OnEach(() => observedEmitCount++);
+
+        Assert.AreEqual(0, observedEmitCount);
+
+        observableSource.Emit(new("Hello", 0));
+
+        Assert.AreEqual(1, observedEmitCount);
+
+        observableSource.Emit(new("World", 0));
+
+        Assert.AreEqual(2, observedEmitCount);
+    }
+
+    [TestMethod]
     public void Where_Runs_As_Expected()
     {
         var observedNames = new List<string>();
@@ -241,6 +265,30 @@ public class ObserverTests(TestContext testContext)
 
         Assert.HasCount(1, observedNames);
         Assert.AreEqual("Hi", observedNames[0]);
+    }
+
+    [TestMethod]
+    public void Of_Type_Continues_On_Next_Without_Args()
+    {
+        var observedEmitCount = 0;
+
+        var observableSource = new ObservableSource<ExampleArgs>();
+        var observable = observableSource.Observable;
+
+        var observer = observable
+            .Observe()
+            .OfType<SubExampleArgs>()
+            .OnEach(() => observedEmitCount++);
+
+        Assert.AreEqual(0, observedEmitCount);
+
+        observableSource.Emit(new("Hello", 0));
+
+        Assert.AreEqual(0, observedEmitCount);
+
+        observableSource.Emit(new SubExampleArgs(SubName: "Hi"));
+
+        Assert.AreEqual(1, observedEmitCount);
     }
 
     [TestMethod]

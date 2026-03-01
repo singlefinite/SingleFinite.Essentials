@@ -48,11 +48,7 @@ internal class AsyncObserverCombine : IAsyncObserver
         foreach (var observer in observers)
         {
             observer
-                .OnEach(async () =>
-                {
-                    if (Next is not null)
-                        await Next.Invoke();
-                })
+                .OnEach(Next.TryInvoke)
                 .Until(_disposeState.CancellationToken);
         }
     }
@@ -114,10 +110,8 @@ internal class AsyncObserverCombine<TArgs> : IAsyncObserver<TArgs>
             observer
                 .OnEach(async args =>
                 {
-                    if (NextWithArgs is not null)
-                        await NextWithArgs.Invoke(args);
-                    if (Next is not null)
-                        await Next.Invoke();
+                    await NextWithArgs.TryInvoke(args);
+                    await Next.TryInvoke();
                 })
                 .Until(_disposeState.CancellationToken);
         }

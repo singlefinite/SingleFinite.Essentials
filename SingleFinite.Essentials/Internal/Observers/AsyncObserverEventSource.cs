@@ -95,8 +95,8 @@ internal class AsyncObserverEventSource<TEventDelegate> : IAsyncObserver
     /// <summary>
     /// Raise the Next event.
     /// </summary>
-    /// <returns>The task from invoking the Next event.</returns>
-    private Task RaiseNextAsync() => Next?.Invoke() ?? Task.CompletedTask;
+    /// <returns>A task that completes when the event handlers finish.</returns>
+    private Task RaiseNextAsync() => Next.TryInvoke();
 
     #endregion
 
@@ -184,16 +184,14 @@ internal class AsyncObserverEventSource<TEventDelegate, TArgs> : IAsyncObserver<
     public void Dispose() => _disposeState.Dispose();
 
     /// <summary>
-    /// Raise the Next event.
+    /// Raise the NextWithArgs and Next event.
     /// </summary>
     /// <param name="args">Arguments passed with the event.</param>
-    /// <returns>The task from invoking the Next event.</returns>
+    /// <returns>A task that completes when the event handlers finish.</returns>
     private async Task RaiseNextAsync(TArgs args)
     {
-        if (NextWithArgs is not null)
-            await NextWithArgs.Invoke(args);
-        if (Next is not null)
-            await Next.Invoke();
+        await NextWithArgs.TryInvoke(args);
+        await Next.TryInvoke();
     }
 
     #endregion

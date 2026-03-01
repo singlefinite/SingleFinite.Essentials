@@ -42,13 +42,7 @@ internal class ObserverToAsync(
     /// <returns>This method always returns false.</returns>
     protected override bool OnEvent()
     {
-        dispatcher.Run(
-            function: async () =>
-            {
-                if (BranchNext is not null)
-                    await BranchNext.Invoke();
-            }
-        );
+        dispatcher.Run(function: BranchNext.TryInvoke);
         return false;
     }
 
@@ -56,11 +50,8 @@ internal class ObserverToAsync(
 
     #region Events
 
-    /// <summary>
-    /// This event is raised on the dispatcher for an observed event to pass
-    /// down the observer chain.
-    /// </summary>
-    event Func<Task> IAsyncObserver.Next
+    /// <inheritdoc/>
+    event Func<Task>? IAsyncObserver.Next
     {
         add => BranchNext += value;
         remove => BranchNext -= value;
@@ -97,10 +88,8 @@ internal class ObserverToAsync<TArgs>(
         dispatcher.Run(
             function: async () =>
             {
-                if (BranchNextWithArgs is not null)
-                    await BranchNextWithArgs.Invoke(args);
-                if (BranchNext is not null)
-                    await BranchNext.Invoke();
+                await BranchNextWithArgs.TryInvoke(args);
+                await BranchNext.TryInvoke();
             }
         );
         return false;
@@ -114,7 +103,7 @@ internal class ObserverToAsync<TArgs>(
     /// This event is raised on the dispatcher for an observed event to pass
     /// down the observer chain.
     /// </summary>
-    event Func<TArgs, Task> IAsyncObserver<TArgs>.NextWithArgs
+    event Func<TArgs, Task>? IAsyncObserver<TArgs>.NextWithArgs
     {
         add => BranchNextWithArgs += value;
         remove => BranchNextWithArgs -= value;
@@ -125,7 +114,7 @@ internal class ObserverToAsync<TArgs>(
     /// This event is raised on the dispatcher for an observed event to pass
     /// down the observer chain.
     /// </summary>
-    event Func<Task> IAsyncObserver.Next
+    event Func<Task>? IAsyncObserver.Next
     {
         add => BranchNext += value;
         remove => BranchNext -= value;

@@ -59,8 +59,7 @@ internal class AsyncObserverToSync : IObserver
     #region Methods
 
     /// <inheritdoc/>
-    public void Dispose() =>
-        _parent.Dispose();
+    public void Dispose() => _parent.Dispose();
 
     #endregion
 
@@ -114,8 +113,7 @@ internal class AsyncObserverToSync<TArgs> : IObserver<TArgs>
     #region Methods
 
     /// <inheritdoc/>
-    public void Dispose() =>
-        _parent.Dispose();
+    public void Dispose() => _parent.Dispose();
 
     #endregion
 

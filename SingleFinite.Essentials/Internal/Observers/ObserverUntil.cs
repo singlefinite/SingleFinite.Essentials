@@ -22,8 +22,7 @@
 namespace SingleFinite.Essentials.Internal.Observers;
 
 /// <summary>
-/// An observer that will observe events until the passed in lifecycle is
-/// disposed or the passed in cancellation token is cancelled.
+/// An observer that will observe events until the passed in condition is met.
 /// </summary>
 internal class ObserverUntil : ObserverBase
 {
@@ -122,8 +121,7 @@ internal class ObserverUntil : ObserverBase
 }
 
 /// <summary>
-/// An observer that will observe events until the passed in lifecycle is
-/// disposed or the passed in cancellation token is cancelled.
+/// An observer that will observe events until the passed in condition is met.
 /// </summary>
 /// <typeparam name="TArgs">
 /// The type of arguments passed with observed events.

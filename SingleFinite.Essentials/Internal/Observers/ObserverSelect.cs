@@ -49,7 +49,8 @@ internal class ObserverSelect<TArgsOut>(
     protected override bool OnEvent()
     {
         var value = selector();
-        BranchNext?.Invoke(value);
+        BranchNextWithArgs?.Invoke(value);
+        BranchNext?.Invoke();
         return false;
     }
 
@@ -57,16 +58,21 @@ internal class ObserverSelect<TArgsOut>(
 
     #region Events
 
-    /// <summary>
-    /// This event is raised when a value is selected for an observed event to
-    /// pass down the observer chain.
-    /// </summary>
-    event Action<TArgsOut> IObserver<TArgsOut>.NextWithArgs
+    /// <inheritdoc/>
+    event Action<TArgsOut>? IObserver<TArgsOut>.NextWithArgs
+    {
+        add => BranchNextWithArgs += value;
+        remove => BranchNextWithArgs -= value;
+    }
+    private event Action<TArgsOut>? BranchNextWithArgs;
+
+    /// <inheritdoc/>
+    public override event Action? Next
     {
         add => BranchNext += value;
         remove => BranchNext -= value;
     }
-    private event Action<TArgsOut>? BranchNext;
+    private event Action? BranchNext;
 
     #endregion
 }
@@ -106,7 +112,8 @@ internal class ObserverSelect<TArgsIn, TArgsOut>(
     protected override bool OnEvent(TArgsIn args)
     {
         var value = selector(args);
-        BranchNext?.Invoke(value);
+        BranchNextWithArgs?.Invoke(value);
+        BranchNext?.Invoke();
         return false;
     }
 
@@ -114,16 +121,21 @@ internal class ObserverSelect<TArgsIn, TArgsOut>(
 
     #region Events
 
-    /// <summary>
-    /// This event is raised when a value is selected for an observed event to
-    /// pass down the observer chain.
-    /// </summary>
-    event Action<TArgsOut> IObserver<TArgsOut>.NextWithArgs
+    /// <inheritdoc/>
+    event Action<TArgsOut>? IObserver<TArgsOut>.NextWithArgs
+    {
+        add => BranchNextWithArgs += value;
+        remove => BranchNextWithArgs -= value;
+    }
+    private event Action<TArgsOut>? BranchNextWithArgs;
+
+    /// <inheritdoc/>
+    public override event Action? Next
     {
         add => BranchNext += value;
         remove => BranchNext -= value;
     }
-    private event Action<TArgsOut>? BranchNext;
+    private event Action? BranchNext;
 
     #endregion
 }

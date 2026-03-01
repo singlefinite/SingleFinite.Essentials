@@ -49,8 +49,8 @@ internal class AsyncObserverSelect<TArgsOut>(
     protected async override Task<bool> OnEventAsync()
     {
         var value = await selector();
-        if (BranchNextWithArgs is not null)
-            await BranchNextWithArgs.Invoke(value);
+        await BranchNextWithArgs.TryInvoke(value);
+        await BranchNext.TryInvoke();
         return false;
     }
 
@@ -59,12 +59,20 @@ internal class AsyncObserverSelect<TArgsOut>(
     #region Events
 
     /// <inheritdoc/>
-    event Func<TArgsOut, Task> IAsyncObserver<TArgsOut>.NextWithArgs
+    event Func<TArgsOut, Task>? IAsyncObserver<TArgsOut>.NextWithArgs
     {
         add => BranchNextWithArgs += value;
         remove => BranchNextWithArgs -= value;
     }
     private event Func<TArgsOut, Task>? BranchNextWithArgs;
+
+    /// <inheritdoc/>
+    public override event Func<Task>? Next
+    {
+        add => BranchNext += value;
+        remove => BranchNext -= value;
+    }
+    private event Func<Task>? BranchNext;
 
     #endregion
 }
@@ -104,8 +112,8 @@ internal class AsyncObserverSelect<TArgsIn, TArgsOut>(
     protected async override Task<bool> OnEventAsync(TArgsIn args)
     {
         var value = await selector(args);
-        if (BranchNextWithArgs is not null)
-            await BranchNextWithArgs.Invoke(value);
+        await BranchNextWithArgs.TryInvoke(value);
+        await BranchNext.TryInvoke();
         return false;
     }
 
@@ -114,12 +122,20 @@ internal class AsyncObserverSelect<TArgsIn, TArgsOut>(
     #region Events
 
     /// <inheritdoc/>
-    event Func<TArgsOut, Task> IAsyncObserver<TArgsOut>.NextWithArgs
+    event Func<TArgsOut, Task>? IAsyncObserver<TArgsOut>.NextWithArgs
     {
         add => BranchNextWithArgs += value;
         remove => BranchNextWithArgs -= value;
     }
     private event Func<TArgsOut, Task>? BranchNextWithArgs;
+
+    /// <inheritdoc/>
+    public override event Func<Task>? Next
+    {
+        add => BranchNext += value;
+        remove => BranchNext -= value;
+    }
+    private event Func<Task>? BranchNext;
 
     #endregion
 }

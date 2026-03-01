@@ -22,7 +22,7 @@
 namespace SingleFinite.Essentials.Internal.Observers;
 
 /// <summary>
-/// Base class for common observer class behavior.
+/// Base class for common async observer class behavior.
 /// </summary>
 internal abstract class AsyncObserverBase : IAsyncObserver
 {
@@ -63,22 +63,22 @@ internal abstract class AsyncObserverBase : IAsyncObserver
     #region Methods
 
     /// <summary>
-    /// This method is invoked when the parent event is raised.
+    /// This method is invoked when the parent Next event is raised.
     /// </summary>
     /// <returns>
-    /// True if this observers event should be raised which would continue down
-    /// the chain of observers. False if this observers event should not be
-    /// raised which would stop the remaining chain of observers from seeing the
-    /// event.
+    /// True if this observers Next event should be raised which would continue
+    /// down the chain of observers. False if this observers Next event should
+    /// not be raised which would stop the remaining chain of observers from
+    /// seeing the event.
     /// </returns>
     protected abstract Task<bool> OnEventAsync();
 
     /// <summary>
-    /// Raise the Event for this observer which moves execution down the chain.
+    /// Raise the Next event for this observer which moves execution down the
+    /// chain.
     /// </summary>
-    /// <returns>The running task.</returns>
-    protected Task RaiseNextEventAsync() =>
-        Next?.Invoke() ?? Task.CompletedTask;
+    /// <returns>A task that completes when the event handlers finish.</returns>
+    protected Task RaiseNextEventAsync() => Next.TryInvoke();
 
     /// <summary>
     /// Invoke the parent Dispose method.  The expectation is that the dispose
@@ -95,7 +95,7 @@ internal abstract class AsyncObserverBase : IAsyncObserver
     public IObservable Disposed => _parent.Disposed;
 
     /// <inheritdoc/>
-    public event Func<Task>? Next;
+    public virtual event Func<Task>? Next;
 
     #endregion
 }
@@ -142,28 +142,26 @@ internal abstract class AsyncObserverBase<TArgs> : IAsyncObserver<TArgs>
     #region Methods
 
     /// <summary>
-    /// This method is invoked when the parent event is raised.
+    /// This method is invoked when the parent Next event is raised.
     /// </summary>
     /// <returns>
-    /// True if this observers event should be raised which would continue down
-    /// the chain of observers. False if this observers event should not be
-    /// raised which would stop the remaining chain of observers from seeing the
-    /// event.
+    /// True if this observers Next event should be raised which would continue
+    /// down the chain of observers. False if this observers Next event should
+    /// not be raised which would stop the remaining chain of observers from
+    /// seeing the event.
     /// </returns>
     protected abstract Task<bool> OnEventAsync(TArgs args);
 
     /// <summary>
-    /// Raise the Event for this observer which moves execution down the chain.
+    /// Raise the Next event for this observer which moves execution down the
+    /// chain.
     /// </summary>
     /// <param name="args">The args to pass with the event.</param>
-    /// <returns>The running task.</returns>
+    /// <returns>A task that completes when the event handlers finish.</returns>
     protected async Task RaiseNextEventAsync(TArgs args)
     {
-        if (NextWithArgs is not null)
-            await NextWithArgs.Invoke(args);
-
-        if (Next is not null)
-            await Next.Invoke();
+        await NextWithArgs.TryInvoke(args);
+        await Next.TryInvoke();
     }
 
     /// <summary>
@@ -181,10 +179,10 @@ internal abstract class AsyncObserverBase<TArgs> : IAsyncObserver<TArgs>
     public IObservable Disposed => _parent.Disposed;
 
     /// <inheritdoc/>
-    public event Func<Task>? Next;
+    public virtual event Func<Task>? Next;
 
     /// <inheritdoc/>
-    public event Func<TArgs, Task>? NextWithArgs;
+    public virtual event Func<TArgs, Task>? NextWithArgs;
 
     #endregion
 }

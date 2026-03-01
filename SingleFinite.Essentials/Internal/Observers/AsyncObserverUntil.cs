@@ -22,8 +22,7 @@
 namespace SingleFinite.Essentials.Internal.Observers;
 
 /// <summary>
-/// An observer that will observe events until the passed in lifecycle is
-/// disposed.
+/// An observer that will observe events until the passed in condition is met.
 /// </summary>
 internal class AsyncObserverUntil : AsyncObserverBase
 {
@@ -125,8 +124,7 @@ internal class AsyncObserverUntil : AsyncObserverBase
 }
 
 /// <summary>
-/// An observer that will observe events until the passed in lifecycle is
-/// disposed.
+/// An observer that will observe events until the passed in condition is met.
 /// </summary>
 /// <typeparam name="TArgs">
 /// The type of arguments passed with observed events.

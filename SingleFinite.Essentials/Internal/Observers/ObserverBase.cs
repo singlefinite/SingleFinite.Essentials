@@ -92,11 +92,8 @@ internal abstract class ObserverBase : IObserver
     /// <inheritdoc/>
     public IObservable Disposed => _parent.Disposed;
 
-    /// <summary>
-    /// The event that is raised when handling of the parent event should
-    /// continue the next observers down the chain of observers.
-    /// </summary>
-    public event Action? Next;
+    /// <inheritdoc/>
+    public virtual event Action? Next;
 
     #endregion
 }
@@ -178,10 +175,10 @@ internal abstract class ObserverBase<TArgs> : IObserver<TArgs>
     public IObservable Disposed => _parent.Disposed;
 
     /// <inheritdoc/>
-    public event Action? Next;
+    public virtual event Action? Next;
 
     /// <inheritdoc/>
-    public event Action<TArgs>? NextWithArgs;
+    public virtual event Action<TArgs>? NextWithArgs;
 
     #endregion
 }
