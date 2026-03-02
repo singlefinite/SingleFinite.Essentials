@@ -24,7 +24,7 @@ namespace SingleFinite.Essentials;
 /// <summary>
 /// An object whose cancel state can be observed.
 /// </summary>
-public interface ICancelObservable
+public interface ICancelEventObservable
 {
     /// <summary>
     /// A token that is canceled when this object is canceled.

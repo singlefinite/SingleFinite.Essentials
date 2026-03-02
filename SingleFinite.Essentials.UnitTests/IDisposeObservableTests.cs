@@ -1,7 +1,7 @@
 ﻿namespace SingleFinite.Essentials.UnitTests;
 
 [TestClass]
-public class IDisposeObservableTests
+public class IDisposeEventObservableTests
 {
     [TestMethod]
     public void Dispose_Calls_DisposeState_Dispose()
@@ -31,7 +31,7 @@ public class IDisposeObservableTests
         Assert.AreEqual(1, exampleDisposable.ObservedDisposeCount);
     }
 
-    private sealed class ExampleDisposable : IDisposable, IDisposeObservable
+    private sealed class ExampleDisposable : IDisposable, IDisposeEventObservable
     {
         private readonly DisposeState _disposeState;
 
@@ -54,6 +54,6 @@ public class IDisposeObservableTests
             ObservedDisposeCount++;
         }
 
-        public IObservable Disposed => _disposeState.Disposed;
+        public IEventObservable Disposed => _disposeState.Disposed;
     }
 }

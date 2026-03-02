@@ -24,7 +24,7 @@ namespace SingleFinite.Essentials;
 /// <summary>
 /// An object whose dispose state can be observed.
 /// </summary>
-public interface IDisposeObservable
+public interface IDisposeEventObservable
 {
     /// <summary>
     /// Indicates if this object is disposed.
@@ -32,7 +32,7 @@ public interface IDisposeObservable
     bool IsDisposed { get; }
 
     /// <summary>
-    /// Observable that will notify observers when this object is disposed.
+    /// EventObservable that will notify observers when this object is disposed.
     /// </summary>
-    IObservable Disposed { get; }
+    IEventObservable Disposed { get; }
 }

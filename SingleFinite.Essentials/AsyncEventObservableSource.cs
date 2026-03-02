@@ -22,19 +22,19 @@
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// The source for an <see cref="EventObservable"/>.  Instances of this class can be 
-/// kept private within its owner while the observable is shared publicly 
+/// The source for an <see cref="AsyncEventObservable"/>.  Instances of this class
+/// can be kept private within its owner while the observable is shared publicly 
 /// outside of the owner.  Since events are only raised through this class it 
 /// prevents events from being raised outside of the owning class.
 /// </summary>
-public sealed class EventObservableSource
+public sealed class AsyncEventObservableSource
 {
     #region Properties
 
     /// <summary>
     /// The observable provided by this class.
     /// </summary>
-    public IEventObservable EventObservable { get; }
+    public IAsyncEventObservable EventObservable { get; }
 
     #endregion
 
@@ -43,9 +43,9 @@ public sealed class EventObservableSource
     /// <summary>
     /// Constructor.
     /// </summary>
-    public EventObservableSource()
+    public AsyncEventObservableSource()
     {
-        EventObservable = new EventObservable(source: this);
+        EventObservable = new AsyncEventObservable(source: this);
     }
 
     #endregion
@@ -55,37 +55,51 @@ public sealed class EventObservableSource
     /// <summary>
     /// Raise the event for the observable.
     /// </summary>
-    public void Emit() => Event?.Invoke();
+    /// <returns>The running task.</returns>
+    public Task EmitAsync() => Event.TryInvoke();
+
+    /// <summary>
+    /// Raise the event using the given dispatcher.
+    /// </summary>
+    /// <param name="dispatcher">The dispatcher to raise the event on.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    public void EmitEvent(
+        IDispatcher dispatcher,
+        CancellationToken cancellationToken
+    ) => dispatcher.Run(
+        function: EmitAsync,
+        cancellationToken: cancellationToken
+    );
 
     #endregion
 
     #region Events
 
     /// <summary>
-    /// Event that is raised when the Emit method is invoked.
+    /// Event that is raised when the EmitAsync method is invoked.
     /// </summary>
-    internal event Action? Event;
+    internal event Func<Task>? Event;
 
     #endregion
 }
 
 /// <summary>
-/// The source for an <see cref="EventObservable{TArgs}"/>.  Instances of this class
-/// can be kept private within its owner while the observable is shared publicly 
-/// outside of the owner.  Since events are only raised through this class it 
-/// prevents events from being raised outside of the owning class.
+/// The source for an <see cref="AsyncEventObservableSource{TArgs}"/>.  Instances of
+/// this class can be kept private within its owner while the observable is
+/// shared publicly outside of the owner.  Since events are only raised through
+/// this class it prevents events from being raised outside of the owning class.
 /// </summary>
 /// <typeparam name="TArgs">
 /// The type of arguments passed with the event.
 /// </typeparam>
-public sealed class EventObservableSource<TArgs>
+public sealed class AsyncEventObservableSource<TArgs>
 {
     #region Properties
 
     /// <summary>
     /// The observable provided by this class.
     /// </summary>
-    public IEventObservable<TArgs> EventObservable { get; }
+    public IAsyncEventObservable<TArgs> EventObservable { get; }
 
     #endregion
 
@@ -94,9 +108,9 @@ public sealed class EventObservableSource<TArgs>
     /// <summary>
     /// Constructor.
     /// </summary>
-    public EventObservableSource()
+    public AsyncEventObservableSource()
     {
-        EventObservable = new EventObservable<TArgs>(source: this);
+        EventObservable = new AsyncEventObservable<TArgs>(source: this);
     }
 
     #endregion
@@ -107,16 +121,32 @@ public sealed class EventObservableSource<TArgs>
     /// Raise the event for the observable.
     /// </summary>
     /// <param name="args">The arguments to pass with the event.</param>
-    public void Emit(TArgs args) => Event?.Invoke(args);
+    /// <returns>The running task.</returns>
+    public Task EmitAsync(TArgs args) => Event.TryInvoke(args);
+
+    /// <summary>
+    /// Raise the event using the given dispatcher.
+    /// </summary>
+    /// <param name="args">The arguments to pass with the event.</param>
+    /// <param name="dispatcher">The dispatcher to raise the event on.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    public void Emit(
+        TArgs args,
+        IDispatcher dispatcher,
+        CancellationToken cancellationToken
+    ) => dispatcher.Run(
+        function: () => EmitAsync(args),
+        cancellationToken: cancellationToken
+    );
 
     #endregion
 
     #region Events
 
     /// <summary>
-    /// Event that is raised when the Emit method is invoked.
+    /// Event that is raised when the EmitAsync method is invoked.
     /// </summary>
-    internal event Action<TArgs>? Event;
+    internal event Func<TArgs, Task>? Event;
 
     #endregion
 }

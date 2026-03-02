@@ -168,7 +168,7 @@ public sealed class TaskScope : ITaskScope, IDisposable
     #region Events
 
     /// <inheritdoc/>
-    public IObservable Disposed => _disposeState.Disposed;
+    public IEventObservable Disposed => _disposeState.Disposed;
 
     #endregion
 }

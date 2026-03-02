@@ -111,12 +111,12 @@ public static class Dispatcher
     #region Events
 
     /// <summary>
-    /// Observable that emits when an unhandled exception occurs in a
+    /// EventObservable that emits when an unhandled exception occurs in a
     /// dispatcher.
     /// </summary>
-    public static IObservable<UnhandledDispatcherException>
-        UnhandledException => s_unhandledExceptionSource.Observable;
-    private static readonly ObservableSource<UnhandledDispatcherException>
+    public static IEventObservable<UnhandledDispatcherException>
+        UnhandledException => s_unhandledExceptionSource.EventObservable;
+    private static readonly EventObservableSource<UnhandledDispatcherException>
         s_unhandledExceptionSource = new();
 
     #endregion

@@ -24,30 +24,30 @@ using SingleFinite.Essentials.Internal.EventObservers;
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// Implementation of <see cref="AsyncEventObservable"/>.
+/// Implementation of <see cref="IAsyncEventObservable"/>.
 /// </summary>
-public sealed class EventObservable : IEventObservable
+public sealed class AsyncEventObservable : IAsyncEventObservable
 {
     #region Constructors
 
     /// <summary>
-    /// Instances of this class are created with <see cref="EventObservableSource"/> 
-    /// objects.
+    /// Instances of this class are created with
+    /// <see cref="AsyncEventObservableSource"/> objects.
     /// </summary>
     /// <param name="source">
     /// The source that raises the observable event.
     /// </param>
-    internal EventObservable(EventObservableSource source)
+    internal AsyncEventObservable(AsyncEventObservableSource source)
     {
-        source.Event += Emit;
+        source.Event += EmitAsync;
     }
 
     #endregion
 
     #region Methods
 
-    /// <inheritdoc/>
-    public IEventObserver Observe() => new EventObserverEventSource<Action>(
+    /// <inhertidoc/>
+    public IAsyncEventObserver Observe() => new AsyncEventObserverEventSource<Func<Task>>(
         register: handler => Event += handler,
         unregister: handler => Event -= handler,
         handler: eventHandler => () => eventHandler()
@@ -56,7 +56,8 @@ public sealed class EventObservable : IEventObservable
     /// <summary>
     /// Raise the event for this observable.
     /// </summary>
-    private void Emit() => Event?.Invoke();
+    /// <returns>A task that completes when the event handlers finish.</returns>
+    private Task EmitAsync() => Event.TryInvoke();
 
     /// <summary>
     /// Create an observer for a generic event.
@@ -71,11 +72,11 @@ public sealed class EventObservable : IEventObservable
     /// of this observer is passed into the Func.
     /// </param>
     /// <returns>An observer that observes from the event.</returns>
-    public static IEventObserver Observe<TEventDelegate>(
+    public static IAsyncEventObserver Observe<TEventDelegate>(
         Action<TEventDelegate> register,
         Action<TEventDelegate> unregister,
-        Func<Action, TEventDelegate> handler
-    ) => new EventObserverEventSource<TEventDelegate>(
+        Func<Func<Task>, TEventDelegate> handler
+    ) => new AsyncEventObserverEventSource<TEventDelegate>(
         register,
         unregister,
         handler
@@ -95,11 +96,11 @@ public sealed class EventObservable : IEventObservable
     /// of this observer is passed into the Func.
     /// </param>
     /// <returns>An observer that observes from the event.</returns>
-    public static IEventObserver<TArgs> Observe<TEventDelegate, TArgs>(
+    public static IAsyncEventObserver<TArgs> Observe<TEventDelegate, TArgs>(
         Action<TEventDelegate> register,
         Action<TEventDelegate> unregister,
-        Func<Action<TArgs>, TEventDelegate> handler
-    ) => new EventObserverEventSource<TEventDelegate, TArgs>(
+        Func<Func<TArgs, Task>, TEventDelegate> handler
+    ) => new AsyncEventObserverEventSource<TEventDelegate, TArgs>(
         register,
         unregister,
         handler
@@ -112,10 +113,10 @@ public sealed class EventObservable : IEventObservable
     /// <returns>
     /// A new observer that emits when any of the observers emit.
     /// </returns>
-    public static IEventObserver Combine(
-        params EventObservable[] observables
+    public static IAsyncEventObserver Combine(
+        params IAsyncEventObservable[] observables
     ) =>
-        new EventObserverCombine(
+        new AsyncEventObserverCombine(
             [.. observables.Select(observable => observable.Observe())]
         );
 
@@ -124,78 +125,78 @@ public sealed class EventObservable : IEventObservable
     /// </summary>
     /// <param name="observers">The observers to combine.</param>
     /// <returns>
-    /// A new observer that emits when any of the provided observers emit.
+    /// A new observer that emits when any of the provided observers emits.
     /// </returns>
-    public static IEventObserver Combine(params IEventObserver[] observers) =>
-        new EventObserverCombine(observers);
+    public static IAsyncEventObserver Combine(params IAsyncEventObserver[] observers) =>
+        new AsyncEventObserverCombine(observers);
 
     /// <summary>
     /// Combine the given observables into a single observer.
     /// </summary>
-    /// <typeparam name="TArgs">The type of args passed through.</typeparam>
     /// <param name="observables">The observables to combine.</param>
+    /// <typeparam name="TArgs">The type of args passed through.</typeparam>
     /// <returns>
     /// A new observer that emits when any of the observers emit.
     /// </returns>
-    public static IEventObserver<TArgs> Combine<TArgs>(
-        params IEventObservable<TArgs>[] observables
+    public static IAsyncEventObserver<TArgs> Combine<TArgs>(
+        params IAsyncEventObservable<TArgs>[] observables
     ) =>
-        new EventObserverCombine<TArgs>(
+        new AsyncEventObserverCombine<TArgs>(
             [.. observables.Select(observable => observable.Observe())]
         );
 
     /// <summary>
-    /// Combine the given event providers into a single observer.
+    /// Combine the given observers into a single observer.
     /// </summary>
     /// <typeparam name="TArgs">The type of args passed through.</typeparam>
     /// <param name="observers">The observers to combine.</param>
     /// <returns>
-    /// A new observer that emits when any of the observers emits.
+    /// A new observer that emits when any of the observers emit.
     /// </returns>
-    public static IEventObserver<TArgs> Combine<TArgs>(
-        params IEventObserver<TArgs>[] observers
+    public static IAsyncEventObserver<TArgs> Combine<TArgs>(
+        params IAsyncEventObserver<TArgs>[] observers
     ) =>
-        new EventObserverCombine<TArgs>(observers);
+        new AsyncEventObserverCombine<TArgs>(observers);
 
     #endregion
 
     #region Events
 
-    /// <inheritdoc/>
-    public event Action? Event;
+    /// <inhertidoc/>
+    public event Func<Task>? Event;
 
     #endregion
 }
 
 /// <summary>
-/// Implementation of <see cref="AsyncEventObservable"/>.
+/// Implementation of <see cref="IAsyncEventObservable"/>.
 /// </summary>
 /// <typeparam name="TArgs">
 /// The type of arguments passed with the event.
 /// </typeparam>
-public sealed class EventObservable<TArgs> : IEventObservable<TArgs>
+public sealed class AsyncEventObservable<TArgs> : IAsyncEventObservable<TArgs>
 {
     #region Constructors
 
     /// <summary>
-    /// Instances of this class are created with <see cref="EventObservableSource"/> 
-    /// objects.
+    /// Instances of this class are created with
+    /// <see cref="AsyncEventObservableSource"/> objects.
     /// </summary>
     /// <param name="source">
     /// The source that raises the observable event.
     /// </param>
-    internal EventObservable(EventObservableSource<TArgs> source)
+    internal AsyncEventObservable(AsyncEventObservableSource<TArgs> source)
     {
-        source.Event += Emit;
+        source.Event += EmitAsync;
     }
 
     #endregion
 
     #region Methods
 
-    /// <inheritdoc/>
-    public IEventObserver<TArgs> Observe() =>
-        new EventObserverEventSource<Action<TArgs>, TArgs>(
+    /// <inhertidoc/>
+    public IAsyncEventObserver<TArgs> Observe() =>
+        new AsyncEventObserverEventSource<Func<TArgs, Task>, TArgs>(
             register: handler => Event += handler,
             unregister: handler => Event -= handler,
             handler: eventHandler => args => eventHandler(args)
@@ -205,14 +206,15 @@ public sealed class EventObservable<TArgs> : IEventObservable<TArgs>
     /// Raise the event for this observable.
     /// </summary>
     /// <param name="args">The args included with the event.</param>
-    private void Emit(TArgs args) => Event?.Invoke(args);
+    /// <returns>A task that completes when the event handlers finish.</returns>
+    private Task EmitAsync(TArgs args) => Event.TryInvoke(args);
 
     #endregion
 
     #region Events
 
-    /// <inheritdoc/>
-    public event Action<TArgs>? Event;
+    /// <inhertidoc/>
+    public event Func<TArgs, Task>? Event;
 
     #endregion
 }

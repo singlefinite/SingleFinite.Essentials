@@ -107,22 +107,22 @@ public class Transaction
     /// <summary>
     /// Event that is raised when the IsOpen property changes.
     /// </summary>
-    public IObservable<bool> IsOpenChanged => _isOpenChangedSource.Observable;
-    private readonly ObservableSource<bool> _isOpenChangedSource = new();
+    public IEventObservable<bool> IsOpenChanged => _isOpenChangedSource.EventObservable;
+    private readonly EventObservableSource<bool> _isOpenChangedSource = new();
 
     /// <summary>
     /// Event that is raised when the IsOpen property changes from false to 
     /// true.
     /// </summary>
-    public IObservable Opened => _openedSource.Observable;
-    private readonly ObservableSource _openedSource = new();
+    public IEventObservable Opened => _openedSource.EventObservable;
+    private readonly EventObservableSource _openedSource = new();
 
     /// <summary>
     /// Event that is raised when the IsOpen property changes from true to 
     /// false.
     /// </summary>
-    public IObservable Closed => _closedSource.Observable;
-    private readonly ObservableSource _closedSource = new();
+    public IEventObservable Closed => _closedSource.EventObservable;
+    private readonly EventObservableSource _closedSource = new();
 
     #endregion
 }

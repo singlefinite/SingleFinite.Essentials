@@ -127,10 +127,10 @@ public abstract class DisposeStateBase : IDisposable
     #region Events
 
     /// <summary>
-    /// Observable that will notify observers when this object is disposed.
+    /// EventObservable that will notify observers when this object is disposed.
     /// </summary>
-    public IObservable Disposed => _disposedSource.Observable;
-    private readonly ObservableSource _disposedSource = new();
+    public IEventObservable Disposed => _disposedSource.EventObservable;
+    private readonly EventObservableSource _disposedSource = new();
 
     #endregion
 }
