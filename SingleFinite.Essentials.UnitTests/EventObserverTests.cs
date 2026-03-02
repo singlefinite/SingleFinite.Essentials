@@ -30,7 +30,7 @@ public class EventObserverTests(TestContext testContext)
         var observedCount = 0;
 
         var observableSource = new EventObservableSource();
-        var observable = observableSource.EventObservable;
+        var observable = observableSource.Observable;
 
         var observer = observable
             .Observe()
@@ -65,7 +65,7 @@ public class EventObserverTests(TestContext testContext)
         var observedNames = new List<string>();
 
         var observableSource = new EventObservableSource<ExampleArgs>();
-        var observable = observableSource.EventObservable;
+        var observable = observableSource.Observable;
 
         var observer = observable
             .Observe()
@@ -98,7 +98,7 @@ public class EventObserverTests(TestContext testContext)
         var observedEmitCount = 0;
 
         var observableSource = new EventObservableSource<ExampleArgs>();
-        var observable = observableSource.EventObservable;
+        var observable = observableSource.Observable;
 
         var observer = observable
             .Observe()
@@ -122,7 +122,7 @@ public class EventObserverTests(TestContext testContext)
         var observedNames = new List<string>();
 
         var observableSource = new EventObservableSource<ExampleArgs>();
-        var observable = observableSource.EventObservable;
+        var observable = observableSource.Observable;
 
         var observer = observable
             .Observe()
@@ -154,7 +154,7 @@ public class EventObserverTests(TestContext testContext)
         var observedNames = new List<string>();
 
         var observableSource = new EventObservableSource<ExampleArgs>();
-        var observable = observableSource.EventObservable;
+        var observable = observableSource.Observable;
 
         var observer = observable
             .Observe()
@@ -183,36 +183,6 @@ public class EventObserverTests(TestContext testContext)
     }
 
     [TestMethod]
-    public void Until_DisposeEventObservable_Runs_As_Expected()
-    {
-        var disposable = new ExampleDisposable();
-
-        var observedNames = new List<string>();
-
-        var observableSource = new EventObservableSource<ExampleArgs>();
-        var observable = observableSource.EventObservable;
-
-        var observer = observable
-            .Observe()
-            .OnEach(args => observedNames.Add(args.Name))
-            .Until(disposable);
-
-        Assert.IsEmpty(observedNames);
-
-        observableSource.Emit(new("Hello", 0));
-
-        Assert.HasCount(1, observedNames);
-        Assert.AreEqual("Hello", observedNames[0]);
-        observedNames.Clear();
-
-        disposable.Dispose();
-
-        observableSource.Emit(new("World", 0));
-
-        Assert.IsEmpty(observedNames);
-    }
-
-    [TestMethod]
     public void Until_CancellationToken_Runs_As_Expected()
     {
         var cancellationTokenSource = new CancellationTokenSource();
@@ -220,7 +190,7 @@ public class EventObserverTests(TestContext testContext)
         var observedNames = new List<string>();
 
         var observableSource = new EventObservableSource<ExampleArgs>();
-        var observable = observableSource.EventObservable;
+        var observable = observableSource.Observable;
 
         var observer = observable
             .Observe()
@@ -248,7 +218,7 @@ public class EventObserverTests(TestContext testContext)
         var observedNames = new List<string>();
 
         var observableSource = new EventObservableSource<ExampleArgs>();
-        var observable = observableSource.EventObservable;
+        var observable = observableSource.Observable;
 
         var observer = observable
             .Observe()
@@ -273,7 +243,7 @@ public class EventObserverTests(TestContext testContext)
         var observedEmitCount = 0;
 
         var observableSource = new EventObservableSource<ExampleArgs>();
-        var observable = observableSource.EventObservable;
+        var observable = observableSource.Observable;
 
         var observer = observable
             .Observe()
@@ -297,7 +267,7 @@ public class EventObserverTests(TestContext testContext)
         var observedNames = new List<string>();
 
         var observableSource = new EventObservableSource<ExampleArgs>();
-        var observable = observableSource.EventObservable;
+        var observable = observableSource.Observable;
 
         var observer = observable
             .Observe()
@@ -334,7 +304,7 @@ public class EventObserverTests(TestContext testContext)
         var observedThreadIdsAfterDispatch = new List<int>();
 
         var observableSource = new EventObservableSource<ExampleArgs>();
-        var observable = observableSource.EventObservable;
+        var observable = observableSource.Observable;
 
         var eventWaitHandle = new EventWaitHandle(
             initialState: false,
@@ -373,7 +343,7 @@ public class EventObserverTests(TestContext testContext)
         var dispatcher = new DedicatedThreadDispatcher();
 
         var observableSource = new EventObservableSource<ExampleArgs>();
-        var observable = observableSource.EventObservable;
+        var observable = observableSource.Observable;
 
         var observer = observable
             .Observe()
@@ -408,7 +378,7 @@ public class EventObserverTests(TestContext testContext)
         var observedNames = new List<string>();
 
         var observableSource = new EventObservableSource<ExampleArgs>();
-        var observable = observableSource.EventObservable;
+        var observable = observableSource.Observable;
 
         var observer = observable
             .Observe()
@@ -443,7 +413,7 @@ public class EventObserverTests(TestContext testContext)
         var observedNames = new List<string>();
 
         var observableSource = new EventObservableSource<ExampleArgs>();
-        var observable = observableSource.EventObservable;
+        var observable = observableSource.Observable;
         var dispatcher = new DedicatedThreadDispatcher();
 
         var observer = observable
@@ -481,7 +451,7 @@ public class EventObserverTests(TestContext testContext)
         var observedNames = new List<string>();
 
         var observableSource = new EventObservableSource<ExampleArgs>();
-        var observable = observableSource.EventObservable;
+        var observable = observableSource.Observable;
 
         var observer = observable
             .Observe()
@@ -521,7 +491,7 @@ public class EventObserverTests(TestContext testContext)
         var observedNames = new List<string>();
 
         var observableSource = new EventObservableSource<ExampleArgs>();
-        var observable = observableSource.EventObservable;
+        var observable = observableSource.Observable;
 
         var observer = observable
             .Observe()
@@ -574,46 +544,6 @@ public class EventObserverTests(TestContext testContext)
     }
 
     [TestMethod]
-    public async Task ToAsync_Runs_As_Expected_Async()
-    {
-        var observedCount = 0;
-
-        var observableSource = new EventObservableSource();
-        var observable = observableSource.EventObservable;
-        var dispatcher = new DedicatedThreadDispatcher();
-
-        var waitHandle = new ManualResetEvent(false);
-
-        var observer = observable
-            .Observe()
-            .ToAsync(dispatcher)
-            .OnEach(async () =>
-            {
-                await Task.Run(() => observedCount++);
-                waitHandle.Set();
-            });
-
-        Assert.AreEqual(0, observedCount);
-
-        observableSource.Emit();
-        waitHandle.WaitOne();
-        waitHandle.Reset();
-
-        Assert.AreEqual(1, observedCount);
-        observedCount = 0;
-
-        observer.Dispose();
-
-        observableSource.Emit();
-        await Task.Delay(
-            millisecondsDelay: 100,
-            cancellationToken: testContext.CancellationToken
-        );
-
-        Assert.AreEqual(0, observedCount);
-    }
-
-    [TestMethod]
     public void EventObserver_Generic_Event_Runs_As_Expected()
     {
         var exampleObject = new ExampleWithEvent();
@@ -651,12 +581,12 @@ public class EventObserverTests(TestContext testContext)
 
         var observableSource = new EventObservableSource();
 
-        var observable1 = observableSource.EventObservable;
+        var observable1 = observableSource.Observable;
         var observer1 = observable1
             .Observe()
             .OnEach(() => observed1Count++);
 
-        var observable2 = observer1.ToEventObservable();
+        var observable2 = observer1.ToObservable();
         var observer2 = observable2
             .Observe()
             .OnEach(() => observed2Count++);
@@ -684,12 +614,12 @@ public class EventObserverTests(TestContext testContext)
 
         var observableSource = new EventObservableSource();
 
-        var observable1 = observableSource.EventObservable;
+        var observable1 = observableSource.Observable;
         var observer1 = observable1
             .Observe()
             .OnEach(() => observed1Count++);
 
-        var observable2 = observer1.ToEventObservable();
+        var observable2 = observer1.ToObservable();
         var observer2 = observable2
             .Observe()
             .OnEach(() => observed2Count++);
@@ -723,7 +653,7 @@ public class EventObserverTests(TestContext testContext)
         Age: 0
     );
 
-    private class ExampleDisposable : IDisposable, IDisposeEventObservable
+    private class ExampleDisposable : IDisposable
     {
         private readonly DisposeState _disposeState;
 

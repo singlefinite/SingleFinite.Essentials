@@ -78,13 +78,6 @@ internal class EventObserverEventSource<TEventDelegate> : IEventObserver
 
     #endregion
 
-    #region Properties
-
-    /// <inheritdoc/>
-    public bool IsDisposed => _disposeState.IsDisposed;
-
-    #endregion
-
     #region Methods
 
     /// <summary>
@@ -100,9 +93,6 @@ internal class EventObserverEventSource<TEventDelegate> : IEventObserver
     #endregion
 
     #region Events
-
-    /// <inheritdoc/>
-    public IEventObservable Disposed => _disposeState.Disposed;
 
     /// <inheritdoc/>
     public event Action? Next;
@@ -168,13 +158,6 @@ internal class EventObserverEventSource<TEventDelegate, TArgs> : IEventObserver<
 
     #endregion
 
-    #region Properties
-
-    /// <inheritdoc/>
-    public bool IsDisposed => _disposeState.IsDisposed;
-
-    #endregion
-
     #region Methods
 
     /// <summary>
@@ -195,9 +178,6 @@ internal class EventObserverEventSource<TEventDelegate, TArgs> : IEventObserver<
     #endregion
 
     #region Events
-
-    /// <inheritdoc/>
-    public IEventObservable Disposed => _disposeState.Disposed;
 
     /// <inheritdoc/>
     public event Action? Next;

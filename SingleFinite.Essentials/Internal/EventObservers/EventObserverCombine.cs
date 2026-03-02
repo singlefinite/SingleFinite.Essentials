@@ -55,16 +55,6 @@ internal class EventObserverCombine : IEventObserver
 
     #endregion
 
-    #region Properties
-
-    /// <inheritdoc/>
-    public bool IsDisposed => _disposeState.IsDisposed;
-
-    /// <inheritdoc/>
-    public IEventObservable Disposed => _disposeState.Disposed;
-
-    #endregion
-
     #region Methods
 
     /// <inheritdoc/>
@@ -116,16 +106,6 @@ internal class EventObserverCombine<TArgs> : IEventObserver<TArgs>
                 .Until(_disposeState.CancellationToken);
         }
     }
-
-    #endregion
-
-    #region Properties
-
-    /// <inheritdoc/>
-    public bool IsDisposed => _disposeState.IsDisposed;
-
-    /// <inheritdoc/>
-    public IEventObservable Disposed => _disposeState.Disposed;
 
     #endregion
 

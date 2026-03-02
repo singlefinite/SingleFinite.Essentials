@@ -29,7 +29,7 @@ public class AsyncEventObservableTests(TestContext testContext)
     {
         var observedNumber = 0;
         var observableSource = new AsyncEventObservableSource<int>();
-        observableSource.EventObservable
+        observableSource.Observable
             .Observe()
             .OnEach(async args =>
             {
@@ -51,7 +51,7 @@ public class AsyncEventObservableTests(TestContext testContext)
     {
         var observedNumber = 0;
         var observableSource = new AsyncEventObservableSource<int>();
-        var observer = observableSource.EventObservable
+        var observer = observableSource.Observable
             .Observe()
             .OnEach(async args =>
             {
@@ -79,7 +79,7 @@ public class AsyncEventObservableTests(TestContext testContext)
     {
         var observedNumber = 0;
         var observableSource = new AsyncEventObservableSource<int>();
-        observableSource.EventObservable.Event += async args =>
+        observableSource.Observable.Event += async args =>
         {
             await Task.Run(() => observedNumber = args);
         };
@@ -99,7 +99,7 @@ public class AsyncEventObservableTests(TestContext testContext)
         var dispatcher = new DedicatedThreadDispatcher();
 
         var observableSource = new AsyncEventObservableSource<ExampleArgs>();
-        var observable = observableSource.EventObservable;
+        var observable = observableSource.Observable;
 
         var observer = observable
             .Observe()
@@ -134,8 +134,8 @@ public class AsyncEventObservableTests(TestContext testContext)
         var firstEventObservableSource = new AsyncEventObservableSource<int>();
         var secondEventObservableSource = new AsyncEventObservableSource<int>();
         var combinedEventObserver = AsyncEventObservable.Combine(
-            firstEventObservableSource.EventObservable,
-            secondEventObservableSource.EventObservable
+            firstEventObservableSource.Observable,
+            secondEventObservableSource.Observable
         );
 
         combinedEventObserver.OnEach(observedNumbers.Add);
@@ -159,8 +159,8 @@ public class AsyncEventObservableTests(TestContext testContext)
         var firstEventObservableSource = new AsyncEventObservableSource<int>();
         var secondEventObservableSource = new AsyncEventObservableSource<int>();
 
-        var firstEventObserver = firstEventObservableSource.EventObservable.Observe();
-        var secondEventObserver = secondEventObservableSource.EventObservable.Observe();
+        var firstEventObserver = firstEventObservableSource.Observable.Observe();
+        var secondEventObserver = secondEventObservableSource.Observable.Observe();
 
         var combinedEventObserver = AsyncEventObservable.Combine(
             firstEventObserver,
@@ -170,7 +170,6 @@ public class AsyncEventObservableTests(TestContext testContext)
         combinedEventObserver.OnEach(observedNumbers.Add);
 
         firstEventObserver.Dispose();
-        Assert.IsFalse(combinedEventObserver.IsDisposed);
 
         await firstEventObservableSource.EmitAsync(9);
         Assert.IsEmpty(observedNumbers);
@@ -181,28 +180,27 @@ public class AsyncEventObservableTests(TestContext testContext)
     }
 
     [TestMethod]
-    public void Combine_Dispose_Will_Dispose_Combined_EventObservers()
+    public async Task Combine_Dispose_Will_Dispose_Combined_EventObservers()
     {
+        var observedNumbers = new List<int>();
+
         var firstEventObservableSource = new AsyncEventObservableSource<int>();
         var secondEventObservableSource = new AsyncEventObservableSource<int>();
 
-        var firstEventObserver = firstEventObservableSource.EventObservable.Observe();
-        var secondEventObserver = secondEventObservableSource.EventObservable.Observe();
+        var firstEventObserver = firstEventObservableSource.Observable.Observe();
+        var secondEventObserver = secondEventObservableSource.Observable.Observe();
 
         var combinedEventObserver = AsyncEventObservable.Combine(
             firstEventObserver,
             secondEventObserver
         );
 
-        Assert.IsFalse(combinedEventObserver.IsDisposed);
-        Assert.IsFalse(firstEventObserver.IsDisposed);
-        Assert.IsFalse(secondEventObserver.IsDisposed);
+        combinedEventObserver.OnEach(observedNumbers.Add);
 
         combinedEventObserver.Dispose();
 
-        Assert.IsTrue(combinedEventObserver.IsDisposed);
-        Assert.IsTrue(firstEventObserver.IsDisposed);
-        Assert.IsTrue(secondEventObserver.IsDisposed);
+        await firstEventObservableSource.EmitAsync(9);
+        Assert.IsEmpty(observedNumbers);
     }
 
     [TestMethod]
@@ -214,8 +212,8 @@ public class AsyncEventObservableTests(TestContext testContext)
         var secondEventObservableSource = new AsyncEventObservableSource<Child>();
 
         var firstCombinedEventObserver = AsyncEventObservable.Combine(
-            firstEventObservableSource.EventObservable,
-            secondEventObservableSource.EventObservable
+            firstEventObservableSource.Observable,
+            secondEventObservableSource.Observable
         );
 
         firstCombinedEventObserver.OnEach(observedArgs.Add);
@@ -231,8 +229,8 @@ public class AsyncEventObservableTests(TestContext testContext)
         firstCombinedEventObserver.Dispose();
 
         var secondCombinedEventObserver = AsyncEventObservable.Combine(
-            firstEventObservableSource.EventObservable,
-            secondEventObservableSource.EventObservable
+            firstEventObservableSource.Observable,
+            secondEventObservableSource.Observable
         );
 
         secondCombinedEventObserver.OnEach(observedArgs.Add);

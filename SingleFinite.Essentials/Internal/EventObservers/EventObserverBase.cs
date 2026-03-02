@@ -53,13 +53,6 @@ internal abstract class EventObserverBase : IEventObserver
 
     #endregion
 
-    #region Properties
-
-    /// <inheritdoc/>
-    public bool IsDisposed => _parent.IsDisposed;
-
-    #endregion
-
     #region Methods
 
     /// <summary>
@@ -88,9 +81,6 @@ internal abstract class EventObserverBase : IEventObserver
     #endregion
 
     #region Events
-
-    /// <inheritdoc/>
-    public IEventObservable Disposed => _parent.Disposed;
 
     /// <inheritdoc/>
     public virtual event Action? Next;
@@ -130,13 +120,6 @@ internal abstract class EventObserverBase<TArgs> : IEventObserver<TArgs>
 
     #endregion
 
-    #region Properties
-
-    /// <inheritdoc/>
-    public bool IsDisposed => _parent.IsDisposed;
-
-    #endregion
-
     #region Methods
 
     /// <summary>
@@ -170,9 +153,6 @@ internal abstract class EventObserverBase<TArgs> : IEventObserver<TArgs>
     #endregion
 
     #region Events
-
-    /// <inheritdoc/>
-    public IEventObservable Disposed => _parent.Disposed;
 
     /// <inheritdoc/>
     public virtual event Action? Next;

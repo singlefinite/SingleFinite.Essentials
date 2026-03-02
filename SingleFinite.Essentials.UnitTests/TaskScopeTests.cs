@@ -25,37 +25,37 @@ namespace SingleFinite.Essentials.UnitTests;
 public class TaskScopeTests(TestContext testContext)
 {
     [TestMethod]
-    public void Child_Is_Disposed_When_Parent_Is_Cancelled()
+    public void Child_Is_Canceled_When_Parent_Is_Cancelled()
     {
         var parentScope = new TaskScope(
             dispatcher: new ThreadPoolDispatcher()
         );
         var childScope = parentScope.CreateChildScope();
 
-        Assert.IsFalse(parentScope.IsDisposed);
-        Assert.IsFalse(childScope.IsDisposed);
+        Assert.IsFalse(parentScope.CancellationToken.IsCancellationRequested);
+        Assert.IsFalse(childScope.CancellationToken.IsCancellationRequested);
 
         parentScope.Dispose();
 
-        Assert.IsTrue(parentScope.IsDisposed);
-        Assert.IsTrue(childScope.IsDisposed);
+        Assert.IsTrue(parentScope.CancellationToken.IsCancellationRequested);
+        Assert.IsTrue(childScope.CancellationToken.IsCancellationRequested);
     }
 
     [TestMethod]
-    public void Parent_Is_Not_Disposed_When_Child_Is_Disposed()
+    public void Parent_Is_Not_Canceled_When_Child_Is_Disposed()
     {
         var parentScope = new TaskScope(
             dispatcher: new ThreadPoolDispatcher()
         );
         var childScope = parentScope.CreateChildScope();
 
-        Assert.IsFalse(parentScope.IsDisposed);
-        Assert.IsFalse(childScope.IsDisposed);
+        Assert.IsFalse(parentScope.CancellationToken.IsCancellationRequested);
+        Assert.IsFalse(childScope.CancellationToken.IsCancellationRequested);
 
         childScope.Dispose();
 
-        Assert.IsFalse(parentScope.IsDisposed);
-        Assert.IsTrue(childScope.IsDisposed);
+        Assert.IsFalse(parentScope.CancellationToken.IsCancellationRequested);
+        Assert.IsTrue(childScope.CancellationToken.IsCancellationRequested);
     }
 
     [TestMethod]

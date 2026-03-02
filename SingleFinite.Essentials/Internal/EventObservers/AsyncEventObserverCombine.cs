@@ -55,13 +55,6 @@ internal class AsyncEventObserverCombine : IAsyncEventObserver
 
     #endregion
 
-    #region Properties
-
-    /// <inheritdoc/>
-    public bool IsDisposed => _disposeState.IsDisposed;
-
-    #endregion
-
     #region Methods
 
     /// <inheritdoc/>
@@ -70,9 +63,6 @@ internal class AsyncEventObserverCombine : IAsyncEventObserver
     #endregion
 
     #region Events
-
-    /// <inheritdoc/>
-    public IEventObservable Disposed => _disposeState.Disposed;
 
     /// <inheritdoc/>
     public event Func<Task>? Next;
@@ -119,13 +109,6 @@ internal class AsyncEventObserverCombine<TArgs> : IAsyncEventObserver<TArgs>
 
     #endregion
 
-    #region Properties
-
-    /// <inheritdoc/>
-    public bool IsDisposed => _disposeState.IsDisposed;
-
-    #endregion
-
     #region Methods
 
     /// <inheritdoc/>
@@ -134,9 +117,6 @@ internal class AsyncEventObserverCombine<TArgs> : IAsyncEventObserver<TArgs>
     #endregion
 
     #region Events
-
-    /// <inheritdoc/>
-    public IEventObservable Disposed => _disposeState.Disposed;
 
     /// <inheritdoc/>
     public event Func<Task>? Next;

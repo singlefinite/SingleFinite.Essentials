@@ -103,21 +103,6 @@ public static class IEventObserverExtensions
             );
 
         /// <summary>
-        /// Dispose of the observer chain when the given object is disposed.
-        /// </summary>
-        /// <param name="disposeEventObservable">
-        /// The object that when disposed will dispose of this observer.
-        /// </param>
-        /// <returns>
-        /// A new observer that has been added to the chain of observers.
-        /// </returns>
-        public IEventObserver Until(IDisposeEventObservable disposeEventObservable) =>
-            new EventObserverUntil(
-                parent: observer,
-                disposeEventObservable: disposeEventObservable
-            );
-
-        /// <summary>
         /// Dispose of the observer chain when the given cancellation token is
         /// cancelled.
         /// </summary>
@@ -241,31 +226,13 @@ public static class IEventObserverExtensions
             );
 
         /// <summary>
-        /// Create an observer that raises the next event in the observer chain
-        /// as async by using the provided dispatcher.
-        /// </summary>
-        /// <param name="dispatcher">
-        /// The dispatcher the async events will be run with.
-        /// </param>
-        /// <returns>
-        /// A new observer that has been added to the chain of observers.
-        /// </returns>
-        public IAsyncEventObserver ToAsync(
-            IDispatcher dispatcher
-        ) =>
-            new EventObserverToAsync(
-                parent: observer,
-                dispatcher: dispatcher
-            );
-
-        /// <summary>
         /// Create an observable that will emit when the parent observer
         /// observes an event.
         /// </summary>
         /// <returns>
         /// A new observable.
         /// </returns>
-        public IEventObservable ToEventObservable() =>
+        public IEventObservable ToObservable() =>
             new EventObserverEventObservable(
                 parent: observer
             ).EventObservable;
@@ -344,21 +311,6 @@ public static class IEventObserverExtensions
             new EventObserverUntil<TArgs>(
                 parent: observer,
                 predicate: predicate
-            );
-
-        /// <summary>
-        /// Dispose of the observer chain when the given object is disposed.
-        /// </summary>
-        /// <param name="disposeEventObservable">
-        /// The object that when disposed will dispose of this observer.
-        /// </param>
-        /// <returns>
-        /// A new observer that has been added to the chain of observers.
-        /// </returns>
-        public IEventObserver<TArgs> Until(IDisposeEventObservable disposeEventObservable) =>
-            new EventObserverUntil<TArgs>(
-                parent: observer,
-                disposeEventObservable: disposeEventObservable
             );
 
         /// <summary>
@@ -485,31 +437,13 @@ public static class IEventObserverExtensions
             );
 
         /// <summary>
-        /// Create an observer that raises the next event in the observer chain
-        /// as async by using the provided dispatcher.
-        /// </summary>
-        /// <param name="dispatcher">
-        /// The dispatcher the async events will be run with.
-        /// </param>
-        /// <returns>
-        /// A new observer that has been added to the chain of observers.
-        /// </returns>
-        public IAsyncEventObserver<TArgs> ToAsync(
-            IDispatcher dispatcher
-        ) =>
-            new EventObserverToAsync<TArgs>(
-                parent: observer,
-                dispatcher: dispatcher
-            );
-
-        /// <summary>
         /// Create an observable that will emit when the parent observer
         /// observes an event.
         /// </summary>
         /// <returns>
         /// A new observable.
         /// </returns>
-        public IEventObservable<TArgs> ToEventObservable() =>
+        public IEventObservable<TArgs> ToObservable() =>
             new EventObserverEventObservable<TArgs>(
                 parent: observer
             ).EventObservable;

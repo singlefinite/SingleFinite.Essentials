@@ -24,7 +24,7 @@ namespace SingleFinite.Essentials;
 /// <summary>
 /// Wraps an event to make registering and unregistering callbacks 
 /// for the event more convenient when working with dependency injection scopes.
-/// EventObservable instances are created by instances of the 
+/// Observable instances are created by instances of the 
 /// <see cref="EventObservableSource"/> class.
 /// </summary>
 public interface IEventObservable
@@ -46,7 +46,7 @@ public interface IEventObservable
 /// <summary>
 /// Wraps an event to make registering and unregistering callbacks 
 /// for the event more convenient when working with dependency injection scopes.
-/// EventObservable instances are created by instances of the 
+/// Observable instances are created by instances of the 
 /// <see cref="EventObservableSource{TArgs}"/> class.
 /// </summary>
 /// <typeparam name="TArgs">

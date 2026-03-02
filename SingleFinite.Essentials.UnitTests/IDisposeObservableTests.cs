@@ -31,7 +31,7 @@ public class IDisposeEventObservableTests
         Assert.AreEqual(1, exampleDisposable.ObservedDisposeCount);
     }
 
-    private sealed class ExampleDisposable : IDisposable, IDisposeEventObservable
+    private sealed class ExampleDisposable : IDisposable
     {
         private readonly DisposeState _disposeState;
 

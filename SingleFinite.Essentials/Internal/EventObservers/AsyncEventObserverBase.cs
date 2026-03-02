@@ -53,13 +53,6 @@ internal abstract class AsyncEventObserverBase : IAsyncEventObserver
 
     #endregion
 
-    #region Properties
-
-    /// <inheritdoc/>
-    public bool IsDisposed => _parent.IsDisposed;
-
-    #endregion
-
     #region Methods
 
     /// <summary>
@@ -90,9 +83,6 @@ internal abstract class AsyncEventObserverBase : IAsyncEventObserver
     #endregion
 
     #region Events
-
-    /// <inheritdoc/>
-    public IEventObservable Disposed => _parent.Disposed;
 
     /// <inheritdoc/>
     public virtual event Func<Task>? Next;
@@ -132,13 +122,6 @@ internal abstract class AsyncEventObserverBase<TArgs> : IAsyncEventObserver<TArg
 
     #endregion
 
-    #region Properties
-
-    /// <inheritdoc/>
-    public bool IsDisposed => _parent.IsDisposed;
-
-    #endregion
-
     #region Methods
 
     /// <summary>
@@ -174,9 +157,6 @@ internal abstract class AsyncEventObserverBase<TArgs> : IAsyncEventObserver<TArg
     #endregion
 
     #region Events
-
-    /// <inheritdoc/>
-    public IEventObservable Disposed => _parent.Disposed;
 
     /// <inheritdoc/>
     public virtual event Func<Task>? Next;

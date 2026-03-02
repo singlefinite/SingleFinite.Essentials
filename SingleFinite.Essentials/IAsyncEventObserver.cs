@@ -30,7 +30,7 @@ namespace SingleFinite.Essentials;
 /// it will unregister all observers in the chain so any future observable
 /// events will not be observed.
 /// </summary>
-public interface IAsyncEventObserver : IDisposable, IDisposeEventObservable
+public interface IAsyncEventObserver : IDisposable
 {
     /// <summary>
     /// An event that is raised when the next observer(s) in the chain should

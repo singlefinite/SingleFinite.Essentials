@@ -29,15 +29,6 @@ namespace SingleFinite.Essentials;
 /// </summary>
 public sealed class AsyncEventObservableSource
 {
-    #region Properties
-
-    /// <summary>
-    /// The observable provided by this class.
-    /// </summary>
-    public IAsyncEventObservable EventObservable { get; }
-
-    #endregion
-
     #region Constructors
 
     /// <summary>
@@ -45,8 +36,17 @@ public sealed class AsyncEventObservableSource
     /// </summary>
     public AsyncEventObservableSource()
     {
-        EventObservable = new AsyncEventObservable(source: this);
+        Observable = new AsyncEventObservable(source: this);
     }
+
+    #endregion
+
+    #region Properties
+
+    /// <summary>
+    /// The observable provided by this class.
+    /// </summary>
+    public IAsyncEventObservable Observable { get; }
 
     #endregion
 
@@ -94,15 +94,6 @@ public sealed class AsyncEventObservableSource
 /// </typeparam>
 public sealed class AsyncEventObservableSource<TArgs>
 {
-    #region Properties
-
-    /// <summary>
-    /// The observable provided by this class.
-    /// </summary>
-    public IAsyncEventObservable<TArgs> EventObservable { get; }
-
-    #endregion
-
     #region Constructors
 
     /// <summary>
@@ -110,8 +101,17 @@ public sealed class AsyncEventObservableSource<TArgs>
     /// </summary>
     public AsyncEventObservableSource()
     {
-        EventObservable = new AsyncEventObservable<TArgs>(source: this);
+        Observable = new AsyncEventObservable<TArgs>(source: this);
     }
+
+    #endregion
+
+    #region Properties
+
+    /// <summary>
+    /// The observable provided by this class.
+    /// </summary>
+    public IAsyncEventObservable<TArgs> Observable { get; }
 
     #endregion
 

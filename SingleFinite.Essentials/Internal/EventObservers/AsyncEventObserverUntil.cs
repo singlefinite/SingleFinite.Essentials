@@ -56,30 +56,6 @@ internal class AsyncEventObserverUntil : AsyncEventObserverBase
     /// Constructor.
     /// </summary>
     /// <param name="parent">The parent to this observer.</param>
-    /// <param name="disposeEventObservable">
-    /// The object that when disposed will dispose of this observer.
-    /// </param>
-    public AsyncEventObserverUntil(
-        IAsyncEventObserver parent,
-        IDisposeEventObservable disposeEventObservable
-    ) : base(parent)
-    {
-        if (disposeEventObservable.IsDisposed)
-        {
-            Dispose();
-            return;
-        }
-
-        disposeEventObservable.Disposed
-            .Observe()
-            .OnEach(Dispose)
-            .Once();
-    }
-
-    /// <summary>
-    /// Constructor.
-    /// </summary>
-    /// <param name="parent">The parent to this observer.</param>
     /// <param name="cancellationToken">
     /// The cancellation token that when cancelled will dispose of this
     /// observer.
@@ -155,30 +131,6 @@ internal class AsyncEventObserverUntil<TArgs> : AsyncEventObserverBase<TArgs>
     ) : base(parent)
     {
         _predicate = predicate;
-    }
-
-    /// <summary>
-    /// Constructor.
-    /// </summary>
-    /// <param name="parent">The parent to this observer.</param>
-    /// <param name="disposeEventObservable">
-    /// The object that when disposed will dispose of this observer.
-    /// </param>
-    public AsyncEventObserverUntil(
-        IAsyncEventObserver<TArgs> parent,
-        IDisposeEventObservable disposeEventObservable
-    ) : base(parent)
-    {
-        if (disposeEventObservable.IsDisposed)
-        {
-            Dispose();
-            return;
-        }
-
-        disposeEventObservable.Disposed
-            .Observe()
-            .OnEach(Dispose)
-            .Once();
     }
 
     /// <summary>

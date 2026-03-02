@@ -29,7 +29,7 @@ public class EventObservableTests
     {
         var observedNumber = 0;
         var observableSource = new EventObservableSource<int>();
-        observableSource.EventObservable
+        observableSource.Observable
             .Observe()
             .OnEach(args => observedNumber = args);
 
@@ -45,7 +45,7 @@ public class EventObservableTests
     {
         var observedNumber = 0;
         var observableSource = new EventObservableSource<int>();
-        var observer = observableSource.EventObservable
+        var observer = observableSource.Observable
             .Observe()
             .OnEach(args => observedNumber = args);
 
@@ -67,7 +67,7 @@ public class EventObservableTests
     {
         var observedNumber = 0;
         var observableSource = new EventObservableSource<int>();
-        observableSource.EventObservable.Event += args => observedNumber = args;
+        observableSource.Observable.Event += args => observedNumber = args;
 
         Assert.AreEqual(0, observedNumber);
 
@@ -84,8 +84,8 @@ public class EventObservableTests
         var firstEventObservableSource = new EventObservableSource<int>();
         var secondEventObservableSource = new EventObservableSource<int>();
         var combinedEventObserver = EventObservable.Combine(
-            firstEventObservableSource.EventObservable,
-            secondEventObservableSource.EventObservable
+            firstEventObservableSource.Observable,
+            secondEventObservableSource.Observable
         );
 
         combinedEventObserver.OnEach(observedNumbers.Add);
@@ -109,8 +109,8 @@ public class EventObservableTests
         var firstEventObservableSource = new EventObservableSource<int>();
         var secondEventObservableSource = new EventObservableSource<int>();
 
-        var firstEventObserver = firstEventObservableSource.EventObservable.Observe();
-        var secondEventObserver = secondEventObservableSource.EventObservable.Observe();
+        var firstEventObserver = firstEventObservableSource.Observable.Observe();
+        var secondEventObserver = secondEventObservableSource.Observable.Observe();
 
         var combinedEventObserver = EventObservable.Combine(
             firstEventObserver,
@@ -120,7 +120,6 @@ public class EventObservableTests
         combinedEventObserver.OnEach(observedNumbers.Add);
 
         firstEventObserver.Dispose();
-        Assert.IsFalse(combinedEventObserver.IsDisposed);
 
         firstEventObservableSource.Emit(9);
         Assert.IsEmpty(observedNumbers);
@@ -133,26 +132,25 @@ public class EventObservableTests
     [TestMethod]
     public void Combine_Dispose_Will_Dispose_Combined_EventObservers()
     {
+        var observedNumbers = new List<int>();
+
         var firstEventObservableSource = new EventObservableSource<int>();
         var secondEventObservableSource = new EventObservableSource<int>();
 
-        var firstEventObserver = firstEventObservableSource.EventObservable.Observe();
-        var secondEventObserver = secondEventObservableSource.EventObservable.Observe();
+        var firstEventObserver = firstEventObservableSource.Observable.Observe();
+        var secondEventObserver = secondEventObservableSource.Observable.Observe();
 
         var combinedEventObserver = EventObservable.Combine(
             firstEventObserver,
             secondEventObserver
         );
 
-        Assert.IsFalse(combinedEventObserver.IsDisposed);
-        Assert.IsFalse(firstEventObserver.IsDisposed);
-        Assert.IsFalse(secondEventObserver.IsDisposed);
+        combinedEventObserver.OnEach(observedNumbers.Add);
 
         combinedEventObserver.Dispose();
 
-        Assert.IsTrue(combinedEventObserver.IsDisposed);
-        Assert.IsTrue(firstEventObserver.IsDisposed);
-        Assert.IsTrue(secondEventObserver.IsDisposed);
+        firstEventObservableSource.Emit(9);
+        Assert.IsEmpty(observedNumbers);
     }
 
     [TestMethod]
@@ -164,8 +162,8 @@ public class EventObservableTests
         var secondEventObservableSource = new EventObservableSource<Child>();
 
         var firstCombinedEventObserver = EventObservable.Combine(
-            firstEventObservableSource.EventObservable,
-            secondEventObservableSource.EventObservable
+            firstEventObservableSource.Observable,
+            secondEventObservableSource.Observable
         );
 
         firstCombinedEventObserver.OnEach(observedArgs.Add);
@@ -181,8 +179,8 @@ public class EventObservableTests
         firstCombinedEventObserver.Dispose();
 
         var secondCombinedEventObserver = EventObservable.Combine(
-            firstEventObservableSource.EventObservable,
-            secondEventObservableSource.EventObservable
+            firstEventObservableSource.Observable,
+            secondEventObservableSource.Observable
         );
 
         secondCombinedEventObserver.OnEach(observedArgs.Add);

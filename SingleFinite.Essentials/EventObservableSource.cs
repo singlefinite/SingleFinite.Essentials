@@ -22,22 +22,13 @@
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// The source for an <see cref="EventObservable"/>.  Instances of this class can be 
+/// The source for an <see cref="Observable"/>.  Instances of this class can be 
 /// kept private within its owner while the observable is shared publicly 
 /// outside of the owner.  Since events are only raised through this class it 
 /// prevents events from being raised outside of the owning class.
 /// </summary>
 public sealed class EventObservableSource
 {
-    #region Properties
-
-    /// <summary>
-    /// The observable provided by this class.
-    /// </summary>
-    public IEventObservable EventObservable { get; }
-
-    #endregion
-
     #region Constructors
 
     /// <summary>
@@ -45,8 +36,17 @@ public sealed class EventObservableSource
     /// </summary>
     public EventObservableSource()
     {
-        EventObservable = new EventObservable(source: this);
+        Observable = new EventObservable(source: this);
     }
+
+    #endregion
+
+    #region Properties
+
+    /// <summary>
+    /// The observable provided by this class.
+    /// </summary>
+    public IEventObservable Observable { get; }
 
     #endregion
 
@@ -80,15 +80,6 @@ public sealed class EventObservableSource
 /// </typeparam>
 public sealed class EventObservableSource<TArgs>
 {
-    #region Properties
-
-    /// <summary>
-    /// The observable provided by this class.
-    /// </summary>
-    public IEventObservable<TArgs> EventObservable { get; }
-
-    #endregion
-
     #region Constructors
 
     /// <summary>
@@ -96,8 +87,17 @@ public sealed class EventObservableSource<TArgs>
     /// </summary>
     public EventObservableSource()
     {
-        EventObservable = new EventObservable<TArgs>(source: this);
+        Observable = new EventObservable<TArgs>(source: this);
     }
+
+    #endregion
+
+    #region Properties
+
+    /// <summary>
+    /// The observable provided by this class.
+    /// </summary>
+    public IEventObservable<TArgs> Observable { get; }
 
     #endregion
 

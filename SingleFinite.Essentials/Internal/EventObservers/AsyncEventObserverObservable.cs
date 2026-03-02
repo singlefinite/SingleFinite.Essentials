@@ -48,7 +48,7 @@ internal class AsyncEventObserverEventObservable(
     /// <summary>
     /// EventObservable that is raised when an event is recieved from the observer.
     /// </summary>
-    public IAsyncEventObservable EventObservable => _observableSource.EventObservable;
+    public IAsyncEventObservable EventObservable => _observableSource.Observable;
     private readonly AsyncEventObservableSource _observableSource = new();
 
     #endregion
@@ -88,7 +88,7 @@ internal class AsyncEventObserverEventObservable<TArgs>(
     /// <summary>
     /// EventObservable that is raised when an event is recieved from the observer.
     /// </summary>
-    public IAsyncEventObservable<TArgs> EventObservable => _observableSource.EventObservable;
+    public IAsyncEventObservable<TArgs> EventObservable => _observableSource.Observable;
     private readonly AsyncEventObservableSource<TArgs> _observableSource = new();
 
     #endregion

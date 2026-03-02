@@ -78,13 +78,6 @@ internal class AsyncEventObserverEventSource<TEventDelegate> : IAsyncEventObserv
 
     #endregion
 
-    #region Properties
-
-    /// <inheritdoc/>
-    public bool IsDisposed => _disposeState.IsDisposed;
-
-    #endregion
-
     #region Methods
 
     /// <summary>
@@ -101,9 +94,6 @@ internal class AsyncEventObserverEventSource<TEventDelegate> : IAsyncEventObserv
     #endregion
 
     #region Events
-
-    /// <inheritdoc/>
-    public IEventObservable Disposed => _disposeState.Disposed;
 
     /// <inheritdoc/>
     public event Func<Task>? Next;
@@ -169,13 +159,6 @@ internal class AsyncEventObserverEventSource<TEventDelegate, TArgs> : IAsyncEven
 
     #endregion
 
-    #region Properties
-
-    /// <inheritdoc/>
-    public bool IsDisposed => _disposeState.IsDisposed;
-
-    #endregion
-
     #region Methods
 
     /// <summary>
@@ -197,9 +180,6 @@ internal class AsyncEventObserverEventSource<TEventDelegate, TArgs> : IAsyncEven
     #endregion
 
     #region Events
-
-    /// <inheritdoc/>
-    public IEventObservable Disposed => _disposeState.Disposed;
 
     /// <inheritdoc/>
     public event Func<Task>? Next;

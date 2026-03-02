@@ -182,21 +182,6 @@ public static class IAsyncEventObserverExtensions
             );
 
         /// <summary>
-        /// Dispose of the observer chain when the given object is disposed.
-        /// </summary>
-        /// <param name="disposeEventObservable">
-        /// The object that that when disposed will dispose of this observer.
-        /// </param>
-        /// <returns>
-        /// A new observer that has been added to the chain of observers.
-        /// </returns>
-        public IAsyncEventObserver Until(IDisposeEventObservable disposeEventObservable) =>
-            new AsyncEventObserverUntil(
-                parent: observer,
-                disposeEventObservable: disposeEventObservable
-            );
-
-        /// <summary>
         /// Dispose of the observer chain when the given cancellation token is
         /// cancelled.
         /// </summary>
@@ -370,21 +355,13 @@ public static class IAsyncEventObserverExtensions
             );
 
         /// <summary>
-        /// Turn this async observer into a synchronous observer.
-        /// </summary>
-        public IEventObserver ToSync() =>
-            new AsyncEventObserverToSync(
-                parent: observer
-            );
-
-        /// <summary>
         /// Create an observable that will emit when the parent observer
         /// observes an event.
         /// </summary>
         /// <returns>
         /// A new observable.
         /// </returns>
-        public IAsyncEventObservable ToEventObservable() =>
+        public IAsyncEventObservable ToObservable() =>
             new AsyncEventObserverEventObservable(
                 parent: observer
             ).EventObservable;
@@ -540,21 +517,6 @@ public static class IAsyncEventObserverExtensions
             new AsyncEventObserverUntil<TArgs>(
                 parent: observer,
                 predicate: args => Task.FromResult(predicate(args))
-            );
-
-        /// <summary>
-        /// Dispose of the observer chain when the given object is disposed.
-        /// </summary>
-        /// <param name="disposeEventObservable">
-        /// The object that that when disposed will dispose of this observer.
-        /// </param>
-        /// <returns>
-        /// A new observer that has been added to the chain of observers.
-        /// </returns>
-        public IAsyncEventObserver<TArgs> Until(IDisposeEventObservable disposeEventObservable) =>
-            new AsyncEventObserverUntil<TArgs>(
-                parent: observer,
-                disposeEventObservable: disposeEventObservable
             );
 
         /// <summary>
@@ -734,21 +696,13 @@ public static class IAsyncEventObserverExtensions
             );
 
         /// <summary>
-        /// Turn this async observer into a synchronous observer.
-        /// </summary>
-        public IEventObserver<TArgs> ToSync() =>
-            new AsyncEventObserverToSync<TArgs>(
-                parent: observer
-            );
-
-        /// <summary>
         /// Create an observable that will emit when the parent observer
         /// observes an event.
         /// </summary>
         /// <returns>
         /// A new observable.
         /// </returns>
-        public IAsyncEventObservable<TArgs> ToEventObservable() =>
+        public IAsyncEventObservable<TArgs> ToObservable() =>
             new AsyncEventObserverEventObservable<TArgs>(
                 parent: observer
             ).EventObservable;

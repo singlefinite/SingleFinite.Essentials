@@ -56,30 +56,6 @@ internal class EventObserverUntil : EventObserverBase
     /// Constructor.
     /// </summary>
     /// <param name="parent">The parent to this observer.</param>
-    /// <param name="disposeEventObservable">
-    /// The object that when disposed will dispose of this observer.
-    /// </param>
-    public EventObserverUntil(
-        IEventObserver parent,
-        IDisposeEventObservable disposeEventObservable
-    ) : base(parent)
-    {
-        if (disposeEventObservable.IsDisposed)
-        {
-            Dispose();
-            return;
-        }
-
-        disposeEventObservable.Disposed
-            .Observe()
-            .OnEach(Dispose)
-            .Once();
-    }
-
-    /// <summary>
-    /// Constructor.
-    /// </summary>
-    /// <param name="parent">The parent to this observer.</param>
     /// <param name="cancellationToken">
     /// The cancellation token that when cancelled will dispose of this
     /// observer.
@@ -152,30 +128,6 @@ internal class EventObserverUntil<TArgs> : EventObserverBase<TArgs>
     ) : base(parent)
     {
         _predicate = predicate;
-    }
-
-    /// <summary>
-    /// Constructor.
-    /// </summary>
-    /// <param name="parent">The parent to this observer.</param>
-    /// <param name="disposeEventObservable">
-    /// The object that when disposed will dispose of this observer.
-    /// </param>
-    public EventObserverUntil(
-        IEventObserver<TArgs> parent,
-        IDisposeEventObservable disposeEventObservable
-    ) : base(parent)
-    {
-        if (disposeEventObservable.IsDisposed)
-        {
-            Dispose();
-            return;
-        }
-
-        disposeEventObservable.Disposed
-            .Observe()
-            .OnEach(Dispose)
-            .Once();
     }
 
     /// <summary>

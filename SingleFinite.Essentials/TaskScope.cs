@@ -77,9 +77,6 @@ public sealed class TaskScope : ITaskScope, IDisposable
     #region Properties
 
     /// <inheritdoc/>
-    public bool IsDisposed => _disposeState.IsDisposed;
-
-    /// <inheritdoc/>
     public IDispatcher Dispatcher { get; }
 
     /// <inheritdoc/>
@@ -162,13 +159,6 @@ public sealed class TaskScope : ITaskScope, IDisposable
                 ).Token
         };
     }
-
-    #endregion
-
-    #region Events
-
-    /// <inheritdoc/>
-    public IEventObservable Disposed => _disposeState.Disposed;
 
     #endregion
 }
