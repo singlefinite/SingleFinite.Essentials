@@ -29,6 +29,10 @@ namespace SingleFinite.Essentials;
 /// </summary>
 public static class IAsyncEventObserverExtensions
 {
+    /// <summary>
+    /// Extension members for <see cref="IAsyncEventObserver"/>.
+    /// </summary>
+    /// <param name="observer">The instance being extended.</param>
     extension(IAsyncEventObserver observer)
     {
         /// <summary>
@@ -367,6 +371,13 @@ public static class IAsyncEventObserverExtensions
             ).EventObservable;
     }
 
+    /// <summary>
+    /// Extension members for <see cref="IAsyncEventObserver{TArgs}"/>.
+    /// </summary>
+    /// <typeparam name="TArgs">
+    /// The type of arguments being extended.
+    /// </typeparam>
+    /// <param name="observer">The instance being extended.</param>
     extension<TArgs>(IAsyncEventObserver<TArgs> observer)
     {
         /// <summary>

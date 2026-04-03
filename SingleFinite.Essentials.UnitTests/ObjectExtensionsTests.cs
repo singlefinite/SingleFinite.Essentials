@@ -62,6 +62,24 @@ public class ObjectExtensionsTests
         Assert.AreEqual(99, person.Age);
     }
 
+    [TestMethod]
+    public void Apply_Executes_Code_In_Object_Initializer()
+    {
+        var person = new Person
+        {
+            Apply = it =>
+            {
+                it.Update(
+                    name: "Example",
+                    age: 99
+                );
+            }
+        };
+
+        Assert.AreEqual("Example", person.Name);
+        Assert.AreEqual(99, person.Age);
+    }
+
     private class Person
     {
         public string Name { get; private set; } = "";

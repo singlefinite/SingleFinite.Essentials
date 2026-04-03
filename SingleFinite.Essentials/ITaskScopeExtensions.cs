@@ -26,6 +26,10 @@ namespace SingleFinite.Essentials;
 /// </summary>
 public static class ITaskScopeExtensions
 {
+    /// <summary>
+    /// Extension members for <see cref="ITaskScope"/>.
+    /// </summary>
+    /// <param name="scope">The instance being extended.</param>
     extension(ITaskScope scope)
     {
         /// <summary>

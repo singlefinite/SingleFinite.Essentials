@@ -29,6 +29,10 @@ namespace SingleFinite.Essentials;
 /// </summary>
 public static class IEventObserverExtensions
 {
+    /// <summary>
+    /// Extension members for <seealso cref="IEventObserver"/>.
+    /// </summary>
+    /// <param name="observer">The instance being extended.</param>
     extension(IEventObserver observer)
     {
         /// <summary>
@@ -238,6 +242,13 @@ public static class IEventObserverExtensions
             ).EventObservable;
     }
 
+    /// <summary>
+    /// Extension members for <seealso cref="IEventObserver{TArgs}"/>.
+    /// </summary>
+    /// <typeparam name="TArgs">
+    /// The type of arguments being extended.
+    /// </typeparam>
+    /// <param name="observer">The instance being extended.</param>
     extension<TArgs>(IEventObserver<TArgs> observer)
     {
         /// <summary>

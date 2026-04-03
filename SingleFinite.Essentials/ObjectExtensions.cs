@@ -29,8 +29,6 @@ namespace SingleFinite.Essentials;
 /// </summary>
 public static class ObjectExtensions
 {
-    #region Methods
-
     /// <summary>
     /// Throw an exception if the given item is null, otherwise return the item
     /// ensuring it's not null.
@@ -57,22 +55,34 @@ public static class ObjectExtensions
     }
 
     /// <summary>
-    /// Execute the given action against the given item and then return the
-    /// item.
+    /// Extension members for any type.
     /// </summary>
-    /// <typeparam name="TType">
-    /// The type of item to execute the action against.
-    /// </typeparam>
-    /// <param name="item">
-    /// The item to execute the action against.
-    /// </param>
-    /// <param name="action">The action to execute.</param>
-    /// <returns>The item that was passed in.</returns>
-    public static TType Also<TType>(this TType item, Action<TType> action)
+    /// <typeparam name="TType">The type being extended.</typeparam>
+    /// <param name="item">The instance being extended.</param>
+    extension<TType>(TType item)
     {
-        action(item);
-        return item;
-    }
+        /// <summary>
+        /// Execute the given action against the given item and then return the
+        /// item.
+        /// </summary>
+        /// <param name="action">The action to execute.</param>
+        /// <returns>The item that was passed in.</returns>
+        public TType Also(Action<TType> action)
+        {
+            action(item);
+            return item;
+        }
 
-    #endregion
+        /// <summary>
+        /// Execute the given action against the given item.  This is useful for
+        /// applying changes in an object initializer.
+        /// </summary>
+        public Action<TType> Apply
+        {
+            set
+            {
+                value(item);
+            }
+        }
+    }
 }

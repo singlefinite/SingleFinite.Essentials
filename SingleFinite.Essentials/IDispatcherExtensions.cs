@@ -26,6 +26,10 @@ namespace SingleFinite.Essentials;
 /// </summary>
 public static class IDispatcherExtensions
 {
+    /// <summary>
+    /// Extension members for <seealso cref="IDispatcher"/>.
+    /// </summary>
+    /// <param name="dispatcher">The instance being extended.</param>
     extension(IDispatcher dispatcher)
     {
         /// <summary>
