@@ -34,7 +34,7 @@ namespace SingleFinite.Essentials;
 /// applications that require fine-grained task management or custom dispatching
 /// strategies.
 /// </remarks>
-public interface ITaskScope : ICancelObservable
+public interface ITaskScope
 {
     /// <summary>
     /// The default dispatcher for this scope.
@@ -89,4 +89,9 @@ public interface ITaskScope : ICancelObservable
         IDispatcher? dispatcher = default,
         CancellationToken cancellationToken = default
     );
+
+    /// <summary>
+    /// Token that is cancelled when this scope is disposed.
+    /// </summary>
+    CancellationToken CancellationToken { get; }
 }
