@@ -213,7 +213,7 @@ public class EventObserverTests(TestContext testContext)
     }
 
     [TestMethod]
-    public void Until_DisposeObserver_Runs_As_Expected()
+    public void Until_DisposeObservable_Runs_As_Expected()
     {
         var disposeObservableSource = new EventObservableSource();
 
@@ -243,7 +243,7 @@ public class EventObserverTests(TestContext testContext)
     }
 
     [TestMethod]
-    public void Until_DisposeObserver_With_Args_Runs_As_Expected()
+    public void Until_DisposeObservable_With_Args_Runs_As_Expected()
     {
         var disposeObservableSource = new EventObservableSource<int>();
 
@@ -270,6 +270,46 @@ public class EventObserverTests(TestContext testContext)
         observableSource.Emit(new("World", 0));
 
         Assert.IsEmpty(observedNames);
+    }
+
+    [TestMethod]
+    public void Until_DisposeObserver_Runs_As_Expected()
+    {
+        var observedOnDisposeObserverCount = 0;
+        var disposeObservableSource = new EventObservableSource();
+        var disposeObserver = disposeObservableSource.Observable
+            .Observe()
+            .OnEach(() => observedOnDisposeObserverCount++)
+            .Until(testContext.CancellationToken);
+
+        var observedNames = new List<string>();
+
+        var observableSource = new EventObservableSource<ExampleArgs>();
+
+        var observer = observableSource.Observable
+            .Observe()
+            .OnEach(args => observedNames.Add(args.Name))
+            .Until(disposeObservableSource.Observable);
+
+        Assert.IsEmpty(observedNames);
+
+        observableSource.Emit(new("Hello", 0));
+
+        Assert.HasCount(1, observedNames);
+        Assert.AreEqual("Hello", observedNames[0]);
+        observedNames.Clear();
+
+        disposeObservableSource.Emit();
+
+        Assert.AreEqual(1, observedOnDisposeObserverCount);
+
+        observableSource.Emit(new("World", 0));
+
+        Assert.IsEmpty(observedNames);
+
+        disposeObservableSource.Emit();
+
+        Assert.AreEqual(2, observedOnDisposeObserverCount);
     }
 
     [TestMethod]

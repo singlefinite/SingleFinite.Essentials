@@ -228,7 +228,7 @@ public class AsyncEventObserverTests(TestContext testContext)
     }
 
     [TestMethod]
-    public async Task Until_DisposeObserver_Runs_As_Expected()
+    public async Task Until_DisposeObservable_Runs_As_Expected()
     {
         var disposeObservableSource = new AsyncEventObservableSource();
 
@@ -258,7 +258,7 @@ public class AsyncEventObserverTests(TestContext testContext)
     }
 
     [TestMethod]
-    public async Task Until_DisposeObserver_With_Args_Runs_As_Expected()
+    public async Task Until_DisposeObservable_With_Args_Runs_As_Expected()
     {
         var disposeObservableSource = new AsyncEventObservableSource<int>();
 
@@ -285,6 +285,46 @@ public class AsyncEventObserverTests(TestContext testContext)
         await observableSource.EmitAsync(new("World", 0));
 
         Assert.IsEmpty(observedNames);
+    }
+
+    [TestMethod]
+    public async Task Until_DisposeObserver_Runs_As_Expected()
+    {
+        var observedOnDisposeObserverCount = 0;
+        var disposeObservableSource = new AsyncEventObservableSource();
+        var disposeObserver = disposeObservableSource.Observable
+            .Observe()
+            .OnEach(() => observedOnDisposeObserverCount++)
+            .Until(testContext.CancellationToken);
+
+        var observedNames = new List<string>();
+
+        var observableSource = new AsyncEventObservableSource<ExampleArgs>();
+
+        var observer = observableSource.Observable
+            .Observe()
+            .OnEach(args => observedNames.Add(args.Name))
+            .Until(disposeObservableSource.Observable);
+
+        Assert.IsEmpty(observedNames);
+
+        await observableSource.EmitAsync(new("Hello", 0));
+
+        Assert.HasCount(1, observedNames);
+        Assert.AreEqual("Hello", observedNames[0]);
+        observedNames.Clear();
+
+        await disposeObservableSource.EmitAsync();
+
+        Assert.AreEqual(1, observedOnDisposeObserverCount);
+
+        await observableSource.EmitAsync(new("World", 0));
+
+        Assert.IsEmpty(observedNames);
+
+        await disposeObservableSource.EmitAsync();
+
+        Assert.AreEqual(2, observedOnDisposeObserverCount);
     }
 
     [TestMethod]

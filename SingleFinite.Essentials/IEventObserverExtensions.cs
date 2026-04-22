@@ -135,7 +135,7 @@ public static class IEventObserverExtensions
         public IEventObserver Until(IEventObserver disposeObserver) =>
             new EventObserverUntil(
                 parent: observer,
-                disposeObserver: disposeObserver
+                disposeObserver: disposeObserver.ToObservable().Observe()
             );
 
         /// <summary>
@@ -398,7 +398,7 @@ public static class IEventObserverExtensions
         public IEventObserver<TArgs> Until(IEventObserver disposeObserver) =>
             new EventObserverUntil<TArgs>(
                 parent: observer,
-                disposeObserver: disposeObserver
+                disposeObserver: disposeObserver.ToObservable().Observe()
             );
 
         /// <summary>

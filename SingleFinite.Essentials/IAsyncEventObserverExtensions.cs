@@ -214,7 +214,7 @@ public static class IAsyncEventObserverExtensions
         public IAsyncEventObserver Until(IAsyncEventObserver disposeObserver) =>
             new AsyncEventObserverUntil(
                 parent: observer,
-                disposeObserver: disposeObserver
+                disposeObserver: disposeObserver.ToObservable().Observe()
             );
 
         /// <summary>
@@ -259,7 +259,7 @@ public static class IAsyncEventObserverExtensions
         public IAsyncEventObserver Until(IEventObserver disposeObserver) =>
             new AsyncEventObserverUntil(
                 parent: observer,
-                disposeObserver: disposeObserver
+                disposeObserver: disposeObserver.ToObservable().Observe()
             );
 
         /// <summary>
@@ -649,7 +649,7 @@ public static class IAsyncEventObserverExtensions
         public IAsyncEventObserver<TArgs> Until(IAsyncEventObserver disposeObserver) =>
             new AsyncEventObserverUntil<TArgs>(
                 parent: observer,
-                disposeObserver: disposeObserver
+                disposeObserver: disposeObserver.ToObservable().Observe()
             );
 
         /// <summary>
@@ -694,7 +694,7 @@ public static class IAsyncEventObserverExtensions
         public IAsyncEventObserver<TArgs> Until(IEventObserver disposeObserver) =>
             new AsyncEventObserverUntil<TArgs>(
                 parent: observer,
-                disposeObserver: disposeObserver
+                disposeObserver: disposeObserver.ToObservable().Observe()
             );
 
         /// <summary>
