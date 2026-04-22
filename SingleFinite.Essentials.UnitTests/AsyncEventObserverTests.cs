@@ -728,7 +728,7 @@ public class AsyncEventObserverTests(TestContext testContext)
             .Observe()
             .OnEach(() => observed1Count++);
 
-        var observable2 = observer1.ToObservable();
+        var observable2 = observer1.Scope().Observable;
         var observer2 = observable2
             .Observe()
             .OnEach(() => observed2Count++);
@@ -761,8 +761,8 @@ public class AsyncEventObserverTests(TestContext testContext)
             .Observe()
             .OnEach(() => observed1Count++);
 
-        var observable2 = observer1.ToObservable();
-        var observer2 = observable2
+        var observable2 = observer1.Scope();
+        var observer2 = observable2.Observable
             .Observe()
             .OnEach(() => observed2Count++);
 

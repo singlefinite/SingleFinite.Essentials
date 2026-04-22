@@ -214,7 +214,7 @@ public static class IAsyncEventObserverExtensions
         public IAsyncEventObserver Until(IAsyncEventObserver disposeObserver) =>
             new AsyncEventObserverUntil(
                 parent: observer,
-                disposeObserver: disposeObserver.ToObservable().Observe()
+                disposeObserver: disposeObserver.Scope().Observable.Observe()
             );
 
         /// <summary>
@@ -259,7 +259,7 @@ public static class IAsyncEventObserverExtensions
         public IAsyncEventObserver Until(IEventObserver disposeObserver) =>
             new AsyncEventObserverUntil(
                 parent: observer,
-                disposeObserver: disposeObserver.ToObservable().Observe()
+                disposeObserver: disposeObserver.Scope().Observable.Observe()
             );
 
         /// <summary>
@@ -449,16 +449,13 @@ public static class IAsyncEventObserverExtensions
             );
 
         /// <summary>
-        /// Create an observable that will emit when the parent observer
-        /// observes an event.
+        /// Create a new scope for the observer.
         /// </summary>
-        /// <returns>
-        /// A new observable.
-        /// </returns>
-        public IAsyncEventObservable ToObservable() =>
-            new AsyncEventObserverEventObservable(
+        /// <returns>A new observer scope.</returns>
+        public IAsyncEventObserverScope Scope() =>
+            new AsyncEventObserverScope(
                 parent: observer
-            ).EventObservable;
+            );
     }
 
     /// <summary>
@@ -649,7 +646,7 @@ public static class IAsyncEventObserverExtensions
         public IAsyncEventObserver<TArgs> Until(IAsyncEventObserver disposeObserver) =>
             new AsyncEventObserverUntil<TArgs>(
                 parent: observer,
-                disposeObserver: disposeObserver.ToObservable().Observe()
+                disposeObserver: disposeObserver.Scope().Observable.Observe()
             );
 
         /// <summary>
@@ -694,7 +691,7 @@ public static class IAsyncEventObserverExtensions
         public IAsyncEventObserver<TArgs> Until(IEventObserver disposeObserver) =>
             new AsyncEventObserverUntil<TArgs>(
                 parent: observer,
-                disposeObserver: disposeObserver.ToObservable().Observe()
+                disposeObserver: disposeObserver.Scope().Observable.Observe()
             );
 
         /// <summary>
@@ -887,15 +884,12 @@ public static class IAsyncEventObserverExtensions
             );
 
         /// <summary>
-        /// Create an observable that will emit when the parent observer
-        /// observes an event.
+        /// Create a new scope for the observer.
         /// </summary>
-        /// <returns>
-        /// A new observable.
-        /// </returns>
-        public IAsyncEventObservable<TArgs> ToObservable() =>
-            new AsyncEventObserverEventObservable<TArgs>(
+        /// <returns>A new observer scope.</returns>
+        public IAsyncEventObserverScope<TArgs> Scope() =>
+            new AsyncEventObserverScope<TArgs>(
                 parent: observer
-            ).EventObservable;
+            );
     }
 }

@@ -674,7 +674,7 @@ public class EventObserverTests(TestContext testContext)
     }
 
     [TestMethod]
-    public void ToEventObservable_Observes()
+    public void Scope_Observes()
     {
         var observed1Count = 0;
         var observed2Count = 0;
@@ -686,7 +686,7 @@ public class EventObserverTests(TestContext testContext)
             .Observe()
             .OnEach(() => observed1Count++);
 
-        var observable2 = observer1.ToObservable();
+        var observable2 = observer1.Scope().Observable;
         var observer2 = observable2
             .Observe()
             .OnEach(() => observed2Count++);
@@ -707,7 +707,7 @@ public class EventObserverTests(TestContext testContext)
     }
 
     [TestMethod]
-    public void ToEventObservable_Stops_Observing_When_Parent_Is_Disposed()
+    public void Scope_Stops_Observing_When_Parent_Is_Disposed()
     {
         var observed1Count = 0;
         var observed2Count = 0;
@@ -719,7 +719,7 @@ public class EventObserverTests(TestContext testContext)
             .Observe()
             .OnEach(() => observed1Count++);
 
-        var observable2 = observer1.ToObservable();
+        var observable2 = observer1.Scope().Observable;
         var observer2 = observable2
             .Observe()
             .OnEach(() => observed2Count++);

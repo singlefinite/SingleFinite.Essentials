@@ -61,7 +61,8 @@ internal class AsyncEventObserverCombine : IAsyncEventObserver
         _observers = observers;
         _combinedObservers = [.. observers.Select(observer =>
             observer
-                .ToObservable()
+                .Scope()
+                .Observable
                 .Observe()
                 .OnEach(Next.TryInvoke)
         )];
@@ -145,7 +146,8 @@ internal class AsyncEventObserverCombine<TArgs> : IAsyncEventObserver<TArgs>
         _observers = observers;
         _combinedObservers = [.. observers.Select(observer =>
             observer
-                .ToObservable()
+                .Scope()
+                .Observable
                 .Observe()
                 .OnEach(async args =>
                 {

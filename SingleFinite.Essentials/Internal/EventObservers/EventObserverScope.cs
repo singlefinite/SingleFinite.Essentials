@@ -25,9 +25,9 @@ namespace SingleFinite.Essentials.Internal.EventObservers;
 /// Emit to an observable when an event is raised on this observer.
 /// </summary>
 /// <param name="parent">The parent to this observer.</param>
-internal class AsyncEventObserverEventObservable(
-    IAsyncEventObserver parent
-) : AsyncEventObserverBase(parent)
+internal class EventObserverScope(
+    IEventObserver parent
+) : EventObserverBase(parent), IEventObserverScope
 {
     #region Methods
 
@@ -35,9 +35,9 @@ internal class AsyncEventObserverEventObservable(
     /// Emit the event on the observable.
     /// </summary>
     /// <returns>Always returns false.</returns>
-    protected override async Task<bool> OnEventAsync()
+    protected override bool OnEvent()
     {
-        await _observableSource.EmitAsync();
+        _observableSource.Emit();
         return false;
     }
 
@@ -52,10 +52,10 @@ internal class AsyncEventObserverEventObservable(
     #region Events
 
     /// <summary>
-    /// EventObservable that is raised when an event is recieved from the observer.
+    /// Observable that emits when an event is recieved from the observer.
     /// </summary>
-    public IAsyncEventObservable EventObservable => _observableSource.Observable;
-    private readonly AsyncEventObservableSource _observableSource = new();
+    public IEventObservable Observable => _observableSource.Observable;
+    private readonly EventObservableSource _observableSource = new();
 
     #endregion
 }
@@ -67,9 +67,9 @@ internal class AsyncEventObserverEventObservable(
 /// The type of arguments passed with observed events.
 /// </typeparam>
 /// <param name="parent">The parent to this observer.</param>
-internal class AsyncEventObserverEventObservable<TArgs>(
-    IAsyncEventObserver<TArgs> parent
-) : AsyncEventObserverBase<TArgs>(parent)
+internal class EventObserverScope<TArgs>(
+    IEventObserver<TArgs> parent
+) : EventObserverBase<TArgs>(parent), IEventObserverScope<TArgs>
 {
     #region Methods
 
@@ -81,9 +81,9 @@ internal class AsyncEventObserverEventObservable<TArgs>(
     /// observable.
     /// </param>
     /// <returns>Always returns false.</returns>
-    protected override async Task<bool> OnEventAsync(TArgs args)
+    protected override bool OnEvent(TArgs args)
     {
-        await _observableSource.EmitAsync(args);
+        _observableSource.Emit(args);
         return false;
     }
 
@@ -98,10 +98,10 @@ internal class AsyncEventObserverEventObservable<TArgs>(
     #region Events
 
     /// <summary>
-    /// EventObservable that is raised when an event is recieved from the observer.
+    /// Observable that emits when an event is recieved from the observer.
     /// </summary>
-    public IAsyncEventObservable<TArgs> EventObservable => _observableSource.Observable;
-    private readonly AsyncEventObservableSource<TArgs> _observableSource = new();
+    public IEventObservable<TArgs> Observable => _observableSource.Observable;
+    private readonly EventObservableSource<TArgs> _observableSource = new();
 
     #endregion
 }

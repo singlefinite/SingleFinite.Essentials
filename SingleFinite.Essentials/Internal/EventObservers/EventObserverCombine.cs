@@ -61,7 +61,8 @@ internal class EventObserverCombine : IEventObserver
         _observers = observers;
         _combinedObservers = [.. observers.Select(observer =>
             observer
-                .ToObservable()
+                .Scope()
+                .Observable
                 .Observe()
                 .OnEach(() => Next?.Invoke())
         )];
@@ -145,7 +146,8 @@ internal class EventObserverCombine<TArgs> : IEventObserver<TArgs>
         _observers = observers;
         _combinedObservers = [.. observers.Select(observer =>
             observer
-                .ToObservable()
+                .Scope()
+                .Observable
                 .Observe()
                 .OnEach(args =>
                 {
