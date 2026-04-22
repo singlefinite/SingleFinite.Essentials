@@ -86,7 +86,6 @@ public sealed class DedicatedThreadDispatcher :
     /// </summary>
     private void ThreadStart()
     {
-        var test = SynchronizationContext.Current;
         try
         {
             while (!_queue.IsCompleted)
