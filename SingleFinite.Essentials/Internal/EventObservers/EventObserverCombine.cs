@@ -33,6 +33,16 @@ internal class EventObserverCombine : IEventObserver
     /// </summary>
     private readonly ConcurrentDisposeState _disposeState;
 
+    /// <summary>
+    /// Holds the original observers passed in.
+    /// </summary>
+    private readonly IEventObserver[] _observers;
+
+    /// <summary>
+    /// Holds the combined observers.
+    /// </summary>
+    private readonly IEventObserver[] _combinedObservers;
+
     #endregion
 
     #region Constructors
@@ -43,14 +53,21 @@ internal class EventObserverCombine : IEventObserver
     /// <param name="observers">The observers to combine.</param>
     public EventObserverCombine(params IEventObserver[] observers)
     {
-        _disposeState = new(owner: this);
+        _disposeState = new(
+            owner: this,
+            onDispose: OnDispose
+        );
+
+        _observers = observers;
+        _combinedObservers = [.. observers.Select(observer =>
+            observer
+                .ToObservable()
+                .Observe()
+                .OnEach(() => Next?.Invoke())
+        )];
 
         foreach (var observer in observers)
-        {
-            observer
-                .OnEach(() => Next?.Invoke())
-                .Until(_disposeState.CancellationToken);
-        }
+            observer.Disposed += Dispose;
     }
 
     #endregion
@@ -60,12 +77,29 @@ internal class EventObserverCombine : IEventObserver
     /// <inheritdoc/>
     public void Dispose() => _disposeState.Dispose();
 
+    /// <summary>
+    /// Clean up this object.
+    /// </summary>
+    private void OnDispose()
+    {
+        foreach (var observer in _combinedObservers)
+            observer.Dispose();
+
+        foreach (var observer in _observers)
+            observer.Disposed -= Dispose;
+
+        Disposed?.Invoke();
+    }
+
     #endregion
 
     #region Events
 
     /// <inheritdoc/>
     public event Action? Next;
+
+    /// <inheritdoc/>
+    public event Action? Disposed;
 
     #endregion
 }
@@ -83,6 +117,16 @@ internal class EventObserverCombine<TArgs> : IEventObserver<TArgs>
     /// </summary>
     private readonly ConcurrentDisposeState _disposeState;
 
+    /// <summary>
+    /// Holds the original observers passed in.
+    /// </summary>
+    private readonly IEventObserver[] _observers;
+
+    /// <summary>
+    /// Holds the combined observers.
+    /// </summary>
+    private readonly IEventObserver[] _combinedObservers;
+
     #endregion
 
     #region Constructors
@@ -93,18 +137,25 @@ internal class EventObserverCombine<TArgs> : IEventObserver<TArgs>
     /// <param name="observers">The observers to combine.</param>
     public EventObserverCombine(params IEventObserver<TArgs>[] observers)
     {
-        _disposeState = new(owner: this);
+        _disposeState = new(
+            owner: this,
+            onDispose: OnDispose
+        );
 
-        foreach (var observer in observers)
-        {
+        _observers = observers;
+        _combinedObservers = [.. observers.Select(observer =>
             observer
+                .ToObservable()
+                .Observe()
                 .OnEach(args =>
                 {
                     NextWithArgs?.Invoke(args);
                     Next?.Invoke();
                 })
-                .Until(_disposeState.CancellationToken);
-        }
+        )];
+
+        foreach (var observer in observers)
+            observer.Disposed += Dispose;
     }
 
     #endregion
@@ -113,6 +164,20 @@ internal class EventObserverCombine<TArgs> : IEventObserver<TArgs>
 
     /// <inheritdoc/>
     public void Dispose() => _disposeState.Dispose();
+
+    /// <summary>
+    /// Clean up this object.
+    /// </summary>
+    private void OnDispose()
+    {
+        foreach (var observer in _combinedObservers)
+            observer.Dispose();
+
+        foreach (var observer in _observers)
+            observer.Disposed -= Dispose;
+
+        Disposed?.Invoke();
+    }
 
     #endregion
 
@@ -123,6 +188,9 @@ internal class EventObserverCombine<TArgs> : IEventObserver<TArgs>
 
     /// <inheritdoc/>
     public event Action<TArgs>? NextWithArgs;
+
+    /// <inheritdoc/>
+    public event Action? Disposed;
 
     #endregion
 }

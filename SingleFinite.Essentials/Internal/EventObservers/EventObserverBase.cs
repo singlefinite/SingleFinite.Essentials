@@ -44,16 +44,35 @@ internal abstract class EventObserverBase : IEventObserver
     public EventObserverBase(IEventObserver parent)
     {
         _parent = parent;
-        _parent.Next += () =>
-        {
-            if (OnEvent())
-                RaiseNextEvent();
-        };
+        _parent.Next += OnParentNext;
+        _parent.Disposed += OnParentDisposed;
     }
 
     #endregion
 
     #region Methods
+
+    /// <summary>
+    /// Handle the Next event from parent.
+    /// </summary>
+    private void OnParentNext()
+    {
+        if (OnEvent())
+            RaiseNextEvent();
+    }
+
+    /// <summary>
+    /// Handle the Disposed event from parent.
+    /// </summary>
+    protected void OnParentDisposed()
+    {
+        _parent.Next -= OnParentNext;
+        _parent.Disposed -= OnParentDisposed;
+
+        OnDispose();
+
+        Disposed?.Invoke();
+    }
 
     /// <summary>
     /// This method is invoked when the parent event is raised.
@@ -78,12 +97,22 @@ internal abstract class EventObserverBase : IEventObserver
     /// </summary>
     public virtual void Dispose() => _parent.Dispose();
 
+    /// <summary>
+    /// Called when this observer is disposed.
+    /// </summary>
+    protected virtual void OnDispose()
+    {
+    }
+
     #endregion
 
     #region Events
 
     /// <inheritdoc/>
     public virtual event Action? Next;
+
+    /// <inheritdoc/>
+    public event Action? Disposed;
 
     #endregion
 }
@@ -111,16 +140,36 @@ internal abstract class EventObserverBase<TArgs> : IEventObserver<TArgs>
     public EventObserverBase(IEventObserver<TArgs> parent)
     {
         _parent = parent;
-        _parent.NextWithArgs += args =>
-        {
-            if (OnEvent(args))
-                RaiseNextEvent(args);
-        };
+        _parent.NextWithArgs += OnParentNext;
+        _parent.Disposed += OnParentDisposed;
     }
 
     #endregion
 
     #region Methods
+
+    /// <summary>
+    /// Handle the Next event from parent.
+    /// </summary>
+    /// <param name="args">The arguments passed with the event.</param>
+    private void OnParentNext(TArgs args)
+    {
+        if (OnEvent(args))
+            RaiseNextEvent(args);
+    }
+
+    /// <summary>
+    /// Handle the Disposed event from parent.
+    /// </summary>
+    protected void OnParentDisposed()
+    {
+        _parent.NextWithArgs -= OnParentNext;
+        _parent.Disposed -= OnParentDisposed;
+
+        OnDispose();
+
+        Disposed?.Invoke();
+    }
 
     /// <summary>
     /// This method is invoked when the parent event is raised.
@@ -150,6 +199,13 @@ internal abstract class EventObserverBase<TArgs> : IEventObserver<TArgs>
     /// </summary>
     public virtual void Dispose() => _parent.Dispose();
 
+    /// <summary>
+    /// Called when this observer is disposed.
+    /// </summary>
+    protected virtual void OnDispose()
+    {
+    }
+
     #endregion
 
     #region Events
@@ -159,6 +215,9 @@ internal abstract class EventObserverBase<TArgs> : IEventObserver<TArgs>
 
     /// <inheritdoc/>
     public virtual event Action<TArgs>? NextWithArgs;
+
+    /// <inheritdoc/>
+    public event Action? Disposed;
 
     #endregion
 }

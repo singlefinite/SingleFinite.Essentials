@@ -124,6 +124,51 @@ public static class IEventObserverExtensions
             );
 
         /// <summary>
+        /// Dispose of the observer chain when the given observer emits.
+        /// </summary>
+        /// <param name="disposeObserver">
+        /// The observer that when emits will dispose of this observer.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IEventObserver Until(IEventObserver disposeObserver) =>
+            new EventObserverUntil(
+                parent: observer,
+                disposeObserver: disposeObserver
+            );
+
+        /// <summary>
+        /// Dispose of the observer chain when the given observable emits.
+        /// </summary>
+        /// <param name="disposeObservable">
+        /// The observable that when emits will dispose of this observer.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IEventObserver Until(IEventObservable disposeObservable) =>
+            new EventObserverUntil(
+                parent: observer,
+                disposeObserver: disposeObservable.Observe()
+            );
+
+        /// <summary>
+        /// Dispose of the observer chain when the given observable emits.
+        /// </summary>
+        /// <param name="disposeObservable">
+        /// The observable that when emits will dispose of this observer.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IEventObserver Until<TArgs>(IEventObservable<TArgs> disposeObservable) =>
+            new EventObserverUntil(
+                parent: observer,
+                disposeObserver: disposeObservable.Observe()
+            );
+
+        /// <summary>
         /// Dispose of the observer chain when the first event is observed.
         /// </summary>
         /// <returns>
@@ -339,6 +384,51 @@ public static class IEventObserverExtensions
             new EventObserverUntil<TArgs>(
                 parent: observer,
                 cancellationToken: cancellationToken
+            );
+
+        /// <summary>
+        /// Dispose of the observer chain when the given observer emits.
+        /// </summary>
+        /// <param name="disposeObserver">
+        /// The observer that when emits will dispose of this observer.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IEventObserver<TArgs> Until(IEventObserver disposeObserver) =>
+            new EventObserverUntil<TArgs>(
+                parent: observer,
+                disposeObserver: disposeObserver
+            );
+
+        /// <summary>
+        /// Dispose of the observer chain when the given observable emits.
+        /// </summary>
+        /// <param name="disposeObservable">
+        /// The observable that when emits will dispose of this observer.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IEventObserver Until(IEventObservable disposeObservable) =>
+            new EventObserverUntil<TArgs>(
+                parent: observer,
+                disposeObserver: disposeObservable.Observe()
+            );
+
+        /// <summary>
+        /// Dispose of the observer chain when the given observable emits.
+        /// </summary>
+        /// <param name="disposeObservable">
+        /// The observable that when emits will dispose of this observer.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IEventObserver Until<TDisposeArgs>(IEventObservable<TDisposeArgs> disposeObservable) =>
+            new EventObserverUntil<TArgs>(
+                parent: observer,
+                disposeObserver: disposeObservable.Observe()
             );
 
         /// <summary>

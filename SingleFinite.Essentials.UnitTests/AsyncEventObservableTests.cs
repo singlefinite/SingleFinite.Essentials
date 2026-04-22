@@ -152,7 +152,7 @@ public class AsyncEventObservableTests(TestContext testContext)
     }
 
     [TestMethod]
-    public async Task Combine_Continues_To_Emit_After_Single_EventObserver_Disposed()
+    public async Task Combine_Stops_Emitting_After_Any_EventObserver_Disposed()
     {
         var observedNumbers = new List<int>();
 
@@ -175,8 +175,7 @@ public class AsyncEventObservableTests(TestContext testContext)
         Assert.IsEmpty(observedNumbers);
 
         await secondEventObservableSource.EmitAsync(11);
-        Assert.HasCount(1, observedNumbers);
-        Assert.AreEqual(11, observedNumbers[0]);
+        Assert.IsEmpty(observedNumbers);
     }
 
     [TestMethod]

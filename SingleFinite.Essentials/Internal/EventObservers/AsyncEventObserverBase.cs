@@ -44,16 +44,36 @@ internal abstract class AsyncEventObserverBase : IAsyncEventObserver
     public AsyncEventObserverBase(IAsyncEventObserver parent)
     {
         _parent = parent;
-        _parent.Next += async () =>
-        {
-            if (await OnEventAsync())
-                await RaiseNextEventAsync();
-        };
+        _parent.Next += OnParentNextAsync;
+        _parent.Disposed += OnParentDisposed;
     }
 
     #endregion
 
     #region Methods
+
+    /// <summary>
+    /// Handle the Next event from parent.
+    /// </summary>
+    /// <returns>The running task.</returns>
+    private async Task OnParentNextAsync()
+    {
+        if (await OnEventAsync())
+            await RaiseNextEventAsync();
+    }
+
+    /// <summary>
+    /// Handle the Disposed event from parent.
+    /// </summary>
+    protected void OnParentDisposed()
+    {
+        _parent.Next -= OnParentNextAsync;
+        _parent.Disposed -= OnParentDisposed;
+
+        OnDispose();
+
+        Disposed?.Invoke();
+    }
 
     /// <summary>
     /// This method is invoked when the parent Next event is raised.
@@ -80,12 +100,22 @@ internal abstract class AsyncEventObserverBase : IAsyncEventObserver
     /// </summary>
     public virtual void Dispose() => _parent.Dispose();
 
+    /// <summary>
+    /// Called when this observer is disposed.
+    /// </summary>
+    protected virtual void OnDispose()
+    {
+    }
+
     #endregion
 
     #region Events
 
     /// <inheritdoc/>
     public virtual event Func<Task>? Next;
+
+    /// <inheritdoc/>
+    public event Action? Disposed;
 
     #endregion
 }
@@ -113,16 +143,37 @@ internal abstract class AsyncEventObserverBase<TArgs> : IAsyncEventObserver<TArg
     public AsyncEventObserverBase(IAsyncEventObserver<TArgs> parent)
     {
         _parent = parent;
-        _parent.NextWithArgs += async args =>
-        {
-            if (await OnEventAsync(args))
-                await RaiseNextEventAsync(args);
-        };
+        _parent.NextWithArgs += OnParentNextAsync;
+        _parent.Disposed += OnParentDisposed;
     }
 
     #endregion
 
     #region Methods
+
+    /// <summary>
+    /// Handle the Next event from parent.
+    /// </summary>
+    /// <param name="args">The arguments passed with the event.</param>
+    /// <returns>The running task.</returns>
+    private async Task OnParentNextAsync(TArgs args)
+    {
+        if (await OnEventAsync(args))
+            await RaiseNextEventAsync(args);
+    }
+
+    /// <summary>
+    /// Handle the Disposed event from parent.
+    /// </summary>
+    protected void OnParentDisposed()
+    {
+        _parent.NextWithArgs -= OnParentNextAsync;
+        _parent.Disposed -= OnParentDisposed;
+
+        OnDispose();
+
+        Disposed?.Invoke();
+    }
 
     /// <summary>
     /// This method is invoked when the parent Next event is raised.
@@ -154,6 +205,13 @@ internal abstract class AsyncEventObserverBase<TArgs> : IAsyncEventObserver<TArg
     /// </summary>
     public virtual void Dispose() => _parent.Dispose();
 
+    /// <summary>
+    /// Called when this observer is disposed.
+    /// </summary>
+    protected virtual void OnDispose()
+    {
+    }
+
     #endregion
 
     #region Events
@@ -163,6 +221,9 @@ internal abstract class AsyncEventObserverBase<TArgs> : IAsyncEventObserver<TArg
 
     /// <inheritdoc/>
     public virtual event Func<TArgs, Task>? NextWithArgs;
+
+    /// <inheritdoc/>
+    public event Action? Disposed;
 
     #endregion
 }

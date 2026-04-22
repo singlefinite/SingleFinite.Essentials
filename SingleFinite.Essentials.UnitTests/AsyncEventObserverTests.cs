@@ -228,6 +228,66 @@ public class AsyncEventObserverTests(TestContext testContext)
     }
 
     [TestMethod]
+    public async Task Until_DisposeObserver_Runs_As_Expected()
+    {
+        var disposeObservableSource = new AsyncEventObservableSource();
+
+        var observedNames = new List<string>();
+
+        var observableSource = new AsyncEventObservableSource<ExampleArgs>();
+        var observable = observableSource.Observable;
+
+        var observer = observable
+            .Observe()
+            .OnEach(args => observedNames.Add(args.Name))
+            .Until(disposeObservableSource.Observable);
+
+        Assert.IsEmpty(observedNames);
+
+        await observableSource.EmitAsync(new("Hello", 0));
+
+        Assert.HasCount(1, observedNames);
+        Assert.AreEqual("Hello", observedNames[0]);
+        observedNames.Clear();
+
+        await disposeObservableSource.EmitAsync();
+
+        await observableSource.EmitAsync(new("World", 0));
+
+        Assert.IsEmpty(observedNames);
+    }
+
+    [TestMethod]
+    public async Task Until_DisposeObserver_With_Args_Runs_As_Expected()
+    {
+        var disposeObservableSource = new AsyncEventObservableSource<int>();
+
+        var observedNames = new List<string>();
+
+        var observableSource = new AsyncEventObservableSource<ExampleArgs>();
+        var observable = observableSource.Observable;
+
+        var observer = observable
+            .Observe()
+            .OnEach(args => observedNames.Add(args.Name))
+            .Until(disposeObservableSource.Observable);
+
+        Assert.IsEmpty(observedNames);
+
+        await observableSource.EmitAsync(new("Hello", 0));
+
+        Assert.HasCount(1, observedNames);
+        Assert.AreEqual("Hello", observedNames[0]);
+        observedNames.Clear();
+
+        await disposeObservableSource.EmitAsync(1);
+
+        await observableSource.EmitAsync(new("World", 0));
+
+        Assert.IsEmpty(observedNames);
+    }
+
+    [TestMethod]
     public async Task Of_Type_Runs_As_Expected_Async()
     {
         var observedNames = new List<string>();

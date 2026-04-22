@@ -33,6 +33,16 @@ internal class AsyncEventObserverCombine : IAsyncEventObserver
     /// </summary>
     private readonly ConcurrentDisposeState _disposeState;
 
+    /// <summary>
+    /// Holds the original observers passed in.
+    /// </summary>
+    private readonly IAsyncEventObserver[] _observers;
+
+    /// <summary>
+    /// Holds the combined observers.
+    /// </summary>
+    private readonly IAsyncEventObserver[] _combinedObservers;
+
     #endregion
 
     #region Constructors
@@ -43,14 +53,21 @@ internal class AsyncEventObserverCombine : IAsyncEventObserver
     /// <param name="observers">The observers to combine.</param>
     public AsyncEventObserverCombine(params IAsyncEventObserver[] observers)
     {
-        _disposeState = new(owner: this);
+        _disposeState = new(
+            owner: this,
+            onDispose: OnDispose
+        );
+
+        _observers = observers;
+        _combinedObservers = [.. observers.Select(observer =>
+            observer
+                .ToObservable()
+                .Observe()
+                .OnEach(Next.TryInvoke)
+        )];
 
         foreach (var observer in observers)
-        {
-            observer
-                .OnEach(Next.TryInvoke)
-                .Until(_disposeState.CancellationToken);
-        }
+            observer.Disposed += Dispose;
     }
 
     #endregion
@@ -60,12 +77,29 @@ internal class AsyncEventObserverCombine : IAsyncEventObserver
     /// <inheritdoc/>
     public void Dispose() => _disposeState.Dispose();
 
+    /// <summary>
+    /// Clean up this object.
+    /// </summary>
+    private void OnDispose()
+    {
+        foreach (var observer in _combinedObservers)
+            observer.Dispose();
+
+        foreach (var observer in _observers)
+            observer.Disposed -= Dispose;
+
+        Disposed?.Invoke();
+    }
+
     #endregion
 
     #region Events
 
     /// <inheritdoc/>
     public event Func<Task>? Next;
+
+    /// <inheritdoc/>
+    public event Action? Disposed;
 
     #endregion
 }
@@ -83,6 +117,16 @@ internal class AsyncEventObserverCombine<TArgs> : IAsyncEventObserver<TArgs>
     /// </summary>
     private readonly ConcurrentDisposeState _disposeState;
 
+    /// <summary>
+    /// Holds the original observers passed in.
+    /// </summary>
+    private readonly IAsyncEventObserver[] _observers;
+
+    /// <summary>
+    /// Holds the combined observers.
+    /// </summary>
+    private readonly IAsyncEventObserver[] _combinedObservers;
+
     #endregion
 
     #region Constructors
@@ -93,18 +137,25 @@ internal class AsyncEventObserverCombine<TArgs> : IAsyncEventObserver<TArgs>
     /// <param name="observers">The observers to combine.</param>
     public AsyncEventObserverCombine(params IAsyncEventObserver<TArgs>[] observers)
     {
-        _disposeState = new(owner: this);
+        _disposeState = new(
+            owner: this,
+            onDispose: OnDispose
+        );
 
-        foreach (var observer in observers)
-        {
+        _observers = observers;
+        _combinedObservers = [.. observers.Select(observer =>
             observer
+                .ToObservable()
+                .Observe()
                 .OnEach(async args =>
                 {
                     await NextWithArgs.TryInvoke(args);
                     await Next.TryInvoke();
                 })
-                .Until(_disposeState.CancellationToken);
-        }
+        )];
+
+        foreach (var observer in observers)
+            observer.Disposed += Dispose;
     }
 
     #endregion
@@ -113,6 +164,20 @@ internal class AsyncEventObserverCombine<TArgs> : IAsyncEventObserver<TArgs>
 
     /// <inheritdoc/>
     public void Dispose() => _disposeState.Dispose();
+
+    /// <summary>
+    /// Clean up this object.
+    /// </summary>
+    private void OnDispose()
+    {
+        foreach (var observer in _combinedObservers)
+            observer.Dispose();
+
+        foreach (var observer in _observers)
+            observer.Disposed -= Dispose;
+
+        Disposed?.Invoke();
+    }
 
     #endregion
 
@@ -123,6 +188,9 @@ internal class AsyncEventObserverCombine<TArgs> : IAsyncEventObserver<TArgs>
 
     /// <inheritdoc/>
     public event Func<TArgs, Task>? NextWithArgs;
+
+    /// <inheritdoc/>
+    public event Action? Disposed;
 
     #endregion
 }

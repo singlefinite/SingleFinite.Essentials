@@ -33,6 +33,21 @@ internal class AsyncEventObserverUntil : AsyncEventObserverBase
     /// </summary>
     private readonly Func<Task<bool>>? _predicate;
 
+    /// <summary>
+    /// The registration for the cancellation token.
+    /// </summary>
+    private readonly CancellationTokenRegistration? _cancellationTokenRegistration;
+
+    /// <summary>
+    /// The observer that when emits will dispose of this observer.
+    /// </summary>
+    private readonly IEventObserver? _disposeObserver;
+
+    /// <summary>
+    /// The observer that when emits will dispose of this observer.
+    /// </summary>
+    private readonly IAsyncEventObserver? _asyncDisposeObserver;
+
     #endregion
 
     #region Constructors
@@ -65,12 +80,37 @@ internal class AsyncEventObserverUntil : AsyncEventObserverBase
         CancellationToken cancellationToken
     ) : base(parent)
     {
-        CancellationTokenRegistration? registration = null;
-        registration = cancellationToken.Register(() =>
-        {
-            Dispose();
-            registration?.Dispose();
-        });
+        _cancellationTokenRegistration = cancellationToken.Register(Dispose);
+    }
+
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    /// <param name="parent">The parent to this observer.</param>
+    /// <param name="disposeObserver">
+    /// The observer that when emits will dispose of this observer.
+    /// </param>
+    public AsyncEventObserverUntil(
+        IAsyncEventObserver parent,
+        IEventObserver disposeObserver
+    ) : base(parent)
+    {
+        _disposeObserver = disposeObserver.OnEach(Dispose);
+    }
+
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    /// <param name="parent">The parent to this observer.</param>
+    /// <param name="disposeObserver">
+    /// The observer that when emits will dispose of this observer.
+    /// </param>
+    public AsyncEventObserverUntil(
+        IAsyncEventObserver parent,
+        IAsyncEventObserver disposeObserver
+    ) : base(parent)
+    {
+        _asyncDisposeObserver = disposeObserver.OnEach(Dispose);
     }
 
     #endregion
@@ -96,6 +136,16 @@ internal class AsyncEventObserverUntil : AsyncEventObserverBase
         return willDispose != true;
     }
 
+    /// <summary>
+    /// Clean up this object.
+    /// </summary>
+    protected override void OnDispose()
+    {
+        _cancellationTokenRegistration?.Unregister();
+        _disposeObserver?.Dispose();
+        _asyncDisposeObserver?.Dispose();
+    }
+
     #endregion
 }
 
@@ -113,6 +163,21 @@ internal class AsyncEventObserverUntil<TArgs> : AsyncEventObserverBase<TArgs>
     /// The condition that when met will dispose of the oberver chain.
     /// </summary>
     private readonly Func<TArgs, Task<bool>>? _predicate;
+
+    /// <summary>
+    /// The registration for the cancellation token.
+    /// </summary>
+    private readonly CancellationTokenRegistration? _cancellationTokenRegistration;
+
+    /// <summary>
+    /// The observer that when emits will dispose of this observer.
+    /// </summary>
+    private readonly IEventObserver? _disposeObserver;
+
+    /// <summary>
+    /// The observer that when emits will dispose of this observer.
+    /// </summary>
+    private readonly IAsyncEventObserver? _asyncDisposeObserver;
 
     #endregion
 
@@ -154,6 +219,36 @@ internal class AsyncEventObserverUntil<TArgs> : AsyncEventObserverBase<TArgs>
         });
     }
 
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    /// <param name="parent">The parent to this observer.</param>
+    /// <param name="disposeObserver">
+    /// The observer that when emits will dispose of this observer.
+    /// </param>
+    public AsyncEventObserverUntil(
+        IAsyncEventObserver<TArgs> parent,
+        IEventObserver disposeObserver
+    ) : base(parent)
+    {
+        _disposeObserver = disposeObserver.OnEach(Dispose);
+    }
+
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    /// <param name="parent">The parent to this observer.</param>
+    /// <param name="disposeObserver">
+    /// The observer that when emits will dispose of this observer.
+    /// </param>
+    public AsyncEventObserverUntil(
+        IAsyncEventObserver<TArgs> parent,
+        IAsyncEventObserver disposeObserver
+    ) : base(parent)
+    {
+        _asyncDisposeObserver = disposeObserver.OnEach(Dispose);
+    }
+
     #endregion
 
     #region Methods
@@ -176,6 +271,16 @@ internal class AsyncEventObserverUntil<TArgs> : AsyncEventObserverBase<TArgs>
             Dispose();
 
         return willDispose != true;
+    }
+
+    /// <summary>
+    /// Clean up this object.
+    /// </summary>
+    protected override void OnDispose()
+    {
+        _cancellationTokenRegistration?.Unregister();
+        _disposeObserver?.Dispose();
+        _asyncDisposeObserver?.Dispose();
     }
 
     #endregion

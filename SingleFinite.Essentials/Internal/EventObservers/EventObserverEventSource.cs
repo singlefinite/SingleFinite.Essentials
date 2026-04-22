@@ -72,7 +72,7 @@ internal class EventObserverEventSource<TEventDelegate> : IEventObserver
 
         _disposeState = new(
             owner: this,
-            onDispose: () => _unregister(_handler)
+            onDispose: OnDispose
         );
     }
 
@@ -86,6 +86,15 @@ internal class EventObserverEventSource<TEventDelegate> : IEventObserver
     public void Dispose() => _disposeState.Dispose();
 
     /// <summary>
+    /// Clean up this object.
+    /// </summary>
+    private void OnDispose()
+    {
+        _unregister(_handler);
+        Disposed?.Invoke();
+    }
+
+    /// <summary>
     /// Raise the Next event.
     /// </summary>
     private void RaiseNext() => Next?.Invoke();
@@ -96,6 +105,9 @@ internal class EventObserverEventSource<TEventDelegate> : IEventObserver
 
     /// <inheritdoc/>
     public event Action? Next;
+
+    /// <inheritdoc/>
+    public event Action? Disposed;
 
     #endregion
 }
@@ -152,7 +164,7 @@ internal class EventObserverEventSource<TEventDelegate, TArgs> : IEventObserver<
 
         _disposeState = new(
             owner: this,
-            onDispose: () => _unregister(_handler)
+            onDispose: OnDispose
         );
     }
 
@@ -164,6 +176,15 @@ internal class EventObserverEventSource<TEventDelegate, TArgs> : IEventObserver<
     /// Unregister event handler.
     /// </summary>
     public void Dispose() => _disposeState.Dispose();
+
+    /// <summary>
+    /// Clean up this object.
+    /// </summary>
+    private void OnDispose()
+    {
+        _unregister(_handler);
+        Disposed?.Invoke();
+    }
 
     /// <summary>
     /// Raise the Next event.
@@ -184,6 +205,9 @@ internal class EventObserverEventSource<TEventDelegate, TArgs> : IEventObserver<
 
     /// <inheritdoc/>
     public event Action<TArgs>? NextWithArgs;
+
+    /// <inheritdoc/>
+    public event Action? Disposed;
 
     #endregion
 }

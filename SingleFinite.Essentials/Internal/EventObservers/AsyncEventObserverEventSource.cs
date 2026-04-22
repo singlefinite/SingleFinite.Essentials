@@ -72,7 +72,7 @@ internal class AsyncEventObserverEventSource<TEventDelegate> : IAsyncEventObserv
 
         _disposeState = new(
             owner: this,
-            onDispose: () => _unregister(_handler)
+            onDispose: OnDispose
         );
     }
 
@@ -86,6 +86,15 @@ internal class AsyncEventObserverEventSource<TEventDelegate> : IAsyncEventObserv
     public void Dispose() => _disposeState.Dispose();
 
     /// <summary>
+    /// Clean up this object.
+    /// </summary>
+    private void OnDispose()
+    {
+        _unregister(_handler);
+        Disposed?.Invoke();
+    }
+
+    /// <summary>
     /// Raise the Next event.
     /// </summary>
     /// <returns>A task that completes when the event handlers finish.</returns>
@@ -97,6 +106,9 @@ internal class AsyncEventObserverEventSource<TEventDelegate> : IAsyncEventObserv
 
     /// <inheritdoc/>
     public event Func<Task>? Next;
+
+    /// <inheritdoc/>
+    public event Action? Disposed;
 
     #endregion
 }
@@ -153,7 +165,7 @@ internal class AsyncEventObserverEventSource<TEventDelegate, TArgs> : IAsyncEven
 
         _disposeState = new(
             owner: this,
-            onDispose: () => _unregister(_handler)
+            onDispose: OnDispose
         );
     }
 
@@ -165,6 +177,15 @@ internal class AsyncEventObserverEventSource<TEventDelegate, TArgs> : IAsyncEven
     /// Unregister event handler.
     /// </summary>
     public void Dispose() => _disposeState.Dispose();
+
+    /// <summary>
+    /// Clean up this object.
+    /// </summary>
+    private void OnDispose()
+    {
+        _unregister(_handler);
+        Disposed?.Invoke();
+    }
 
     /// <summary>
     /// Raise the NextWithArgs and Next event.
@@ -186,6 +207,9 @@ internal class AsyncEventObserverEventSource<TEventDelegate, TArgs> : IAsyncEven
 
     /// <inheritdoc/>
     public event Func<TArgs, Task>? NextWithArgs;
+
+    /// <inheritdoc/>
+    public event Action? Disposed;
 
     #endregion
 }

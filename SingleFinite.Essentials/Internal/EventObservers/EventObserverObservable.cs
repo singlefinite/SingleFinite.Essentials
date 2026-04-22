@@ -41,6 +41,12 @@ internal class EventObserverEventObservable(
         return false;
     }
 
+    /// <summary>
+    /// Stop the dispose call from moving up to the parent and instead clean up
+    /// from here down.
+    /// </summary>
+    public override void Dispose() => OnParentDisposed();
+
     #endregion
 
     #region Events
@@ -80,6 +86,12 @@ internal class EventObserverEventObservable<TArgs>(
         _observableSource.Emit(args);
         return false;
     }
+
+    /// <summary>
+    /// Stop the dispose call from moving up to the parent and instead clean up
+    /// from here down.
+    /// </summary>
+    public override void Dispose() => OnParentDisposed();
 
     #endregion
 

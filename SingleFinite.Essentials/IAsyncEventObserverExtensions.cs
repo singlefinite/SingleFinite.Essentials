@@ -203,6 +203,96 @@ public static class IAsyncEventObserverExtensions
             );
 
         /// <summary>
+        /// Dispose of the observer chain when the given observer emits.
+        /// </summary>
+        /// <param name="disposeObserver">
+        /// The observer that when emits will dispose of this observer.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IAsyncEventObserver Until(IAsyncEventObserver disposeObserver) =>
+            new AsyncEventObserverUntil(
+                parent: observer,
+                disposeObserver: disposeObserver
+            );
+
+        /// <summary>
+        /// Dispose of the observer chain when the given observable emits.
+        /// </summary>
+        /// <param name="disposeObservable">
+        /// The observable that when emits will dispose of this observer.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IAsyncEventObserver Until(IAsyncEventObservable disposeObservable) =>
+            new AsyncEventObserverUntil(
+                parent: observer,
+                disposeObserver: disposeObservable.Observe()
+            );
+
+        /// <summary>
+        /// Dispose of the observer chain when the given observable emits.
+        /// </summary>
+        /// <param name="disposeObservable">
+        /// The observable that when emits will dispose of this observer.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IAsyncEventObserver Until<TArgs>(IAsyncEventObservable<TArgs> disposeObservable) =>
+            new AsyncEventObserverUntil(
+                parent: observer,
+                disposeObserver: disposeObservable.Observe()
+            );
+
+        /// <summary>
+        /// Dispose of the observer chain when the given observer emits.
+        /// </summary>
+        /// <param name="disposeObserver">
+        /// The observer that when emits will dispose of this observer.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IAsyncEventObserver Until(IEventObserver disposeObserver) =>
+            new AsyncEventObserverUntil(
+                parent: observer,
+                disposeObserver: disposeObserver
+            );
+
+        /// <summary>
+        /// Dispose of the observer chain when the given observable emits.
+        /// </summary>
+        /// <param name="disposeObservable">
+        /// The observable that when emits will dispose of this observer.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IAsyncEventObserver Until(IEventObservable disposeObservable) =>
+            new AsyncEventObserverUntil(
+                parent: observer,
+                disposeObserver: disposeObservable.Observe()
+            );
+
+        /// <summary>
+        /// Dispose of the observer chain when the given observable emits.
+        /// </summary>
+        /// <param name="disposeObservable">
+        /// The observable that when emits will dispose of this observer.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IAsyncEventObserver Until<TArgs>(IEventObservable<TArgs> disposeObservable) =>
+            new AsyncEventObserverUntil(
+                parent: observer,
+                disposeObserver: disposeObservable.Observe()
+            );
+
+        /// <summary>
         /// Dispose of the observer chain when the first event is observed.
         /// </summary>
         /// <returns>
@@ -545,6 +635,96 @@ public static class IAsyncEventObserverExtensions
             new AsyncEventObserverUntil<TArgs>(
                 parent: observer,
                 cancellationToken: cancellationToken
+            );
+
+        /// <summary>
+        /// Dispose of the observer chain when the given observer emits.
+        /// </summary>
+        /// <param name="disposeObserver">
+        /// The observer that when emits will dispose of this observer.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IAsyncEventObserver<TArgs> Until(IAsyncEventObserver disposeObserver) =>
+            new AsyncEventObserverUntil<TArgs>(
+                parent: observer,
+                disposeObserver: disposeObserver
+            );
+
+        /// <summary>
+        /// Dispose of the observer chain when the given observable emits.
+        /// </summary>
+        /// <param name="disposeObservable">
+        /// The observable that when emits will dispose of this observer.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IAsyncEventObserver Until(IAsyncEventObservable disposeObservable) =>
+            new AsyncEventObserverUntil<TArgs>(
+                parent: observer,
+                disposeObserver: disposeObservable.Observe()
+            );
+
+        /// <summary>
+        /// Dispose of the observer chain when the given observable emits.
+        /// </summary>
+        /// <param name="disposeObservable">
+        /// The observable that when emits will dispose of this observer.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IAsyncEventObserver Until<TDisposeArgs>(IAsyncEventObservable<TDisposeArgs> disposeObservable) =>
+            new AsyncEventObserverUntil<TArgs>(
+                parent: observer,
+                disposeObserver: disposeObservable.Observe()
+            );
+
+        /// <summary>
+        /// Dispose of the observer chain when the given observer emits.
+        /// </summary>
+        /// <param name="disposeObserver">
+        /// The observer that when emits will dispose of this observer.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IAsyncEventObserver<TArgs> Until(IEventObserver disposeObserver) =>
+            new AsyncEventObserverUntil<TArgs>(
+                parent: observer,
+                disposeObserver: disposeObserver
+            );
+
+        /// <summary>
+        /// Dispose of the observer chain when the given observable emits.
+        /// </summary>
+        /// <param name="disposeObservable">
+        /// The observable that when emits will dispose of this observer.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IAsyncEventObserver Until(IEventObservable disposeObservable) =>
+            new AsyncEventObserverUntil<TArgs>(
+                parent: observer,
+                disposeObserver: disposeObservable.Observe()
+            );
+
+        /// <summary>
+        /// Dispose of the observer chain when the given observable emits.
+        /// </summary>
+        /// <param name="disposeObservable">
+        /// The observable that when emits will dispose of this observer.
+        /// </param>
+        /// <returns>
+        /// A new observer that has been added to the chain of observers.
+        /// </returns>
+        public IAsyncEventObserver Until<TDisposeArgs>(IEventObservable<TDisposeArgs> disposeObservable) =>
+            new AsyncEventObserverUntil<TArgs>(
+                parent: observer,
+                disposeObserver: disposeObservable.Observe()
             );
 
         /// <summary>

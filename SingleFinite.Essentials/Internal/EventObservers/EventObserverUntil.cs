@@ -33,6 +33,16 @@ internal class EventObserverUntil : EventObserverBase
     /// </summary>
     private readonly Func<bool>? _predicate;
 
+    /// <summary>
+    /// The registration for the cancellation token.
+    /// </summary>
+    private readonly CancellationTokenRegistration? _cancellationTokenRegistration;
+
+    /// <summary>
+    /// The observer that when emits will dispose of this observer.
+    /// </summary>
+    private readonly IEventObserver? _disposeObserver;
+
     #endregion
 
     #region Constructors
@@ -65,12 +75,22 @@ internal class EventObserverUntil : EventObserverBase
         CancellationToken cancellationToken
     ) : base(parent)
     {
-        CancellationTokenRegistration? registration = null;
-        registration = cancellationToken.Register(() =>
-        {
-            Dispose();
-            registration?.Dispose();
-        });
+        _cancellationTokenRegistration = cancellationToken.Register(Dispose);
+    }
+
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    /// <param name="parent">The parent to this observer.</param>
+    /// <param name="disposeObserver">
+    /// The observer that when emits will dispose of this observer.
+    /// </param>
+    public EventObserverUntil(
+        IEventObserver parent,
+        IEventObserver disposeObserver
+    ) : base(parent)
+    {
+        _disposeObserver = disposeObserver.OnEach(Dispose);
     }
 
     #endregion
@@ -93,6 +113,15 @@ internal class EventObserverUntil : EventObserverBase
         return willDispose != true;
     }
 
+    /// <summary>
+    /// Clean up this object.
+    /// </summary>
+    protected override void OnDispose()
+    {
+        _cancellationTokenRegistration?.Unregister();
+        _disposeObserver?.Dispose();
+    }
+
     #endregion
 }
 
@@ -110,6 +139,16 @@ internal class EventObserverUntil<TArgs> : EventObserverBase<TArgs>
     /// The condition that when met will dispose of the oberver chain.
     /// </summary>
     private readonly Func<TArgs, bool>? _predicate;
+
+    /// <summary>
+    /// The registration for the cancellation token.
+    /// </summary>
+    private readonly CancellationTokenRegistration? _cancellationTokenRegistration;
+
+    /// <summary>
+    /// The observer that when emits will dispose of this observer.
+    /// </summary>
+    private readonly IEventObserver? _disposeObserver;
 
     #endregion
 
@@ -143,12 +182,22 @@ internal class EventObserverUntil<TArgs> : EventObserverBase<TArgs>
         CancellationToken cancellationToken
     ) : base(parent)
     {
-        CancellationTokenRegistration? registration = null;
-        registration = cancellationToken.Register(() =>
-        {
-            Dispose();
-            registration?.Dispose();
-        });
+        _cancellationTokenRegistration = cancellationToken.Register(Dispose);
+    }
+
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    /// <param name="parent">The parent to this observer.</param>
+    /// <param name="disposeObserver">
+    /// The observer that when emits will dispose of this observer.
+    /// </param>
+    public EventObserverUntil(
+        IEventObserver<TArgs> parent,
+        IEventObserver disposeObserver
+    ) : base(parent)
+    {
+        _disposeObserver = disposeObserver.OnEach(Dispose);
     }
 
     #endregion
@@ -170,6 +219,15 @@ internal class EventObserverUntil<TArgs> : EventObserverBase<TArgs>
             Dispose();
 
         return willDispose != true;
+    }
+
+    /// <summary>
+    /// Clean up this object.
+    /// </summary>
+    protected override void OnDispose()
+    {
+        _cancellationTokenRegistration?.Unregister();
+        _disposeObserver?.Dispose();
     }
 
     #endregion

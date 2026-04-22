@@ -213,6 +213,66 @@ public class EventObserverTests(TestContext testContext)
     }
 
     [TestMethod]
+    public void Until_DisposeObserver_Runs_As_Expected()
+    {
+        var disposeObservableSource = new EventObservableSource();
+
+        var observedNames = new List<string>();
+
+        var observableSource = new EventObservableSource<ExampleArgs>();
+        var observable = observableSource.Observable;
+
+        var observer = observable
+            .Observe()
+            .OnEach(args => observedNames.Add(args.Name))
+            .Until(disposeObservableSource.Observable);
+
+        Assert.IsEmpty(observedNames);
+
+        observableSource.Emit(new("Hello", 0));
+
+        Assert.HasCount(1, observedNames);
+        Assert.AreEqual("Hello", observedNames[0]);
+        observedNames.Clear();
+
+        disposeObservableSource.Emit();
+
+        observableSource.Emit(new("World", 0));
+
+        Assert.IsEmpty(observedNames);
+    }
+
+    [TestMethod]
+    public void Until_DisposeObserver_With_Args_Runs_As_Expected()
+    {
+        var disposeObservableSource = new EventObservableSource<int>();
+
+        var observedNames = new List<string>();
+
+        var observableSource = new EventObservableSource<ExampleArgs>();
+        var observable = observableSource.Observable;
+
+        var observer = observable
+            .Observe()
+            .OnEach(args => observedNames.Add(args.Name))
+            .Until(disposeObservableSource.Observable);
+
+        Assert.IsEmpty(observedNames);
+
+        observableSource.Emit(new("Hello", 0));
+
+        Assert.HasCount(1, observedNames);
+        Assert.AreEqual("Hello", observedNames[0]);
+        observedNames.Clear();
+
+        disposeObservableSource.Emit(1);
+
+        observableSource.Emit(new("World", 0));
+
+        Assert.IsEmpty(observedNames);
+    }
+
+    [TestMethod]
     public void Of_Type_Runs_As_Expected()
     {
         var observedNames = new List<string>();

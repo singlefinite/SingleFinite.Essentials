@@ -37,6 +37,13 @@ public interface IAsyncEventObserver : IDisposable
     /// handle the observed event.
     /// </summary>
     event Func<Task> Next;
+
+    /// <summary>
+    /// An event that is raised when the observer is disposed.  The next
+    /// observer(s) in the chain should propogate this event forward so all
+    /// observers can do any necessary cleanup.
+    /// </summary>
+    event Action Disposed;
 }
 
 /// <summary>
