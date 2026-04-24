@@ -215,6 +215,42 @@ public class AsyncEventObservableTests(TestContext testContext)
         secondCombinedEventObserver.Dispose();
     }
 
+    [TestMethod]
+    public async Task Combine_With_Different_Types()
+    {
+        var observedCount = 0;
+
+        var firstEventObservableSource = new AsyncEventObservableSource<int>();
+        var secondEventObservableSource = new AsyncEventObservableSource<string>();
+        var thirdEventobservableSource = new AsyncEventObservableSource();
+
+        var combinedObserver = AsyncEventObservable.Combine(
+            firstEventObservableSource.Observable,
+            secondEventObservableSource.Observable,
+            thirdEventobservableSource.Observable
+        );
+
+        combinedObserver.OnEach(() => observedCount++);
+
+        await firstEventObservableSource.EmitAsync(1);
+
+        Assert.AreEqual(1, observedCount);
+
+        await secondEventObservableSource.EmitAsync("hello");
+
+        Assert.AreEqual(2, observedCount);
+
+        await thirdEventobservableSource.EmitAsync();
+
+        Assert.AreEqual(3, observedCount);
+
+        combinedObserver.Dispose();
+
+        await firstEventObservableSource.EmitAsync(2);
+
+        Assert.AreEqual(3, observedCount);
+    }
+
     #region Types
 
     private record ExampleArgs(

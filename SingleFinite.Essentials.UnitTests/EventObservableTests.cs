@@ -173,6 +173,42 @@ public class EventObservableTests
         secondCombinedEventObserver.Dispose();
     }
 
+    [TestMethod]
+    public void Combine_With_Different_Types()
+    {
+        var observedCount = 0;
+
+        var firstEventObservableSource = new EventObservableSource<int>();
+        var secondEventObservableSource = new EventObservableSource<string>();
+        var thirdEventobservableSource = new EventObservableSource();
+
+        var combinedObserver = EventObservable.Combine(
+            firstEventObservableSource.Observable,
+            secondEventObservableSource.Observable,
+            thirdEventobservableSource.Observable
+        );
+
+        combinedObserver.OnEach(() => observedCount++);
+
+        firstEventObservableSource.Emit(1);
+
+        Assert.AreEqual(1, observedCount);
+
+        secondEventObservableSource.Emit("hello");
+
+        Assert.AreEqual(2, observedCount);
+
+        thirdEventobservableSource.Emit();
+
+        Assert.AreEqual(3, observedCount);
+
+        combinedObserver.Dispose();
+
+        firstEventObservableSource.Emit(2);
+
+        Assert.AreEqual(3, observedCount);
+    }
+
     #region Types
 
     private class Parent

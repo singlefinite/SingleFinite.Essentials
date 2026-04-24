@@ -52,7 +52,7 @@ public interface IAsyncEventObservable
 /// <typeparam name="TArgs">
 /// The type of arguments passed with the event.
 /// </typeparam>
-public interface IAsyncEventObservable<out TArgs>
+public interface IAsyncEventObservable<out TArgs> : IAsyncEventObservable
 {
     /// <summary>
     /// Create an observer for this observable.
@@ -60,10 +60,10 @@ public interface IAsyncEventObservable<out TArgs>
     /// <returns>
     /// An observer that runs when the event for this observable is raised.
     /// </returns>
-    IAsyncEventObserver<TArgs> Observe();
+    new IAsyncEventObserver<TArgs> Observe();
 
     /// <summary>
     /// The underlying event.
     /// </summary>
-    event Func<TArgs, Task>? Event;
+    new event Func<TArgs, Task>? Event;
 }

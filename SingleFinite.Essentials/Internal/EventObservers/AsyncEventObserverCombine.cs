@@ -60,7 +60,7 @@ internal class AsyncEventObserverCombine : IAsyncEventObserver
 
         _observers = observers;
         _combinedObservers = [.. observers.Select(observer =>
-            observer.OnEach(Next.TryInvoke)
+            observer.OnEach(() => Next.TryInvoke())
         )];
 
         foreach (var observer in observers)

@@ -113,7 +113,7 @@ public sealed class EventObservable : IEventObservable
     /// A new observer that emits when any of the observers emit.
     /// </returns>
     public static IEventObserver Combine(
-        params EventObservable[] observables
+        params IEventObservable[] observables
     ) =>
         new EventObserverCombine(
             [.. observables.Select(observable => observable.Observe())]
@@ -178,11 +178,22 @@ public sealed class EventObservable<TArgs> : IEventObservable<TArgs>
             handler: eventHandler => args => eventHandler(args)
         );
 
+    /// <inheritdoc/>
+    IEventObserver IEventObservable.Observe() => new EventObserverEventSource<Action>(
+        register: handler => EventWithoutArgs += handler,
+        unregister: handler => EventWithoutArgs -= handler,
+        handler: eventHandler => () => eventHandler()
+    );
+
     /// <summary>
     /// Raise the event for this observable.
     /// </summary>
     /// <param name="args">The args included with the event.</param>
-    private void Emit(TArgs args) => Event?.Invoke(args);
+    private void Emit(TArgs args)
+    {
+        Event?.Invoke(args);
+        EventWithoutArgs?.Invoke();
+    }
 
     #endregion
 
@@ -190,6 +201,18 @@ public sealed class EventObservable<TArgs> : IEventObservable<TArgs>
 
     /// <inheritdoc/>
     public event Action<TArgs>? Event;
+
+    /// <summary>
+    /// Backing field for event without args.
+    /// </summary>
+    private event Action? EventWithoutArgs;
+
+    /// <inheritdoc/>
+    event Action? IEventObservable.Event
+    {
+        add => EventWithoutArgs += value;
+        remove => EventWithoutArgs -= value;
+    }
 
     #endregion
 }

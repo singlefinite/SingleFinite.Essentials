@@ -47,11 +47,12 @@ public sealed class AsyncEventObservable : IAsyncEventObservable
     #region Methods
 
     /// <inhertidoc/>
-    public IAsyncEventObserver Observe() => new AsyncEventObserverEventSource<Func<Task>>(
-        register: handler => Event += handler,
-        unregister: handler => Event -= handler,
-        handler: eventHandler => () => eventHandler()
-    );
+    public IAsyncEventObserver Observe() =>
+        new AsyncEventObserverEventSource<Func<Task>>(
+            register: handler => Event += handler,
+            unregister: handler => Event -= handler,
+            handler: eventHandler => () => eventHandler()
+        );
 
     /// <summary>
     /// Raise the event for this observable.
@@ -179,12 +180,24 @@ public sealed class AsyncEventObservable<TArgs> : IAsyncEventObservable<TArgs>
             handler: eventHandler => args => eventHandler(args)
         );
 
+    /// <inhertidoc/>
+    IAsyncEventObserver IAsyncEventObservable.Observe() =>
+        new AsyncEventObserverEventSource<Func<Task>>(
+            register: handler => EventWithoutArgs += handler,
+            unregister: handler => EventWithoutArgs -= handler,
+            handler: eventHandler => () => eventHandler()
+        );
+
     /// <summary>
     /// Raise the event for this observable.
     /// </summary>
     /// <param name="args">The args included with the event.</param>
     /// <returns>A task that completes when the event handlers finish.</returns>
-    private Task EmitAsync(TArgs args) => Event.TryInvoke(args);
+    private async Task EmitAsync(TArgs args)
+    {
+        await Event.TryInvoke(args);
+        await EventWithoutArgs.TryInvoke();
+    }
 
     #endregion
 
@@ -192,6 +205,18 @@ public sealed class AsyncEventObservable<TArgs> : IAsyncEventObservable<TArgs>
 
     /// <inhertidoc/>
     public event Func<TArgs, Task>? Event;
+
+    /// <summary>
+    /// Backing field for event without args.
+    /// </summary>
+    private event Func<Task>? EventWithoutArgs;
+
+    /// <inheritdoc/>
+    event Func<Task>? IAsyncEventObservable.Event
+    {
+        add => EventWithoutArgs += value;
+        remove => EventWithoutArgs -= value;
+    }
 
     #endregion
 }

@@ -52,7 +52,7 @@ public interface IEventObservable
 /// <typeparam name="TArgs">
 /// The type of arguments passed with the event.
 /// </typeparam>
-public interface IEventObservable<out TArgs>
+public interface IEventObservable<out TArgs> : IEventObservable
 {
     /// <summary>
     /// Create an observer for this observable.
@@ -60,10 +60,10 @@ public interface IEventObservable<out TArgs>
     /// <returns>
     /// An observer that runs when the event for this observable is raised.
     /// </returns>
-    IEventObserver<TArgs> Observe();
+    new IEventObserver<TArgs> Observe();
 
     /// <summary>
     /// The underlying event.
     /// </summary>
-    event Action<TArgs>? Event;
+    new event Action<TArgs>? Event;
 }
