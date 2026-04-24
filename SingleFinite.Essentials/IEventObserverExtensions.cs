@@ -124,21 +124,6 @@ public static class IEventObserverExtensions
             );
 
         /// <summary>
-        /// Dispose of the observer chain when the given observer emits.
-        /// </summary>
-        /// <param name="disposeObserver">
-        /// The observer that when emits will dispose of this observer.
-        /// </param>
-        /// <returns>
-        /// A new observer that has been added to the chain of observers.
-        /// </returns>
-        public IEventObserver Until(IEventObserver disposeObserver) =>
-            new EventObserverUntil(
-                parent: observer,
-                disposeObserver: disposeObserver.Scope().Observable.Observe()
-            );
-
-        /// <summary>
         /// Dispose of the observer chain when the given observable emits.
         /// </summary>
         /// <param name="disposeObservable">
@@ -273,15 +258,6 @@ public static class IEventObserverExtensions
                 parent: observer,
                 callback: callback
             );
-
-        /// <summary>
-        /// Create a new scope for the observer.
-        /// </summary>
-        /// <returns>A new observer scope.</returns>
-        public IEventObserverScope Scope() =>
-            new EventObserverScope(
-                parent: observer
-            );
     }
 
     /// <summary>
@@ -381,21 +357,6 @@ public static class IEventObserverExtensions
             new EventObserverUntil<TArgs>(
                 parent: observer,
                 cancellationToken: cancellationToken
-            );
-
-        /// <summary>
-        /// Dispose of the observer chain when the given observer emits.
-        /// </summary>
-        /// <param name="disposeObserver">
-        /// The observer that when emits will dispose of this observer.
-        /// </param>
-        /// <returns>
-        /// A new observer that has been added to the chain of observers.
-        /// </returns>
-        public IEventObserver<TArgs> Until(IEventObserver disposeObserver) =>
-            new EventObserverUntil<TArgs>(
-                parent: observer,
-                disposeObserver: disposeObserver.Scope().Observable.Observe()
             );
 
         /// <summary>
@@ -532,15 +493,6 @@ public static class IEventObserverExtensions
             new EventObserverCatch<TArgs>(
                 parent: observer,
                 callback: callback
-            );
-
-        /// <summary>
-        /// Create a new scope for the observer.
-        /// </summary>
-        /// <returns>A new observer scope.</returns>
-        public IEventObserverScope<TArgs> Scope() =>
-            new EventObserverScope<TArgs>(
-                parent: observer
             );
     }
 }

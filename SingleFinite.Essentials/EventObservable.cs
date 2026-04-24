@@ -120,16 +120,6 @@ public sealed class EventObservable : IEventObservable
         );
 
     /// <summary>
-    /// Combine the given observers into a single observer.
-    /// </summary>
-    /// <param name="observers">The observers to combine.</param>
-    /// <returns>
-    /// A new observer that emits when any of the provided observers emit.
-    /// </returns>
-    public static IEventObserver Combine(params IEventObserver[] observers) =>
-        new EventObserverCombine(observers);
-
-    /// <summary>
     /// Combine the given observables into a single observer.
     /// </summary>
     /// <typeparam name="TArgs">The type of args passed through.</typeparam>
@@ -143,19 +133,6 @@ public sealed class EventObservable : IEventObservable
         new EventObserverCombine<TArgs>(
             [.. observables.Select(observable => observable.Observe())]
         );
-
-    /// <summary>
-    /// Combine the given event providers into a single observer.
-    /// </summary>
-    /// <typeparam name="TArgs">The type of args passed through.</typeparam>
-    /// <param name="observers">The observers to combine.</param>
-    /// <returns>
-    /// A new observer that emits when any of the observers emits.
-    /// </returns>
-    public static IEventObserver<TArgs> Combine<TArgs>(
-        params IEventObserver<TArgs>[] observers
-    ) =>
-        new EventObserverCombine<TArgs>(observers);
 
     #endregion
 

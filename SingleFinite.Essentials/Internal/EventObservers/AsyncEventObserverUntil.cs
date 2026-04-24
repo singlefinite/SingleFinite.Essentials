@@ -211,11 +211,10 @@ internal class AsyncEventObserverUntil<TArgs> : AsyncEventObserverBase<TArgs>
         CancellationToken cancellationToken
     ) : base(parent)
     {
-        CancellationTokenRegistration? registration = null;
-        registration = cancellationToken.Register(() =>
+        _cancellationTokenRegistration = cancellationToken.Register(() =>
         {
             Dispose();
-            registration?.Dispose();
+            _cancellationTokenRegistration?.Dispose();
         });
     }
 

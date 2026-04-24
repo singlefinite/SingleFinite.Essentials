@@ -121,16 +121,6 @@ public sealed class AsyncEventObservable : IAsyncEventObservable
         );
 
     /// <summary>
-    /// Combine the given observers into a single observer.
-    /// </summary>
-    /// <param name="observers">The observers to combine.</param>
-    /// <returns>
-    /// A new observer that emits when any of the provided observers emits.
-    /// </returns>
-    public static IAsyncEventObserver Combine(params IAsyncEventObserver[] observers) =>
-        new AsyncEventObserverCombine(observers);
-
-    /// <summary>
     /// Combine the given observables into a single observer.
     /// </summary>
     /// <param name="observables">The observables to combine.</param>
@@ -144,19 +134,6 @@ public sealed class AsyncEventObservable : IAsyncEventObservable
         new AsyncEventObserverCombine<TArgs>(
             [.. observables.Select(observable => observable.Observe())]
         );
-
-    /// <summary>
-    /// Combine the given observers into a single observer.
-    /// </summary>
-    /// <typeparam name="TArgs">The type of args passed through.</typeparam>
-    /// <param name="observers">The observers to combine.</param>
-    /// <returns>
-    /// A new observer that emits when any of the observers emit.
-    /// </returns>
-    public static IAsyncEventObserver<TArgs> Combine<TArgs>(
-        params IAsyncEventObserver<TArgs>[] observers
-    ) =>
-        new AsyncEventObserverCombine<TArgs>(observers);
 
     #endregion
 

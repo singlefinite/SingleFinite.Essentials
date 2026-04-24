@@ -203,21 +203,6 @@ public static class IAsyncEventObserverExtensions
             );
 
         /// <summary>
-        /// Dispose of the observer chain when the given observer emits.
-        /// </summary>
-        /// <param name="disposeObserver">
-        /// The observer that when emits will dispose of this observer.
-        /// </param>
-        /// <returns>
-        /// A new observer that has been added to the chain of observers.
-        /// </returns>
-        public IAsyncEventObserver Until(IAsyncEventObserver disposeObserver) =>
-            new AsyncEventObserverUntil(
-                parent: observer,
-                disposeObserver: disposeObserver.Scope().Observable.Observe()
-            );
-
-        /// <summary>
         /// Dispose of the observer chain when the given observable emits.
         /// </summary>
         /// <param name="disposeObservable">
@@ -245,21 +230,6 @@ public static class IAsyncEventObserverExtensions
             new AsyncEventObserverUntil(
                 parent: observer,
                 disposeObserver: disposeObservable.Observe()
-            );
-
-        /// <summary>
-        /// Dispose of the observer chain when the given observer emits.
-        /// </summary>
-        /// <param name="disposeObserver">
-        /// The observer that when emits will dispose of this observer.
-        /// </param>
-        /// <returns>
-        /// A new observer that has been added to the chain of observers.
-        /// </returns>
-        public IAsyncEventObserver Until(IEventObserver disposeObserver) =>
-            new AsyncEventObserverUntil(
-                parent: observer,
-                disposeObserver: disposeObserver.Scope().Observable.Observe()
             );
 
         /// <summary>
@@ -447,15 +417,6 @@ public static class IAsyncEventObserverExtensions
                 maxConcurrent: maxConcurrent,
                 maxBuffer: maxBuffer
             );
-
-        /// <summary>
-        /// Create a new scope for the observer.
-        /// </summary>
-        /// <returns>A new observer scope.</returns>
-        public IAsyncEventObserverScope Scope() =>
-            new AsyncEventObserverScope(
-                parent: observer
-            );
     }
 
     /// <summary>
@@ -635,21 +596,6 @@ public static class IAsyncEventObserverExtensions
             );
 
         /// <summary>
-        /// Dispose of the observer chain when the given observer emits.
-        /// </summary>
-        /// <param name="disposeObserver">
-        /// The observer that when emits will dispose of this observer.
-        /// </param>
-        /// <returns>
-        /// A new observer that has been added to the chain of observers.
-        /// </returns>
-        public IAsyncEventObserver<TArgs> Until(IAsyncEventObserver disposeObserver) =>
-            new AsyncEventObserverUntil<TArgs>(
-                parent: observer,
-                disposeObserver: disposeObserver.Scope().Observable.Observe()
-            );
-
-        /// <summary>
         /// Dispose of the observer chain when the given observable emits.
         /// </summary>
         /// <param name="disposeObservable">
@@ -677,21 +623,6 @@ public static class IAsyncEventObserverExtensions
             new AsyncEventObserverUntil<TArgs>(
                 parent: observer,
                 disposeObserver: disposeObservable.Observe()
-            );
-
-        /// <summary>
-        /// Dispose of the observer chain when the given observer emits.
-        /// </summary>
-        /// <param name="disposeObserver">
-        /// The observer that when emits will dispose of this observer.
-        /// </param>
-        /// <returns>
-        /// A new observer that has been added to the chain of observers.
-        /// </returns>
-        public IAsyncEventObserver<TArgs> Until(IEventObserver disposeObserver) =>
-            new AsyncEventObserverUntil<TArgs>(
-                parent: observer,
-                disposeObserver: disposeObserver.Scope().Observable.Observe()
             );
 
         /// <summary>
@@ -881,15 +812,6 @@ public static class IAsyncEventObserverExtensions
                 parent: observer,
                 maxConcurrent: maxConcurrent,
                 maxBuffer: maxBuffer
-            );
-
-        /// <summary>
-        /// Create a new scope for the observer.
-        /// </summary>
-        /// <returns>A new observer scope.</returns>
-        public IAsyncEventObserverScope<TArgs> Scope() =>
-            new AsyncEventObserverScope<TArgs>(
-                parent: observer
             );
     }
 }

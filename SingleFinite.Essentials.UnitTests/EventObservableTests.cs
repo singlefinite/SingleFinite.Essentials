@@ -102,93 +102,32 @@ public class EventObservableTests
     }
 
     [TestMethod]
-    public void Combine_Stops_Emitting_After_Any_EventObserver_Disposed()
-    {
-        var observedNumbers = new List<int>();
-
-        var firstEventObservableSource = new EventObservableSource<int>();
-        var secondEventObservableSource = new EventObservableSource<int>();
-
-        var firstEventObserver = firstEventObservableSource.Observable.Observe();
-        var secondEventObserver = secondEventObservableSource.Observable.Observe();
-
-        var combinedEventObserver = EventObservable.Combine(
-            firstEventObserver,
-            secondEventObserver
-        );
-
-        combinedEventObserver.OnEach(observedNumbers.Add);
-
-        firstEventObserver.Dispose();
-
-        firstEventObservableSource.Emit(9);
-        Assert.IsEmpty(observedNumbers);
-
-        secondEventObservableSource.Emit(11);
-        Assert.IsEmpty(observedNumbers);
-    }
-
-    [TestMethod]
     public void Combine_Dispose_Does_Not_Dispose_Of_Original_Observers()
     {
-        var observedNumbers = new List<int>();
         var observedCombinedNumbers = new List<int>();
 
         var firstEventObservableSource = new EventObservableSource<int>();
         var secondEventObservableSource = new EventObservableSource<int>();
 
-        var firstEventObserver = firstEventObservableSource.Observable.Observe();
-        var secondEventObserver = secondEventObservableSource.Observable.Observe();
-
         var combinedEventObserver = EventObservable.Combine(
-            firstEventObserver,
-            secondEventObserver
+            firstEventObservableSource.Observable,
+            secondEventObservableSource.Observable
         );
 
-        firstEventObserver.OnEach(observedNumbers.Add);
         combinedEventObserver.OnEach(observedCombinedNumbers.Add);
 
         firstEventObservableSource.Emit(9);
 
-        Assert.HasCount(1, observedNumbers);
-        Assert.AreEqual(9, observedNumbers[0]);
         Assert.HasCount(1, observedCombinedNumbers);
         Assert.AreEqual(9, observedCombinedNumbers[0]);
 
-        observedNumbers.Clear();
         observedCombinedNumbers.Clear();
 
         combinedEventObserver.Dispose();
 
         firstEventObservableSource.Emit(8);
 
-        Assert.HasCount(1, observedNumbers);
-        Assert.AreEqual(8, observedNumbers[0]);
         Assert.IsEmpty(observedCombinedNumbers);
-    }
-
-    [TestMethod]
-    public void Combine_Dispose_Will_Dispose_Combined_EventObservers()
-    {
-        var observedNumbers = new List<int>();
-
-        var firstEventObservableSource = new EventObservableSource<int>();
-        var secondEventObservableSource = new EventObservableSource<int>();
-
-        var firstEventObserver = firstEventObservableSource.Observable.Observe();
-        var secondEventObserver = secondEventObservableSource.Observable.Observe();
-
-        var combinedEventObserver = EventObservable.Combine(
-            firstEventObserver,
-            secondEventObserver
-        );
-
-        combinedEventObserver.OnEach(observedNumbers.Add);
-
-        combinedEventObserver.Dispose();
-
-        firstEventObservableSource.Emit(9);
-        Assert.IsEmpty(observedNumbers);
     }
 
     [TestMethod]
