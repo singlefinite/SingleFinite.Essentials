@@ -85,6 +85,55 @@ public class TaskScopeTests(TestContext testContext)
     }
 
     [TestMethod]
+    public async Task TaskInfo_Cancel_Will_Cancel_Task()
+    {
+        var testFlag = false;
+        var scope = new TaskScope(
+            dispatcher: new ThreadPoolDispatcher()
+        );
+
+        var taskInfo = scope.Run(
+            function: async token =>
+            {
+                await Task.Delay(5000, token);
+                testFlag = true;
+            },
+            cancellationToken: testContext.CancellationToken
+        );
+
+        taskInfo.Cancel();
+
+        await Assert.ThrowsExactlyAsync<TaskCanceledException>(() =>
+            taskInfo.Task.WaitAsync(testContext.CancellationToken)
+        );
+
+        Assert.IsTrue(taskInfo.CancellationToken.IsCancellationRequested);
+        Assert.IsTrue(taskInfo.Task.IsCanceled);
+        Assert.IsFalse(testFlag);
+    }
+
+    [TestMethod]
+    public async Task TaskInfo_HasResult_WhenCompleted()
+    {
+        var scope = new TaskScope(
+            dispatcher: new ThreadPoolDispatcher()
+        );
+
+        var taskInfo = scope.Run(
+            function: async token =>
+            {
+                await Task.Delay(25, token);
+                return 99;
+            },
+            cancellationToken: testContext.CancellationToken
+        );
+
+        var result = await taskInfo.Task.WaitAsync(testContext.CancellationToken);
+
+        Assert.AreEqual(99, result);
+    }
+
+    [TestMethod]
     public async Task Unhandled_Exceptions_Are_Reported()
     {
         var observedUnhandledExceptions = new List<Exception>();

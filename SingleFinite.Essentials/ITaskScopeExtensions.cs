@@ -68,20 +68,30 @@ public static class ITaskScopeExtensions
         /// specified the default dispatcher for this scope will be used.
         /// </param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
-        public void Run(
+        /// <returns>The task info.</returns>
+        public ITaskInfo Run(
             Action action,
             IDispatcher? dispatcher = default,
             CancellationToken cancellationToken = default
-        ) =>
-            scope.RunAsync(
+        ) => TaskInfo.Create(cancellationTokenFromInfo =>
+        {
+            var task = scope.RunAsync(
                 function: () =>
                 {
                     action();
                     return Task.FromResult(0);
                 },
                 dispatcher: dispatcher,
-                cancellationToken: cancellationToken
-            ).EmitOnException(dispatcher ?? scope.Dispatcher);
+                cancellationToken: TaskScope.CreateLinkedToken(
+                    cancellationToken,
+                    cancellationTokenFromInfo
+                )
+            );
+
+            task.EmitOnException(dispatcher ?? scope.Dispatcher);
+
+            return task;
+        });
 
         /// <summary>
         /// Execute the given async Func.
@@ -94,20 +104,65 @@ public static class ITaskScopeExtensions
         /// specified the default dispatcher for this scope will be used.
         /// </param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
-        public void Run(
+        /// <returns>The task info.</returns>
+        public ITaskInfo Run(
             Func<Task> function,
             IDispatcher? dispatcher = default,
             CancellationToken cancellationToken = default
-        ) =>
-            scope.RunAsync(
+        ) => TaskInfo.Create(cancellationTokenFromInfo =>
+        {
+            var task = scope.RunAsync(
                 function: async () =>
                 {
                     await function().ConfigureAwait(false);
                     return Task.CompletedTask;
                 },
                 dispatcher: dispatcher,
-                cancellationToken: cancellationToken
-            ).EmitOnException(dispatcher ?? scope.Dispatcher);
+                cancellationToken: TaskScope.CreateLinkedToken(
+                    cancellationToken,
+                    cancellationTokenFromInfo
+                )
+            );
+
+            task.EmitOnException(dispatcher ?? scope.Dispatcher);
+
+            return task;
+        });
+
+        /// <summary>
+        /// Execute the given async Func.
+        /// This method will dispatch the Func to be executed and return right 
+        /// away without waiting for the Func to complete execution.
+        /// </summary>
+        /// <typeparam name="TResult">
+        /// The type of result returned by the task.
+        /// </typeparam>
+        /// <param name="function">The Func to execute.</param>
+        /// <param name="dispatcher">
+        /// Optional dispatcher to use to execute the function.  If not
+        /// specified the default dispatcher for this scope will be used.
+        /// </param>
+        /// <param name="cancellationToken">Optional cancellation token.</param>
+        /// <returns>The task info.</returns>
+        public ITaskInfo<TResult> Run<TResult>(
+            Func<Task<TResult>> function,
+            IDispatcher? dispatcher = default,
+            CancellationToken cancellationToken = default
+        ) => TaskInfo.Create(cancellationTokenFromInfo =>
+        {
+            var task = scope.RunAsync(
+                function: async () => await function().ConfigureAwait(false),
+                dispatcher: dispatcher,
+                cancellationToken: TaskScope.CreateLinkedToken(
+                    cancellationToken,
+                    cancellationTokenFromInfo
+                )
+            );
+
+            task.EmitOnException(dispatcher ?? scope.Dispatcher);
+
+            return task;
+        });
 
         /// <summary>
         /// Execute the given cancellable async function without result.
@@ -200,20 +255,30 @@ public static class ITaskScopeExtensions
         /// specified the default dispatcher for this scope will be used.
         /// </param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
-        public void Run(
+        /// <returns>The task info.</returns>
+        public ITaskInfo Run(
             Action<CancellationToken> action,
             IDispatcher? dispatcher = default,
             CancellationToken cancellationToken = default
-        ) =>
-            scope.RunAsync(
-                function: cancellationToken =>
+        ) => TaskInfo.Create(cancellationTokenFromInfo =>
+        {
+            var task = scope.RunAsync(
+                function: cancellationTokenFromFunc =>
                 {
-                    action(cancellationToken);
+                    action(cancellationTokenFromFunc);
                     return Task.CompletedTask;
                 },
                 dispatcher: dispatcher,
-                cancellationToken: cancellationToken
-            ).EmitOnException(dispatcher ?? scope.Dispatcher);
+                cancellationToken: TaskScope.CreateLinkedToken(
+                    cancellationToken,
+                    cancellationTokenFromInfo
+                )
+            );
+
+            task.EmitOnException(dispatcher ?? scope.Dispatcher);
+
+            return task;
+        });
 
         /// <summary>
         /// Execute the given cancellable async function.
@@ -226,19 +291,65 @@ public static class ITaskScopeExtensions
         /// specified the default dispatcher for this scope will be used.
         /// </param>
         /// <param name="cancellationToken">Optional cancellation token.</param>
-        public void Run(
+        /// <returns>The task info.</returns>
+        public ITaskInfo Run(
             Func<CancellationToken, Task> function,
             IDispatcher? dispatcher = default,
             CancellationToken cancellationToken = default
-        ) =>
-            scope.RunAsync(
-                function: async cancellationToken =>
+        ) => TaskInfo.Create(cancellationTokenFromInfo =>
+        {
+            var task = scope.RunAsync(
+                function: async cancellationTokenFromFunc =>
                 {
-                    await function(cancellationToken).ConfigureAwait(false);
+                    await function(cancellationTokenFromFunc).ConfigureAwait(false);
                     return Task.CompletedTask;
                 },
                 dispatcher: dispatcher,
-                cancellationToken: cancellationToken
-            ).EmitOnException(dispatcher ?? scope.Dispatcher);
+                cancellationToken: TaskScope.CreateLinkedToken(
+                    cancellationToken,
+                    cancellationTokenFromInfo
+                )
+            );
+
+            task.EmitOnException(dispatcher ?? scope.Dispatcher);
+
+            return task;
+        });
+
+        /// <summary>
+        /// Execute the given cancellable async function.
+        /// This method will dispatch the function to be executed and return
+        /// right away without waiting for the function to complete execution.
+        /// </summary>
+        /// <typeparam name="TResult">
+        /// The type of result returned by the task.
+        /// </typeparam>
+        /// <param name="function">The async function to execute.</param>
+        /// <param name="dispatcher">
+        /// Optional dispatcher to use to execute the function.  If not
+        /// specified the default dispatcher for this scope will be used.
+        /// </param>
+        /// <param name="cancellationToken">Optional cancellation token.</param>
+        /// <returns>The task info.</returns>
+        public ITaskInfo<TResult> Run<TResult>(
+            Func<CancellationToken, Task<TResult>> function,
+            IDispatcher? dispatcher = default,
+            CancellationToken cancellationToken = default
+        ) => TaskInfo.Create(cancellationTokenFromInfo =>
+        {
+            var task = scope.RunAsync(
+                function: async cancellationTokenFromFunc =>
+                    await function(cancellationTokenFromFunc).ConfigureAwait(false),
+                dispatcher: dispatcher,
+                cancellationToken: TaskScope.CreateLinkedToken(
+                    cancellationToken,
+                    cancellationTokenFromInfo
+                )
+            );
+
+            task.EmitOnException(dispatcher ?? scope.Dispatcher);
+
+            return task;
+        });
     }
 }
