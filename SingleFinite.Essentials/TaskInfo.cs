@@ -47,11 +47,11 @@ public class TaskInfo(
     public void Cancel() => cancellationTokenSource.Cancel();
 
     /// <summary>
-    /// Create a new instance of <see cref="TaskInfo"/> with a task factory.
+    /// Start a new Task.
     /// </summary>
-    /// <param name="factory">The task factory.</param>
-    /// <returns>The created instance of <see cref="TaskInfo"/>.</returns>
-    public static TaskInfo Create(Func<CancellationToken, Task> factory)
+    /// <param name="factory">The factory used to create the Task.</param>
+    /// <returns>The TaskInfo that holds the new Task.</returns>
+    public static TaskInfo Run(Func<CancellationToken, Task> factory)
     {
         var cancellationTokenSource = new CancellationTokenSource();
         var task = factory(cancellationTokenSource.Token);
@@ -59,15 +59,14 @@ public class TaskInfo(
     }
 
     /// <summary>
-    /// Create a new instance of <see cref="TaskInfo{TResult}"/> with a task
-    /// factory.
+    /// Start a new Task.
     /// </summary>
     /// <typeparam name="TResult">
-    /// The type of result returned by the task.
+    /// The type of result returned by the Task.
     /// </typeparam>
-    /// <param name="factory">The task factory.</param>
-    /// <returns>The new instance of <see cref="TaskInfo{TResult}"/>.</returns>
-    public static TaskInfo<TResult> Create<TResult>(
+    /// <param name="factory">The factory used to create the Task.</param>
+    /// <returns>The TaskInfo that holds the new Task.</returns>
+    public static TaskInfo<TResult> Run<TResult>(
         Func<CancellationToken, Task<TResult>> factory
     )
     {

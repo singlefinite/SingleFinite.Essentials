@@ -73,7 +73,7 @@ public static class ITaskScopeExtensions
             Action action,
             IDispatcher? dispatcher = default,
             CancellationToken cancellationToken = default
-        ) => TaskInfo.Create(cancellationTokenFromInfo =>
+        ) => TaskInfo.Run(cancellationTokenFromInfo =>
         {
             var task = scope.RunAsync(
                 function: () =>
@@ -109,7 +109,7 @@ public static class ITaskScopeExtensions
             Func<Task> function,
             IDispatcher? dispatcher = default,
             CancellationToken cancellationToken = default
-        ) => TaskInfo.Create(cancellationTokenFromInfo =>
+        ) => TaskInfo.Run(cancellationTokenFromInfo =>
         {
             var task = scope.RunAsync(
                 function: async () =>
@@ -148,7 +148,7 @@ public static class ITaskScopeExtensions
             Func<Task<TResult>> function,
             IDispatcher? dispatcher = default,
             CancellationToken cancellationToken = default
-        ) => TaskInfo.Create(cancellationTokenFromInfo =>
+        ) => TaskInfo.Run(cancellationTokenFromInfo =>
         {
             var task = scope.RunAsync(
                 function: async () => await function().ConfigureAwait(false),
@@ -260,7 +260,7 @@ public static class ITaskScopeExtensions
             Action<CancellationToken> action,
             IDispatcher? dispatcher = default,
             CancellationToken cancellationToken = default
-        ) => TaskInfo.Create(cancellationTokenFromInfo =>
+        ) => TaskInfo.Run(cancellationTokenFromInfo =>
         {
             var task = scope.RunAsync(
                 function: cancellationTokenFromFunc =>
@@ -296,7 +296,7 @@ public static class ITaskScopeExtensions
             Func<CancellationToken, Task> function,
             IDispatcher? dispatcher = default,
             CancellationToken cancellationToken = default
-        ) => TaskInfo.Create(cancellationTokenFromInfo =>
+        ) => TaskInfo.Run(cancellationTokenFromInfo =>
         {
             var task = scope.RunAsync(
                 function: async cancellationTokenFromFunc =>
@@ -335,7 +335,7 @@ public static class ITaskScopeExtensions
             Func<CancellationToken, Task<TResult>> function,
             IDispatcher? dispatcher = default,
             CancellationToken cancellationToken = default
-        ) => TaskInfo.Create(cancellationTokenFromInfo =>
+        ) => TaskInfo.Run(cancellationTokenFromInfo =>
         {
             var task = scope.RunAsync(
                 function: async cancellationTokenFromFunc =>
