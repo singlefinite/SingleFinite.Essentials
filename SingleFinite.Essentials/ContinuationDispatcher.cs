@@ -23,7 +23,7 @@ namespace SingleFinite.Essentials;
 
 /// <summary>
 /// Implementation of <see cref="IDispatcher"/> that invokes functions using the
-/// same synchronization context from the thread that this class was created on.
+/// current synchronization context from when this class is created.
 /// </summary>
 public sealed class ContinuationDispatcher : IDispatcher
 {
@@ -43,7 +43,7 @@ public sealed class ContinuationDispatcher : IDispatcher
     /// </summary>
     public ContinuationDispatcher()
     {
-        _taskScheduler = TaskScheduler.Current;
+        _taskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
     }
 
     #endregion
@@ -51,7 +51,8 @@ public sealed class ContinuationDispatcher : IDispatcher
     #region Methods
 
     /// <summary>
-    /// Invoke the function on the thread that called this method.
+    /// Invoke the function using the synchronization context from when this
+    /// class is created.
     /// </summary>
     /// <typeparam name="TResult">
     /// The type of result returned by the function.

@@ -28,8 +28,8 @@ namespace SingleFinite.Essentials.Internal.EventObservers;
 /// <param name="delay">The delay period for debouncing.</param>
 /// <param name="dispatcher">
 /// The dispatcher to run on after the delay has elapsed.
-/// If not set the debounce will be run under the synchronization context
-/// of the thread this method was called on.
+/// If not set the debounce will be run using the current synchronization
+/// context from when this class is created.
 /// </param>
 internal class EventObserverDebounce(
     IEventObserver parent,
@@ -43,6 +43,12 @@ internal class EventObserverDebounce(
     /// Debouncer used to debounce.
     /// </summary>
     private readonly Debouncer _debouncer = new();
+
+    /// <summary>
+    /// The dispatcher used with the throttle.
+    /// </summary>
+    private readonly IDispatcher _dispatcher =
+        dispatcher ?? new ContinuationDispatcher();
 
     #endregion
 
@@ -62,7 +68,7 @@ internal class EventObserverDebounce(
         _debouncer.Debounce(
             action: () => BranchNext?.Invoke(),
             delay: delay,
-            dispatcher: dispatcher
+            dispatcher: _dispatcher
         );
 
         return false;
@@ -93,8 +99,8 @@ internal class EventObserverDebounce(
 /// <param name="delay">The delay period for debouncing.</param>
 /// <param name="dispatcher">
 /// The dispatcher to run on after the delay has elapsed.
-/// If not set the debounce will be run under the synchronization context
-/// of the thread this method was called on.
+/// If not set the debounce will be run using the current synchronization
+/// context from when this class is created.
 /// </param>
 internal class EventObserverDebounce<TArgs>(
     IEventObserver<TArgs> parent,
@@ -108,6 +114,12 @@ internal class EventObserverDebounce<TArgs>(
     /// Debouncer used to debounce.
     /// </summary>
     private readonly Debouncer _debouncer = new();
+
+    /// <summary>
+    /// The dispatcher used with the throttle.
+    /// </summary>
+    private readonly IDispatcher _dispatcher =
+        dispatcher ?? new ContinuationDispatcher();
 
     #endregion
 
@@ -132,7 +144,7 @@ internal class EventObserverDebounce<TArgs>(
                 BranchNext?.Invoke();
             },
             delay: delay,
-            dispatcher: dispatcher
+            dispatcher: _dispatcher
         );
 
         return false;

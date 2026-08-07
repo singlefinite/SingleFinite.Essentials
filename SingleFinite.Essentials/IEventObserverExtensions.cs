@@ -188,8 +188,8 @@ public static class IEventObserverExtensions
         /// <param name="delay">The delay period for debouncing.</param>
         /// <param name="dispatcher">
         /// The dispatcher to run on after the delay has passed.
-        /// If not set the debounce will be run under the synchronization
-        /// context of the thread this method was called on.
+        /// If not set the debounce will be run using the current
+        /// synchronization context when this method is called.
         /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
@@ -223,8 +223,8 @@ public static class IEventObserverExtensions
         /// <param name="limit">The limit for throttling.</param>
         /// <param name="dispatcher">
         /// The dispatcher to use to potentially invoke the action in the future
-        /// if it was throttled.  If not set the action will be run under the
-        /// synchronization context of the thread this method was called on.
+        /// if it was throttled.  If not set the action will be run using the
+        /// current synchronization context when this method is called.
         /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
@@ -424,8 +424,8 @@ public static class IEventObserverExtensions
         /// <param name="delay">The delay period for debouncing.</param>
         /// <param name="dispatcher">
         /// The dispatcher to run on after the delay has passed.
-        /// If not set the debounce will be run under the synchronization
-        /// context of the thread this method was called on.
+        /// If not set the debounce will be run using the current
+        /// synchronization context when this method is called.
         /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
@@ -459,8 +459,8 @@ public static class IEventObserverExtensions
         /// <param name="limit">The limit for throttling.</param>
         /// <param name="dispatcher">
         /// The dispatcher to use to potentially invoke the action in the future
-        /// if it was throttled.  If not set the action will be run under the
-        /// synchronization context of the thread this method was called on.
+        /// if it was throttled.  If not set the action will be run using the
+        /// current synchronization context when this method is called.
         /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.

@@ -28,8 +28,8 @@ namespace SingleFinite.Essentials.Internal.EventObservers;
 /// <param name="limit">The limit for throttling.</param>
 /// <param name="dispatcher">
 /// The dispatcher to use to potentially invoke the action in the future if
-/// it was throttled.  If not set the action will be run under the
-/// synchronization context of the thread this method was called on.
+/// it was throttled.  If not set the action will be run using the current
+/// synchronization context from when this class is created.
 /// </param>
 internal class EventObserverThrottleLatest(
     IEventObserver parent,
@@ -43,6 +43,12 @@ internal class EventObserverThrottleLatest(
     /// Used to throttle events.
     /// </summary>
     private readonly ThrottlerLatest _throttleLatest = new();
+
+    /// <summary>
+    /// The dispatcher used with the throttle.
+    /// </summary>
+    private readonly IDispatcher _dispatcher =
+        dispatcher ?? new ContinuationDispatcher();
 
     #endregion
 
@@ -62,7 +68,7 @@ internal class EventObserverThrottleLatest(
                     RaiseNextEvent();
             },
             limit: limit,
-            dispatcher: dispatcher
+            dispatcher: _dispatcher
         );
 
         return !isThrottled;
@@ -81,8 +87,8 @@ internal class EventObserverThrottleLatest(
 /// <param name="limit">The limit for throttling.</param>
 /// <param name="dispatcher">
 /// The dispatcher to use to potentially invoke the action in the future if
-/// it was throttled.  If not set the action will be run under the
-/// synchronization context of the thread this method was called on.
+/// it was throttled.  If not set the action will be using the current
+/// synchronization context from when this class is created.
 /// </param>
 internal class EventObserverThrottleLatest<TArgs>(
     IEventObserver<TArgs> parent,
@@ -96,6 +102,12 @@ internal class EventObserverThrottleLatest<TArgs>(
     /// Used to throttle events.
     /// </summary>
     private readonly ThrottlerLatest _throttleLatest = new();
+
+    /// <summary>
+    /// The dispatcher used with the throttle.
+    /// </summary>
+    private readonly IDispatcher _dispatcher =
+        dispatcher ?? new ContinuationDispatcher();
 
     #endregion
 
@@ -116,7 +128,7 @@ internal class EventObserverThrottleLatest<TArgs>(
                     RaiseNextEvent(args);
             },
             limit: limit,
-            dispatcher: dispatcher
+            dispatcher: _dispatcher
         );
 
         return !isThrottled;

@@ -66,6 +66,8 @@ public class ThrottleLatestTests(TestContext testContext)
     [TestMethod]
     public async Task Throttle_With_Default_Dispatcher_Invokes_Last_Action()
     {
+        SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
+
         var observedItems = new List<string>();
         var throttleLatest = new ThrottlerLatest();
         var limit = TimeSpan.FromMilliseconds(250);
