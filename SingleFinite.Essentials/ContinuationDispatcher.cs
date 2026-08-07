@@ -43,7 +43,10 @@ public sealed class ContinuationDispatcher : IDispatcher
     /// </summary>
     public ContinuationDispatcher()
     {
-        _taskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+        if (SynchronizationContext.Current is null)
+            _taskScheduler = TaskScheduler.Current;
+        else
+            _taskScheduler = TaskScheduler.FromCurrentSynchronizationContext();
     }
 
     #endregion

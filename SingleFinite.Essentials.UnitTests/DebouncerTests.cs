@@ -66,8 +66,6 @@ public class DebouncerTests(TestContext testContext)
     [TestMethod]
     public async Task Debounce_With_Default_Dispatcher()
     {
-        SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
-
         var observedNames = new List<string>();
         var dispatcher = new DedicatedThreadDispatcher();
         var debouncer = new Debouncer();
