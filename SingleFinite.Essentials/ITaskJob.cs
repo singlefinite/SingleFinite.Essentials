@@ -22,33 +22,33 @@
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// Holds a Task that was started through a TaskScope.
+/// Holds a task that can be canceled.
 /// </summary>
-public interface ITaskInfo
+public interface ITaskJob
 {
     /// <summary>
-    /// The task started by a TaskScope.
+    /// The task for the job.
     /// </summary>
     Task Task { get; }
 
     /// <summary>
-    /// The cancellation token used to cancel the Task.
+    /// The cancellation token for the job.
     /// </summary>
     CancellationToken CancellationToken { get; }
 
     /// <summary>
-    /// Cancel the task with the CancellationToken.
+    /// Cancel the job. 
     /// </summary>
     void Cancel();
 }
 
 /// <summary>
-/// Holds a Task that was started through a TaskScope.
+/// Holds a task that can be canceled.
 /// </summary>
-public interface ITaskInfo<TResult> : ITaskInfo
+public interface ITaskJob<TResult> : ITaskJob
 {
     /// <summary>
-    /// The task started by a TaskScope.
+    /// The task for the job.
     /// </summary>
     new Task<TResult> Task { get; }
 }

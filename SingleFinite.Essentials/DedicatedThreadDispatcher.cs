@@ -137,6 +137,10 @@ public sealed class DedicatedThreadDispatcher :
                     var result = await function().ConfigureAwait(false);
                     taskCompletionSource.SetResult(result);
                 }
+                catch (OperationCanceledException)
+                {
+                    taskCompletionSource.SetCanceled();
+                }
                 catch (Exception ex)
                 {
                     taskCompletionSource.SetException(ex);

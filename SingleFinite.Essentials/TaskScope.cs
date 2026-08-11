@@ -47,16 +47,17 @@ public sealed class TaskScope : ITaskScope, IDisposable
     /// </summary>
     /// <param name="dispatcher">
     /// The default dispatcher to use for tasks created in this scope.
+    /// If not provided, a <see cref="ContinuationDispatcher"/> will be used.
     /// </param>
     /// <param name="parentCancellationToken">
     /// Optional CancellationToken for the parent of this scope if there is one.
     /// </param>
     public TaskScope(
-        IDispatcher dispatcher,
+        IDispatcher? dispatcher = default,
         CancellationToken parentCancellationToken = default
     )
     {
-        Dispatcher = dispatcher;
+        Dispatcher = dispatcher ?? new ContinuationDispatcher();
 
         _disposeState = new(owner: this);
 
@@ -87,6 +88,9 @@ public sealed class TaskScope : ITaskScope, IDisposable
     #region Methods
 
     /// <inheritdoc/>
+    public void Cancel() => _disposeState.Dispose();
+
+    /// <inheritdoc/>
     public void Dispose()
     {
         _parentDisposeRegistration?.Unregister();
@@ -98,19 +102,6 @@ public sealed class TaskScope : ITaskScope, IDisposable
     (
         dispatcher: dispatcher ?? Dispatcher,
         parentCancellationToken: CancellationToken
-    );
-
-    /// <inheritdoc/>
-    public Task<TResult> RunAsync<TResult>(
-        Func<Task<TResult>> function,
-        IDispatcher? dispatcher = default,
-        CancellationToken cancellationToken = default
-    ) => (dispatcher ?? Dispatcher).RunAsync(
-        function: function,
-        cancellationToken: CreateLinkedToken(
-            CancellationToken,
-            cancellationToken
-        )
     );
 
     /// <inheritdoc/>

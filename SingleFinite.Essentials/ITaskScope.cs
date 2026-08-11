@@ -42,6 +42,16 @@ public interface ITaskScope
     IDispatcher Dispatcher { get; }
 
     /// <summary>
+    /// Token that is cancelled when this scope is disposed.
+    /// </summary>
+    CancellationToken CancellationToken { get; }
+
+    /// <summary>
+    /// Cancel this scope.
+    /// </summary>
+    void Cancel();
+
+    /// <summary>
     /// Create a new TaskScope that is a child of this scope.  If this scope is
     /// cancelled any descendants of this scope will be cancelled as well.
     /// </summary>
@@ -51,25 +61,6 @@ public interface ITaskScope
     /// </param>
     /// <returns>A new child scope.</returns>
     TaskScope CreateChildScope(IDispatcher? dispatcher = default);
-
-    /// <summary>
-    /// Execute the given async function.
-    /// </summary>
-    /// <typeparam name="TResult">
-    /// The type of result returned by the function.
-    /// </typeparam>
-    /// <param name="function">The function to execute.</param>
-    /// <param name="dispatcher">
-    /// Optional dispatcher to use to execute the function.  If not specified
-    /// the default dispatcher for this scope will be used.
-    /// </param>
-    /// <param name="cancellationToken">Optional cancellation token.</param>
-    /// <returns>A task that runs until the function has completed.</returns>
-    Task<TResult> RunAsync<TResult>(
-        Func<Task<TResult>> function,
-        IDispatcher? dispatcher = default,
-        CancellationToken cancellationToken = default
-    );
 
     /// <summary>
     /// Execute the given cancellable async function.
@@ -89,9 +80,4 @@ public interface ITaskScope
         IDispatcher? dispatcher = default,
         CancellationToken cancellationToken = default
     );
-
-    /// <summary>
-    /// Token that is cancelled when this scope is disposed.
-    /// </summary>
-    CancellationToken CancellationToken { get; }
 }
