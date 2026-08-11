@@ -72,21 +72,13 @@ public static class ITaskScopeExtensions
             IDispatcher? dispatcher = default
         )
         {
-            var childScope = scope.CreateChildScope(dispatcher);
-
-            var job = new TaskJob<int>(
-                scope: childScope,
-                cancellationToken: childScope.CancellationToken
-            );
-
+            var job = new TaskJob<int>();
             job.Run(_ =>
             {
                 action();
                 return Task.FromResult(0);
             });
-
             job.Task.EmitOnException(dispatcher ?? scope.Dispatcher);
-
             return job;
         }
 
@@ -106,21 +98,13 @@ public static class ITaskScopeExtensions
             IDispatcher? dispatcher = default
         )
         {
-            var childScope = scope.CreateChildScope(dispatcher);
-
-            var job = new TaskJob<int>(
-                scope: childScope,
-                cancellationToken: childScope.CancellationToken
-            );
-
+            var job = new TaskJob<int>();
             job.Run(async _ =>
             {
                 await function().ConfigureAwait(false);
                 return 0;
             });
-
             job.Task.EmitOnException(dispatcher ?? scope.Dispatcher);
-
             return job;
         }
 
@@ -143,17 +127,9 @@ public static class ITaskScopeExtensions
             IDispatcher? dispatcher = default
         )
         {
-            var childScope = scope.CreateChildScope(dispatcher);
-
-            var job = new TaskJob<TResult>(
-                scope: childScope,
-                cancellationToken: childScope.CancellationToken
-            );
-
+            var job = new TaskJob<TResult>();
             job.Run(async _ => await function().ConfigureAwait(false));
-
             job.Task.EmitOnException(dispatcher ?? scope.Dispatcher);
-
             return job;
         }
 
@@ -255,16 +231,7 @@ public static class ITaskScopeExtensions
             CancellationToken cancellationToken = default
         )
         {
-            var childScope = scope.CreateChildScope(dispatcher);
-
-            var job = new TaskJob<int>(
-                scope: childScope,
-                cancellationToken: TaskScope.CreateLinkedToken(
-                    cancellationToken,
-                    childScope.CancellationToken
-                )
-            );
-
+            var job = new TaskJob<int>(cancellationToken);
             job.Run(
                 function: cancellationTokenFromFunc =>
                 {
@@ -272,9 +239,7 @@ public static class ITaskScopeExtensions
                     return Task.FromResult(0);
                 }
             );
-
             job.Task.EmitOnException(dispatcher ?? scope.Dispatcher);
-
             return job;
         }
 
@@ -296,16 +261,7 @@ public static class ITaskScopeExtensions
             CancellationToken cancellationToken = default
         )
         {
-            var childScope = scope.CreateChildScope(dispatcher);
-
-            var job = new TaskJob<int>(
-                scope: childScope,
-                cancellationToken: TaskScope.CreateLinkedToken(
-                    cancellationToken,
-                    childScope.CancellationToken
-                )
-            );
-
+            var job = new TaskJob<int>(cancellationToken);
             job.Run(
                 function: async cancellationTokenFromFunc =>
                 {
@@ -313,9 +269,7 @@ public static class ITaskScopeExtensions
                     return 0;
                 }
             );
-
             job.Task.EmitOnException(dispatcher ?? scope.Dispatcher);
-
             return job;
         }
 
@@ -340,23 +294,12 @@ public static class ITaskScopeExtensions
             CancellationToken cancellationToken = default
         )
         {
-            var childScope = scope.CreateChildScope(dispatcher);
-
-            var job = new TaskJob<TResult>(
-                scope: childScope,
-                cancellationToken: TaskScope.CreateLinkedToken(
-                    cancellationToken,
-                    childScope.CancellationToken
-                )
-            );
-
+            var job = new TaskJob<TResult>(cancellationToken);
             job.Run(
                 function: async cancellationTokenFromFunc =>
                     await function(cancellationTokenFromFunc).ConfigureAwait(false)
             );
-
             job.Task.EmitOnException(dispatcher ?? scope.Dispatcher);
-
             return job;
         }
     }

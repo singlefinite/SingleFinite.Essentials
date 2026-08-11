@@ -22,25 +22,46 @@
 namespace SingleFinite.Essentials.Internal;
 
 /// <summary>
-/// Implements the task job interfaces.
+/// Implements the task job interface.
 /// </summary>
 /// <typeparam name="TResult">The type of result for the task.</typeparam>
-/// <param name="scope">
-/// The scope that will be canceled when the job is canceled or when the job
-/// is completed.
-/// </param>
-/// <param name="cancellationToken">The cancellation token used.</param>
-internal class TaskJob<TResult>(
-    ITaskScope scope,
-    CancellationToken cancellationToken
-) : ITaskJob<TResult>
+internal class TaskJob<TResult> : ITaskJob<TResult>
 {
     #region Fields
+
+    /// <summary>
+    /// The cancellation token source that provides the token for this job.
+    /// </summary>
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     /// <summary>
     /// Holds the task completion source.
     /// </summary>
     private readonly TaskCompletionSource<TResult> _taskCompletionSource = new();
+
+    /// <summary>
+    /// Set to true once the Run method has been called.
+    /// </summary>
+    private bool _isRun = false;
+
+    #endregion
+
+    #region Constructors
+
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    /// <param name="cancellationToken">
+    /// Optional cancellation token to link with the cancellation token for this
+    /// job.
+    /// </param>
+    public TaskJob(CancellationToken cancellationToken = default)
+    {
+        CancellationToken = TaskScope.CreateLinkedToken(
+            cancellationToken,
+            _cancellationTokenSource.Token
+        );
+    }
 
     #endregion
 
@@ -53,14 +74,14 @@ internal class TaskJob<TResult>(
     Task ITaskJob.Task => Task;
 
     /// <inheritdoc/>
-    public CancellationToken CancellationToken => cancellationToken;
+    public CancellationToken CancellationToken { get; }
 
     #endregion
 
     #region Methods
 
     /// <inheritdoc/>
-    public void Cancel() => scope.Cancel();
+    public void Cancel() => _cancellationTokenSource.Cancel();
 
     /// <summary>
     /// Call the function to start the task and assign the task results to the
@@ -83,8 +104,6 @@ internal class TaskJob<TResult>(
         {
             _taskCompletionSource.SetException(ex);
         }
-
-        scope.Cancel();
     }
 
     /// <summary>
@@ -93,6 +112,10 @@ internal class TaskJob<TResult>(
     /// <param name="function">The function to start the task.</param>
     public void Run(Func<CancellationToken, Task<TResult>> function)
     {
+        if (_isRun)
+            throw new InvalidOperationException("The job has already been run.");
+        _isRun = true;
+
         _ = RunAsync(function);
     }
 
