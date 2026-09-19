@@ -39,7 +39,7 @@ public interface ITaskScope
     /// <summary>
     /// The default dispatcher for this scope.
     /// </summary>
-    IDispatcher Dispatcher { get; }
+    ITaskDispatcher Dispatcher { get; }
 
     /// <summary>
     /// Token that is cancelled when this scope is disposed.
@@ -60,7 +60,7 @@ public interface ITaskScope
     /// the dispatcher of this scope will be used.
     /// </param>
     /// <returns>A new child scope.</returns>
-    TaskScope CreateChildScope(IDispatcher? dispatcher = default);
+    TaskScope CreateChildScope(ITaskDispatcher? dispatcher = default);
 
     /// <summary>
     /// Execute the given cancellable async function.
@@ -73,11 +73,9 @@ public interface ITaskScope
     /// Optional dispatcher to use to execute the function.  If not specified
     /// the default dispatcher for this scope will be used.
     /// </param>
-    /// <param name="cancellationToken">Optional cancellation token.</param>
-    /// <returns>A task that runs until the function has completed.</returns>
-    Task<TResult> RunAsync<TResult>(
-        Func<CancellationToken, Task<TResult>> function,
-        IDispatcher? dispatcher = default,
-        CancellationToken cancellationToken = default
+    /// <returns>A job that runs until the function has completed.</returns>
+    ITaskJob<TResult> Run<TResult>(
+        Func<Task<TResult>> function,
+        ITaskDispatcher? dispatcher = default
     );
 }

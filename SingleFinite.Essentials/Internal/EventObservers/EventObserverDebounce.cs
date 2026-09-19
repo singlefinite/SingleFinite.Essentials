@@ -26,15 +26,17 @@ namespace SingleFinite.Essentials.Internal.EventObservers;
 /// </summary>
 /// <param name="parent">The parent to this observer.</param>
 /// <param name="delay">The delay period for debouncing.</param>
+/// <param name="scope">
+/// The scope that will be used to invoke the next observers with.
+/// </param>
 /// <param name="dispatcher">
-/// The dispatcher to run on after the delay has elapsed.
-/// If not set the debounce will be run using the current synchronization
-/// context from when this class is created.
+/// The dispatcher that will be used to invoke the next observers with.
 /// </param>
 internal class EventObserverDebounce(
     IEventObserver parent,
     TimeSpan delay,
-    IDispatcher? dispatcher
+    ITaskScope? scope,
+    ITaskDispatcher? dispatcher
 ) : EventObserverBase(parent), IEventObserver
 {
     #region Fields
@@ -43,12 +45,6 @@ internal class EventObserverDebounce(
     /// Debouncer used to debounce.
     /// </summary>
     private readonly Debouncer _debouncer = new();
-
-    /// <summary>
-    /// The dispatcher used with the throttle.
-    /// </summary>
-    private readonly IDispatcher _dispatcher =
-        dispatcher ?? new ContinuationDispatcher();
 
     #endregion
 
@@ -68,7 +64,8 @@ internal class EventObserverDebounce(
         _debouncer.Debounce(
             action: () => BranchNext?.Invoke(),
             delay: delay,
-            dispatcher: _dispatcher
+            scope: scope,
+            dispatcher: dispatcher
         );
 
         return false;
@@ -97,15 +94,17 @@ internal class EventObserverDebounce(
 /// </typeparam>
 /// <param name="parent">The parent to this observer.</param>
 /// <param name="delay">The delay period for debouncing.</param>
+/// <param name="scope">
+/// The scope that will be used to invoke the next observers with.
+/// </param>
 /// <param name="dispatcher">
-/// The dispatcher to run on after the delay has elapsed.
-/// If not set the debounce will be run using the current synchronization
-/// context from when this class is created.
+/// The dispatcher that will be used to invoke the next observers with.
 /// </param>
 internal class EventObserverDebounce<TArgs>(
     IEventObserver<TArgs> parent,
     TimeSpan delay,
-    IDispatcher? dispatcher
+    ITaskScope? scope,
+    ITaskDispatcher? dispatcher
 ) : EventObserverBase<TArgs>(parent), IEventObserver<TArgs>
 {
     #region Fields
@@ -114,12 +113,6 @@ internal class EventObserverDebounce<TArgs>(
     /// Debouncer used to debounce.
     /// </summary>
     private readonly Debouncer _debouncer = new();
-
-    /// <summary>
-    /// The dispatcher used with the throttle.
-    /// </summary>
-    private readonly IDispatcher _dispatcher =
-        dispatcher ?? new ContinuationDispatcher();
 
     #endregion
 
@@ -144,7 +137,8 @@ internal class EventObserverDebounce<TArgs>(
                 BranchNext?.Invoke();
             },
             delay: delay,
-            dispatcher: _dispatcher
+            scope: scope,
+            dispatcher: dispatcher
         );
 
         return false;

@@ -392,11 +392,13 @@ public class EventObserverTests(TestContext testContext)
     public async Task Dispatch_Runs_As_Expected()
     {
         var dispatcherThreadId = -1;
-        var dispatcher = new DedicatedThreadDispatcher();
-        await dispatcher.RunAsync(
-            action: () => dispatcherThreadId = Environment.CurrentManagedThreadId,
-            cancellationToken: testContext.CancellationToken
+        var scope = new TaskScope(
+            parentCancellationToken: testContext.CancellationToken,
+            dispatcher: new DedicatedThreadDispatcher()
         );
+        await scope.Run(
+            action: () => dispatcherThreadId = Environment.CurrentManagedThreadId
+        ).Task;
 
         var currentThreadId = Environment.CurrentManagedThreadId;
 
@@ -414,7 +416,7 @@ public class EventObserverTests(TestContext testContext)
         var observer = observable
             .Observe()
             .OnEach(_ => observedThreadIdsBeforeDispatch.Add(Environment.CurrentManagedThreadId))
-            .Dispatch(dispatcher)
+            .Dispatch(scope)
             .OnEach(_ =>
             {
                 observedThreadIdsAfterDispatch.Add(Environment.CurrentManagedThreadId);

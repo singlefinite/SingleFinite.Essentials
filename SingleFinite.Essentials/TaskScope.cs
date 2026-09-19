@@ -19,6 +19,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using SingleFinite.Essentials.Internal;
+
 namespace SingleFinite.Essentials;
 
 /// <summary>
@@ -53,7 +55,7 @@ public sealed class TaskScope : ITaskScope, IDisposable
     /// Optional CancellationToken for the parent of this scope if there is one.
     /// </param>
     public TaskScope(
-        IDispatcher? dispatcher = default,
+        ITaskDispatcher? dispatcher = default,
         CancellationToken parentCancellationToken = default
     )
     {
@@ -78,7 +80,7 @@ public sealed class TaskScope : ITaskScope, IDisposable
     #region Properties
 
     /// <inheritdoc/>
-    public IDispatcher Dispatcher { get; }
+    public ITaskDispatcher Dispatcher { get; }
 
     /// <inheritdoc/>
     public CancellationToken CancellationToken { get; }
@@ -98,28 +100,33 @@ public sealed class TaskScope : ITaskScope, IDisposable
     }
 
     /// <inheritdoc/>
-    public TaskScope CreateChildScope(IDispatcher? dispatcher = default) => new
+    public TaskScope CreateChildScope(ITaskDispatcher? dispatcher = default) => new
     (
         dispatcher: dispatcher ?? Dispatcher,
         parentCancellationToken: CancellationToken
     );
 
     /// <inheritdoc/>
-    public Task<TResult> RunAsync<TResult>(
-        Func<CancellationToken, Task<TResult>> function,
-        IDispatcher? dispatcher = default,
-        CancellationToken cancellationToken = default
+    public ITaskJob<TResult> Run<TResult>(
+        Func<Task<TResult>> function,
+        ITaskDispatcher? dispatcher = default
     )
     {
-        var linkedCancellationToken = CreateLinkedToken(
-            CancellationToken,
-            cancellationToken
+        var job = new TaskJob<TResult>(
+            cancellationToken: CancellationToken
         );
 
-        return (dispatcher ?? Dispatcher).RunAsync(
-            function: () => function(linkedCancellationToken),
-            cancellationToken: linkedCancellationToken
-        );
+        job.Run(cancellationToken =>
+        {
+            return (dispatcher ?? Dispatcher).RunAsync(
+                function: () => function(),
+                cancellationToken: cancellationToken
+            );
+        });
+
+        job.Task.EmitOnException(dispatcher ?? Dispatcher);
+
+        return job;
     }
 
     /// <summary>

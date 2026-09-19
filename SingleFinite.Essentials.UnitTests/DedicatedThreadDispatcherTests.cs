@@ -55,11 +55,15 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
                 Task.Run(
                     function: async () =>
                     {
-                        await dispatcher.RunAsync(() =>
-                        {
-                            counter++;
-                            nameSet.Add(Thread.CurrentThread.Name);
-                        });
+                        await dispatcher.RunAsync(
+                            function: () =>
+                            {
+                                counter++;
+                                nameSet.Add(Thread.CurrentThread.Name);
+                                return Task.FromResult(0);
+                            },
+                            cancellationToken: testContext.CancellationToken
+                        );
                         handle.Set();
                     },
                     cancellationToken: testContext.CancellationToken
@@ -89,8 +93,14 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
 
         // Make sure an uncaught exception doesn't bring down the app.
         //
-        dispatcher.Run(
-            function: () => throw new InvalidOperationException(),
+        _ = dispatcher.RunAsync(
+            function: () =>
+            {
+                throw new InvalidOperationException();
+#pragma warning disable CS0162 // Unreachable code detected
+                return Task.FromResult(0);
+#pragma warning restore CS0162 // Unreachable code detected
+            },
             cancellationToken: testContext.CancellationToken
         );
 
@@ -98,7 +108,13 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
             async () =>
             {
                 await dispatcher.RunAsync(
-                    function: () => throw new InvalidOperationException(),
+                    function: () =>
+                    {
+                        throw new InvalidOperationException();
+#pragma warning disable CS0162 // Unreachable code detected
+                        return Task.FromResult(0);
+#pragma warning restore CS0162 // Unreachable code detected
+                    },
                     cancellationToken: testContext.CancellationToken
                 );
             }
@@ -111,11 +127,15 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
         var count = 0;
         using var dispatcher = new DedicatedThreadDispatcher();
 
-        (dispatcher as IDisposable).Dispose();
+        dispatcher.Dispose();
 
         await Assert.ThrowsAsync<ObjectDisposedException>(
             () => dispatcher.RunAsync(
-                function: () => count++,
+                function: () =>
+                {
+                    count++;
+                    return Task.FromResult(0);
+                },
                 cancellationToken: testContext.CancellationToken
             )
         );
@@ -123,7 +143,7 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
 
         // Make sure multiple calls to dispose don't cause an exception.
         //
-        (dispatcher as IDisposable).Dispose();
+        dispatcher.Dispose();
     }
 
     [TestMethod]
@@ -142,6 +162,7 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
                             cancellationToken: testContext.CancellationToken
                         );
                         count++;
+                        return 0;
                     },
                     cancellationToken: testContext.CancellationToken
                 ),

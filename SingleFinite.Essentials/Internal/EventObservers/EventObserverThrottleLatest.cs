@@ -26,15 +26,17 @@ namespace SingleFinite.Essentials.Internal.EventObservers;
 /// </summary>
 /// <param name="parent">The parent to this observer.</param>
 /// <param name="limit">The limit for throttling.</param>
+/// <param name="scope">
+/// The scope that will be used to invoke the next observers with.
+/// </param>
 /// <param name="dispatcher">
-/// The dispatcher to use to potentially invoke the action in the future if
-/// it was throttled.  If not set the action will be run using the current
-/// synchronization context from when this class is created.
+/// The dispatcher that will be used to invoke the next observers with.
 /// </param>
 internal class EventObserverThrottleLatest(
     IEventObserver parent,
     TimeSpan limit,
-    IDispatcher? dispatcher
+    ITaskScope? scope,
+    ITaskDispatcher? dispatcher
 ) : EventObserverBase(parent)
 {
     #region Fields
@@ -43,12 +45,6 @@ internal class EventObserverThrottleLatest(
     /// Used to throttle events.
     /// </summary>
     private readonly ThrottlerLatest _throttleLatest = new();
-
-    /// <summary>
-    /// The dispatcher used with the throttle.
-    /// </summary>
-    private readonly IDispatcher _dispatcher =
-        dispatcher ?? new ContinuationDispatcher();
 
     #endregion
 
@@ -68,7 +64,8 @@ internal class EventObserverThrottleLatest(
                     RaiseNextEvent();
             },
             limit: limit,
-            dispatcher: _dispatcher
+            scope: scope,
+            dispatcher: dispatcher
         );
 
         return !isThrottled;
@@ -85,15 +82,17 @@ internal class EventObserverThrottleLatest(
 /// </typeparam>
 /// <param name="parent">The parent to this observer.</param>
 /// <param name="limit">The limit for throttling.</param>
+/// <param name="scope">
+/// The scope that will be used to invoke the next observers with.
+/// </param>
 /// <param name="dispatcher">
-/// The dispatcher to use to potentially invoke the action in the future if
-/// it was throttled.  If not set the action will be using the current
-/// synchronization context from when this class is created.
+/// The dispatcher that will be used to invoke the next observers with.
 /// </param>
 internal class EventObserverThrottleLatest<TArgs>(
     IEventObserver<TArgs> parent,
     TimeSpan limit,
-    IDispatcher? dispatcher
+    ITaskScope? scope,
+    ITaskDispatcher? dispatcher
 ) : EventObserverBase<TArgs>(parent)
 {
     #region Fields
@@ -102,12 +101,6 @@ internal class EventObserverThrottleLatest<TArgs>(
     /// Used to throttle events.
     /// </summary>
     private readonly ThrottlerLatest _throttleLatest = new();
-
-    /// <summary>
-    /// The dispatcher used with the throttle.
-    /// </summary>
-    private readonly IDispatcher _dispatcher =
-        dispatcher ?? new ContinuationDispatcher();
 
     #endregion
 
@@ -128,7 +121,8 @@ internal class EventObserverThrottleLatest<TArgs>(
                     RaiseNextEvent(args);
             },
             limit: limit,
-            dispatcher: _dispatcher
+            scope: scope,
+            dispatcher: dispatcher
         );
 
         return !isThrottled;

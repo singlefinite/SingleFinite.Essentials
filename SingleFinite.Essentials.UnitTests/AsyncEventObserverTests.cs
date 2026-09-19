@@ -401,11 +401,13 @@ public class AsyncEventObserverTests(TestContext testContext)
     public async Task Dispatch_Runs_As_Expected()
     {
         var dispatcherThreadId = -1;
-        var dispatcher = new DedicatedThreadDispatcher();
-        await dispatcher.RunAsync(
-            action: () => dispatcherThreadId = Environment.CurrentManagedThreadId,
-            cancellationToken: testContext.CancellationToken
+        var scope = new TaskScope(
+            parentCancellationToken: testContext.CancellationToken,
+            dispatcher: new DedicatedThreadDispatcher()
         );
+        await scope.Run(
+            action: () => dispatcherThreadId = Environment.CurrentManagedThreadId
+        ).Task;
 
         var currentThreadId = Environment.CurrentManagedThreadId;
 
@@ -418,7 +420,7 @@ public class AsyncEventObserverTests(TestContext testContext)
         var observer = observable
             .Observe()
             .OnEach(_ => observedThreadIdsBeforeDispatch.Add(Environment.CurrentManagedThreadId))
-            .Dispatch(dispatcher)
+            .Dispatch(scope)
             .OnEach(_ => observedThreadIdsAfterDispatch.Add(Environment.CurrentManagedThreadId));
 
         Assert.IsEmpty(observedThreadIdsAfterDispatch);
@@ -437,7 +439,10 @@ public class AsyncEventObserverTests(TestContext testContext)
     {
         var observedNames = new List<string>();
 
-        var dispatcher = new DedicatedThreadDispatcher();
+        var scope = new TaskScope(
+            parentCancellationToken: testContext.CancellationToken,
+            dispatcher: new DedicatedThreadDispatcher()
+        );
 
         var observableSource = new AsyncEventObservableSource<ExampleArgs>();
         var observable = observableSource.Observable;
@@ -446,7 +451,7 @@ public class AsyncEventObserverTests(TestContext testContext)
             .Observe()
             .Debounce(
                 delay: TimeSpan.FromSeconds(1),
-                dispatcher: dispatcher
+                scope: scope
             )
             .OnEach(async args =>
             {
@@ -516,13 +521,17 @@ public class AsyncEventObserverTests(TestContext testContext)
 
         var observableSource = new AsyncEventObservableSource<ExampleArgs>();
         var observable = observableSource.Observable;
-        var dispatcher = new DedicatedThreadDispatcher();
+
+        var scope = new TaskScope(
+            parentCancellationToken: testContext.CancellationToken,
+            dispatcher: new DedicatedThreadDispatcher()
+        );
 
         var observer = observable
             .Observe()
             .ThrottleLatest(
                 limit: TimeSpan.FromMilliseconds(500),
-                dispatcher: dispatcher
+                scope: scope
             )
             .OnEach(args => observedNames.Add(args.Name));
 

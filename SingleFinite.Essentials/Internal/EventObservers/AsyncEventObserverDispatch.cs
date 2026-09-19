@@ -26,26 +26,30 @@ namespace SingleFinite.Essentials.Internal.EventObservers;
 /// Invoke the next observers using the provided dispatcher.
 /// </summary>
 /// <param name="parent">The parent to this observer.</param>
+/// <param name="scope">
+/// The scope to invoke the next observers with.
+/// </param>
 /// <param name="dispatcher">
 /// The dispatcher to invoke the next observers with.
 /// </param>
 internal class AsyncEventObserverDispatch(
     IAsyncEventObserver parent,
-    IDispatcher dispatcher
+    ITaskScope scope,
+    ITaskDispatcher? dispatcher
 ) : AsyncEventObserverBase(parent)
 {
     #region Methods
 
     /// <summary>
-    /// Raise next event using dispatcher.
+    /// Raise next event using scope.
     /// </summary>
     /// <returns>Always return false.</returns>
     protected override async Task<bool> OnEventAsync()
     {
-        await dispatcher.RunAsync(
-            function: RaiseNextEventAsync
-        );
-
+        await scope.Run(
+            function: RaiseNextEventAsync,
+            dispatcher: dispatcher
+        ).Task;
         return false;
     }
 
@@ -59,26 +63,31 @@ internal class AsyncEventObserverDispatch(
 /// The type of arguments passed with observed events.
 /// </typeparam>
 /// <param name="parent">The parent to this observer.</param>
+/// <param name="scope">
+/// The scope to invoke the next observers with.
+/// </param>
 /// <param name="dispatcher">
 /// The dispatcher to invoke the next observers with.
 /// </param>
 internal class AsyncEventObserverDispatch<TArgs>(
     IAsyncEventObserver<TArgs> parent,
-    IDispatcher dispatcher
+    ITaskScope scope,
+    ITaskDispatcher? dispatcher
 ) : AsyncEventObserverBase<TArgs>(parent)
 {
     #region Methods
 
     /// <summary>
-    /// Raise next event using dispatcher.
+    /// Raise next event using scope.
     /// </summary>
     /// <param name="args">Arguments passed with the observed event.</param>
     /// <returns>Always return false.</returns>
     protected override async Task<bool> OnEventAsync(TArgs args)
     {
-        await dispatcher.RunAsync(
-            function: () => RaiseNextEventAsync(args)
-        );
+        await scope.Run(
+            function: () => RaiseNextEventAsync(args),
+            dispatcher: dispatcher
+        ).Task;
 
         return false;
     }

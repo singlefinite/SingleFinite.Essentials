@@ -72,22 +72,22 @@ public sealed class Debouncer : IDisposable
     /// <param name="delay">
     /// The amount of time to wait before invoking the given action.
     /// </param>
+    /// <param name="scope">
+    /// The scope that will run the action after the delay has elapsed.
+    /// </param>
     /// <param name="dispatcher">
     /// The dispatcher that will run the action after the delay has elapsed.
-    /// If not set the debounce will be run under the synchronization context
-    /// of the thread this method was called on.
     /// </param>
-    /// <param name="cancellationToken">Optional cancellation token.</param>
     public void Debounce(
         Action action,
         TimeSpan delay,
-        IDispatcher? dispatcher = default,
-        CancellationToken cancellationToken = default
+        ITaskScope? scope = default,
+        ITaskDispatcher? dispatcher = default
     )
     {
         _disposeState.ThrowIfDisposed();
 
-        var resolvedDispatcher = dispatcher ?? new ContinuationDispatcher();
+        var resolvedScope = scope ?? new TaskScope();
 
         lock (_timerLock)
         {
@@ -96,9 +96,9 @@ public sealed class Debouncer : IDisposable
                 callback: OnTimeout,
                 state: () =>
                 {
-                    resolvedDispatcher.Run(
+                    resolvedScope.Run(
                         action: action,
-                        cancellationToken: cancellationToken
+                        dispatcher: dispatcher
                     );
                 },
                 dueTime: delay,
@@ -117,22 +117,22 @@ public sealed class Debouncer : IDisposable
     /// <param name="delay">
     /// The amount of time to wait before invoking the given Func.
     /// </param>
-    /// <param name="dispatcher">
-    /// The dispatcher that will run the Func after the delay has elapsed.
-    /// If not set the debounce will be run under the synchronization context
-    /// of the thread this method was called on.
+    /// <param name="scope">
+    /// The scope that will run the function after the delay has elapsed.
     /// </param>
-    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <param name="dispatcher">
+    /// The dispatcher that will run the function after the delay has elapsed.
+    /// </param>
     public void Debounce(
         Func<Task> function,
         TimeSpan delay,
-        IDispatcher? dispatcher = default,
-        CancellationToken cancellationToken = default
+        ITaskScope? scope = default,
+        ITaskDispatcher? dispatcher = default
     )
     {
         _disposeState.ThrowIfDisposed();
 
-        var resolvedDispatcher = dispatcher ?? new ContinuationDispatcher();
+        var resolvedScope = scope ?? new TaskScope();
 
         lock (_timerLock)
         {
@@ -141,9 +141,9 @@ public sealed class Debouncer : IDisposable
                 callback: OnTimeout,
                 state: () =>
                 {
-                    resolvedDispatcher.Run(
+                    resolvedScope.Run(
                         function: function,
-                        cancellationToken: cancellationToken
+                        dispatcher: dispatcher
                     );
                 },
                 dueTime: delay,

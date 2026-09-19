@@ -22,41 +22,27 @@
 namespace SingleFinite.Essentials.UnitTests;
 
 [TestClass]
-public class CurrentThreadDispatcherTests(TestContext testContext)
+public class CurrentContextDispatcherTests(TestContext testContext)
 {
     [TestMethod]
-    public async Task RunAsync_Invokes_On_Calling_Thread()
+    public async Task CancellingToken_CancelsTask()
     {
-        var dispatcher = new CurrentThreadDispatcher();
-
-        var threadId1 = Environment.CurrentManagedThreadId;
-        var observedThreadId1 = -1;
-        await dispatcher.RunAsync(
-            function: () =>
-            {
-                observedThreadId1 = Environment.CurrentManagedThreadId;
-                return Task.FromResult(0);
-            },
-            cancellationToken: testContext.CancellationToken
+        var flag = false;
+        var scope = new TaskScope(
+            dispatcher: new CurrentContextDispatcher()
         );
-        Assert.AreEqual(threadId1, observedThreadId1);
 
-        await Task.Run(
+        var job = scope.Run(
             function: async () =>
             {
-                var threadId2 = Environment.CurrentManagedThreadId;
-                var observedThreadId2 = -1;
-                await dispatcher.RunAsync(
-                    function: () =>
-                    {
-                        observedThreadId2 = Environment.CurrentManagedThreadId;
-                        return Task.FromResult(0);
-                    },
-                    cancellationToken: testContext.CancellationToken
-                );
-                Assert.AreEqual(threadId2, observedThreadId2);
-            },
-            cancellationToken: testContext.CancellationToken
+                await Task.Delay(5000, TaskScopeContext.CancellationToken);
+                flag = true;
+                return 0;
+            }
         );
+
+        job.Cancel();
+
+        Assert.IsFalse(flag);
     }
 }

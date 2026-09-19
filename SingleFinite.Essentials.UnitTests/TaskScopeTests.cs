@@ -59,32 +59,6 @@ public class TaskScopeTests(TestContext testContext)
     }
 
     [TestMethod]
-    public async Task Provided_Token_Is_Cancelled_When_Scope_Is_Disposed()
-    {
-        var testFlag = false;
-        var scope = new TaskScope(
-            dispatcher: new ThreadPoolDispatcher()
-        );
-
-        var task = scope.RunAsync(
-            function: async token =>
-            {
-                await Task.Delay(5000, token);
-                testFlag = true;
-            },
-            cancellationToken: testContext.CancellationToken
-        );
-
-        scope.Dispose();
-
-        await Assert.ThrowsExactlyAsync<TaskCanceledException>(() =>
-            task.WaitAsync(testContext.CancellationToken)
-        );
-
-        Assert.IsFalse(testFlag);
-    }
-
-    [TestMethod]
     public async Task Tasks_Are_Not_Run_After_Scope_Is_Canceled()
     {
         var testFlag = false;
@@ -92,10 +66,11 @@ public class TaskScopeTests(TestContext testContext)
 
         scope.Cancel();
 
-        var task = scope.RunAsync(
-            action: _ => testFlag = true,
-            cancellationToken: testContext.CancellationToken
+        var job = scope.Run(
+            action: () => testFlag = true
         );
+
+        await Task.Delay(25, testContext.CancellationToken);
 
         Assert.IsFalse(testFlag);
     }
@@ -109,22 +84,19 @@ public class TaskScopeTests(TestContext testContext)
         );
 
         var job = scope.Run(
-            function: async token =>
+            function: async () =>
             {
-                await Task.Delay(5000, token);
+                await Task.Delay(5000, TaskScopeContext.CancellationToken);
                 testFlag = true;
-            },
-            cancellationToken: testContext.CancellationToken
+            }
         );
 
-        job.Cancel();
+        scope.Dispose();
 
         await Assert.ThrowsExactlyAsync<TaskCanceledException>(() =>
             job.Task.WaitAsync(testContext.CancellationToken)
         );
 
-        Assert.IsTrue(job.CancellationToken.IsCancellationRequested);
-        Assert.IsTrue(job.Task.IsCanceled);
         Assert.IsFalse(testFlag);
     }
 
@@ -136,12 +108,11 @@ public class TaskScopeTests(TestContext testContext)
         );
 
         var job = scope.Run(
-            function: async token =>
+            function: async () =>
             {
-                await Task.Delay(25, token);
+                await Task.Delay(25, testContext.CancellationToken);
                 return 99;
-            },
-            cancellationToken: testContext.CancellationToken
+            }
         );
 
         var result = await job.Task.WaitAsync(testContext.CancellationToken);
@@ -156,7 +127,7 @@ public class TaskScopeTests(TestContext testContext)
 
         var dispatcher = new ThreadPoolDispatcher();
 
-        var observer = Dispatcher.UnhandledException
+        var observer = TaskDispatcher.UnhandledException
             .Observe()
             .Where(args => args.Dispatcher == dispatcher)
             .Select(args => args.Exception)
@@ -167,8 +138,7 @@ public class TaskScopeTests(TestContext testContext)
         );
 
         scope.Run(
-            action: _ => throw new InvalidOperationException("Test Exception"),
-            cancellationToken: testContext.CancellationToken
+            action: () => throw new InvalidOperationException("Test Exception")
         );
 
         await Task.Delay(50, testContext.CancellationToken);
@@ -192,7 +162,7 @@ public class TaskScopeTests(TestContext testContext)
 
         var dispatcher = new ThreadPoolDispatcher();
 
-        var observer = Dispatcher.UnhandledException
+        var observer = TaskDispatcher.UnhandledException
             .Observe()
             .Where(args => args.Dispatcher == dispatcher)
             .Select(args => args.Exception)
@@ -203,16 +173,15 @@ public class TaskScopeTests(TestContext testContext)
         );
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            scope.RunAsync(
-                function: async _ =>
+            scope.Run(
+                function: async () =>
                 {
                     throw new InvalidOperationException("Test Exception");
 #pragma warning disable CS0162 // Unreachable code detected
                     return 0;
 #pragma warning restore CS0162 // Unreachable code detected
-                },
-                cancellationToken: testContext.CancellationToken
-            )
+                }
+            ).Task
         );
 
         observer.Dispose();
@@ -227,7 +196,7 @@ public class TaskScopeTests(TestContext testContext)
 
         var dispatcher = new ThreadPoolDispatcher();
 
-        var observer = Dispatcher.UnhandledException
+        var observer = TaskDispatcher.UnhandledException
             .Observe()
             .Where(args => args.Dispatcher == dispatcher)
             .Select(args => args.Exception)
@@ -238,8 +207,7 @@ public class TaskScopeTests(TestContext testContext)
         );
 
         scope.Run(
-            function: async token => await Task.Delay(5000, token),
-            cancellationToken: testContext.CancellationToken
+            function: async () => await Task.Delay(5000, testContext.CancellationToken)
         );
 
         scope.Dispose();

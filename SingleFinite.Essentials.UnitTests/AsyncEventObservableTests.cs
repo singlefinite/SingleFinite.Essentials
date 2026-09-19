@@ -96,7 +96,9 @@ public class AsyncEventObservableTests(TestContext testContext)
     {
         var observedNames = new List<string>();
 
-        var dispatcher = new DedicatedThreadDispatcher();
+        var scope = new TaskScope(
+            dispatcher: new DedicatedThreadDispatcher()
+        );
 
         var observableSource = new AsyncEventObservableSource<ExampleArgs>();
         var observable = observableSource.Observable;
@@ -104,7 +106,7 @@ public class AsyncEventObservableTests(TestContext testContext)
         var observer = observable
             .Observe()
             .Debounce(
-                dispatcher: dispatcher,
+                scope: scope,
                 delay: TimeSpan.FromSeconds(1)
             )
             .OnEach(args => observedNames.Add(args.Name));

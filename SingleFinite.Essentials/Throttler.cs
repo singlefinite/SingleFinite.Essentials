@@ -63,11 +63,11 @@ public sealed class Throttler
     /// If the time since the last action invoked through this method is less
     /// than this timespan the action will not be invoked.
     /// </param>
-    /// <returns>
     /// <param name="elapsed">
     /// This will be set amount of time that has elapsed since the last time
     /// throttle was called.
     /// </param>
+    /// <returns>
     /// true if the action was not invoked.
     /// false if the action was invoked.
     /// </returns>

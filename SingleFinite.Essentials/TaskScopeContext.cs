@@ -22,31 +22,28 @@
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// Implementation of <see cref="IDispatcher"/> that invokes functions on the
-/// same thread that calls the RunAsync method.
+/// Context for the currently executing TaskScope.
 /// </summary>
-public sealed class CurrentThreadDispatcher : IDispatcher
+public static class TaskScopeContext
 {
-    #region Methods
+    #region Fields
 
     /// <summary>
-    /// Invoke the function on the thread that called this method.
+    /// Holds the cancellation token of the executing TaskScope.
     /// </summary>
-    /// <typeparam name="TResult">
-    /// The type of result returned by the function.
-    /// </typeparam>
-    /// <param name="function">The function to execute.</param>
-    /// <param name="cancellationToken">Optional cancellation token.</param>
-    /// <returns>A task that runs until the function has completed.</returns>
-    /// <exception cref="ObjectDisposedException">
-    /// Thrown if this object has been disposed.
-    /// </exception>
-    public Task<TResult> RunAsync<TResult>(
-        Func<Task<TResult>> function,
-        CancellationToken cancellationToken = default
-    )
+    private static readonly AsyncLocal<CancellationToken> s_localCancellationToken = new();
+
+    #endregion
+
+    #region Properties
+
+    /// <summary>
+    /// The cancellation token of the executing TaskScope.
+    /// </summary>
+    public static CancellationToken CancellationToken
     {
-        return function();
+        get => s_localCancellationToken.Value;
+        internal set => s_localCancellationToken.Value = value;
     }
 
     #endregion

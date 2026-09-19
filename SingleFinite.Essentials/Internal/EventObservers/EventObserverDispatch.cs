@@ -25,24 +25,29 @@ namespace SingleFinite.Essentials.Internal.EventObservers;
 /// Invoke the next observers using the provided dispatcher.
 /// </summary>
 /// <param name="parent">The parent to this observer.</param>
+/// <param name="scope">
+/// The scope to invoke the next observers with.
+/// </param>
 /// <param name="dispatcher">
 /// The dispatcher to invoke the next observers with.
 /// </param>
 internal class EventObserverDispatch(
     IEventObserver parent,
-    IDispatcher dispatcher
+    ITaskScope scope,
+    ITaskDispatcher? dispatcher
 ) : EventObserverBase(parent)
 {
     #region Methods
 
     /// <summary>
-    /// Raise next event using dispatcher.
+    /// Raise next event using scope.
     /// </summary>
     /// <returns>Always return false.</returns>
     protected override bool OnEvent()
     {
-        dispatcher.Run(
-            action: RaiseNextEvent
+        scope.Run(
+            action: RaiseNextEvent,
+            dispatcher: dispatcher
         );
 
         return false;
@@ -58,25 +63,30 @@ internal class EventObserverDispatch(
 /// The type of arguments passed with observed events.
 /// </typeparam>
 /// <param name="parent">The parent to this observer.</param>
+/// <param name="scope">
+/// The scope to invoke the next observers with.
+/// </param>
 /// <param name="dispatcher">
 /// The dispatcher to invoke the next observers with.
 /// </param>
 internal class EventObserverDispatch<TArgs>(
     IEventObserver<TArgs> parent,
-    IDispatcher dispatcher
+    ITaskScope scope,
+    ITaskDispatcher? dispatcher
 ) : EventObserverBase<TArgs>(parent)
 {
     #region Methods
 
     /// <summary>
-    /// Raise next event using dispatcher.
+    /// Raise next event using scope.
     /// </summary>
     /// <param name="args">Arguments passed with the observed event.</param>
     /// <returns>Always return false.</returns>
     protected override bool OnEvent(TArgs args)
     {
-        dispatcher.Run(
-            action: () => RaiseNextEvent(args)
+        scope.Run(
+            action: () => RaiseNextEvent(args),
+            dispatcher: dispatcher
         );
 
         return false;

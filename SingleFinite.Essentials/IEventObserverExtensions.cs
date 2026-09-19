@@ -168,6 +168,9 @@ public static class IEventObserverExtensions
         /// <summary>
         /// Invoke the next observers using the provided dispatcher.
         /// </summary>
+        /// <param name="scope">
+        /// The scope to invoke the next observers with.
+        /// </param>
         /// <param name="dispatcher">
         /// The dispatcher to invoke the next observers with.
         /// </param>
@@ -175,10 +178,12 @@ public static class IEventObserverExtensions
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IEventObserver Dispatch(
-            IDispatcher dispatcher
+            ITaskScope scope,
+            ITaskDispatcher? dispatcher = default
         ) =>
             new EventObserverDispatch(
                 parent: observer,
+                scope: scope,
                 dispatcher: dispatcher
             );
 
@@ -186,21 +191,24 @@ public static class IEventObserverExtensions
         /// EventObserver that debounces events.
         /// </summary>
         /// <param name="delay">The delay period for debouncing.</param>
+        /// <param name="scope">
+        /// The scope to invoke the next observers with.
+        /// </param>
         /// <param name="dispatcher">
-        /// The dispatcher to run on after the delay has passed.
-        /// If not set the debounce will be run using the current
-        /// synchronization context when this method is called.
+        /// The dispatcher to invoke the next observers with.
         /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IEventObserver Debounce(
             TimeSpan delay,
-            IDispatcher? dispatcher = default
+            ITaskScope? scope = default,
+            ITaskDispatcher? dispatcher = default
         ) =>
             new EventObserverDebounce(
                 parent: observer,
                 delay: delay,
+                scope: scope,
                 dispatcher: dispatcher
             );
 
@@ -221,21 +229,24 @@ public static class IEventObserverExtensions
         /// EventObserver that throttles events.
         /// </summary>
         /// <param name="limit">The limit for throttling.</param>
+        /// <param name="scope">
+        /// The scope to invoke the next observers with.
+        /// </param>
         /// <param name="dispatcher">
-        /// The dispatcher to use to potentially invoke the action in the future
-        /// if it was throttled.  If not set the action will be run using the
-        /// current synchronization context when this method is called.
+        /// The dispatcher to invoke the next observers with.
         /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IEventObserver ThrottleLatest(
             TimeSpan limit,
-            IDispatcher? dispatcher = default
+            ITaskScope? scope = default,
+            ITaskDispatcher? dispatcher = default
         ) =>
             new EventObserverThrottleLatest(
                 parent: observer,
                 limit: limit,
+                scope: scope,
                 dispatcher: dispatcher
             );
 
@@ -404,6 +415,9 @@ public static class IEventObserverExtensions
         /// <summary>
         /// Invoke the next observers using the provided dispatcher.
         /// </summary>
+        /// <param name="scope">
+        /// The scope to invoke the next observers with.
+        /// </param>
         /// <param name="dispatcher">
         /// The dispatcher to invoke the next observers with.
         /// </param>
@@ -411,10 +425,12 @@ public static class IEventObserverExtensions
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IEventObserver<TArgs> Dispatch(
-            IDispatcher dispatcher
+            ITaskScope scope,
+            ITaskDispatcher? dispatcher = default
         ) =>
             new EventObserverDispatch<TArgs>(
                 parent: observer,
+                scope: scope,
                 dispatcher: dispatcher
             );
 
@@ -422,21 +438,24 @@ public static class IEventObserverExtensions
         /// EventObserver that debounces events.
         /// </summary>
         /// <param name="delay">The delay period for debouncing.</param>
+        /// <param name="scope">
+        /// The scope to invoke the next observers with.
+        /// </param>
         /// <param name="dispatcher">
-        /// The dispatcher to run on after the delay has passed.
-        /// If not set the debounce will be run using the current
-        /// synchronization context when this method is called.
+        /// The dispatcher to invoke the next observers with.
         /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IEventObserver<TArgs> Debounce(
             TimeSpan delay,
-            IDispatcher? dispatcher = default
+            ITaskScope? scope = default,
+            ITaskDispatcher? dispatcher = default
         ) =>
             new EventObserverDebounce<TArgs>(
                 parent: observer,
                 delay: delay,
+                scope: scope,
                 dispatcher: dispatcher
             );
 
@@ -457,21 +476,24 @@ public static class IEventObserverExtensions
         /// EventObserver that throttles events.
         /// </summary>
         /// <param name="limit">The limit for throttling.</param>
+        /// <param name="scope">
+        /// The scope to invoke the next observers with.
+        /// </param>
         /// <param name="dispatcher">
-        /// The dispatcher to use to potentially invoke the action in the future
-        /// if it was throttled.  If not set the action will be run using the
-        /// current synchronization context when this method is called.
+        /// The dispatcher to invoke the next observers with.
         /// </param>
         /// <returns>
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IEventObserver<TArgs> ThrottleLatest(
             TimeSpan limit,
-            IDispatcher? dispatcher = default
+            ITaskScope? scope = default,
+            ITaskDispatcher? dispatcher = default
         ) =>
             new EventObserverThrottleLatest<TArgs>(
                 parent: observer,
                 limit: limit,
+                scope: scope,
                 dispatcher: dispatcher
             );
 

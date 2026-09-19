@@ -26,15 +26,17 @@ namespace SingleFinite.Essentials.Internal.EventObservers;
 /// </summary>
 /// <param name="parent">The parent to this observer.</param>
 /// <param name="delay">The delay period for debouncing.</param>
+/// <param name="scope">
+/// The scope that will be used to invoke the next observers with.
+/// </param>
 /// <param name="dispatcher">
-/// The dispatcher to run on after the delay has elapsed.
-/// If not set the debounce will be run under the synchronization context
-/// of the thread this method was called on.
+/// The dispatcher that will be used to invoke the next observers with.
 /// </param>
 internal class AsyncEventObserverDebounce(
     IAsyncEventObserver parent,
     TimeSpan delay,
-    IDispatcher? dispatcher
+    ITaskScope? scope,
+    ITaskDispatcher? dispatcher
 ) : AsyncEventObserverBase(parent), IAsyncEventObserver
 {
     #region Fields
@@ -62,6 +64,7 @@ internal class AsyncEventObserverDebounce(
         _debouncer.Debounce(
             function: BranchNext.TryInvoke,
             delay: delay,
+            scope: scope,
             dispatcher: dispatcher
         );
 
@@ -93,15 +96,17 @@ internal class AsyncEventObserverDebounce(
 /// </typeparam>
 /// <param name="parent">The parent to this observer.</param>
 /// <param name="delay">The delay period for debouncing.</param>
+/// <param name="scope">
+/// The scope that will be used to invoke the next observers with.
+/// </param>
 /// <param name="dispatcher">
-/// The dispatcher to run on after the delay has elapsed.
-/// If not set the debounce will be run under the synchronization context
-/// of the thread this method was called on.
+/// The dispatcher that will be used to invoke the next observers with.
 /// </param>
 internal class AsyncEventObserverDebounce<TArgs>(
     IAsyncEventObserver<TArgs> parent,
     TimeSpan delay,
-    IDispatcher? dispatcher
+    ITaskScope? scope,
+    ITaskDispatcher? dispatcher
 ) : AsyncEventObserverBase<TArgs>(parent), IAsyncEventObserver<TArgs>
 {
     #region Fields
@@ -134,6 +139,7 @@ internal class AsyncEventObserverDebounce<TArgs>(
                 await BranchNext.TryInvoke();
             },
             delay: delay,
+            scope: scope,
             dispatcher: dispatcher
         );
 

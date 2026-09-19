@@ -22,23 +22,31 @@
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// Abstracts the behavior of executing code on a specific thread.  Different
-/// IDispatcher implementations can be used to provide different behaviors for
-/// executing code.
+/// Implementation of <see cref="ITaskDispatcher"/> that invokes functions on the
+/// same thread that calls the RunAsync method.
 /// </summary>
-public interface IDispatcher
+public sealed class CurrentContextDispatcher : ITaskDispatcher
 {
+    #region Methods
+
     /// <summary>
-    /// Execute the given async function.
+    /// Invoke the function on the synchronization context of the method that
+    /// called this method.
     /// </summary>
     /// <typeparam name="TResult">
     /// The type of result returned by the function.
     /// </typeparam>
     /// <param name="function">The function to execute.</param>
-    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A task that runs until the function has completed.</returns>
-    Task<TResult> RunAsync<TResult>(
+    public async Task<TResult> RunAsync<TResult>(
         Func<Task<TResult>> function,
-        CancellationToken cancellationToken = default
-    );
+        CancellationToken cancellationToken
+    )
+    {
+        TaskScopeContext.CancellationToken = cancellationToken;
+        return await function();
+    }
+
+    #endregion
 }

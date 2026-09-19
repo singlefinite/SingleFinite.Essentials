@@ -24,14 +24,14 @@ using System.Collections.Concurrent;
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// Implementation of <see cref="IDispatcher"/> that queues functions on to a
+/// Implementation of <see cref="ITaskDispatcher"/> that queues functions on to a
 /// dedicated thread.  Normally a platform specific dispatcher should be used to
 /// dispatch to the UI thread for that platform.  However, this dispatcher is 
 /// useful for unit testing when there is no UI thread provided by the unit 
 /// testing framework.
 /// </summary>
 public sealed class DedicatedThreadDispatcher :
-    IDispatcher,
+    ITaskDispatcher,
     IDisposable
 {
     #region Fields
@@ -101,7 +101,7 @@ public sealed class DedicatedThreadDispatcher :
     }
 
     /// <summary>
-    /// Implements <see cref="IDispatcher"/> by dispatching the function 
+    /// Implements <see cref="ITaskDispatcher"/> by dispatching the function 
     /// execution to the dedicated thread.  If this method is called from the 
     /// dedicated thread the function will be executed right away instead of 
     /// being queued.
@@ -117,7 +117,7 @@ public sealed class DedicatedThreadDispatcher :
     /// </exception>
     public Task<TResult> RunAsync<TResult>(
         Func<Task<TResult>> function,
-        CancellationToken cancellationToken = default
+        CancellationToken cancellationToken
     )
     {
         _disposeState.ThrowIfDisposed();
@@ -134,6 +134,7 @@ public sealed class DedicatedThreadDispatcher :
             {
                 try
                 {
+                    TaskScopeContext.CancellationToken = cancellationToken;
                     var result = await function().ConfigureAwait(false);
                     taskCompletionSource.SetResult(result);
                 }

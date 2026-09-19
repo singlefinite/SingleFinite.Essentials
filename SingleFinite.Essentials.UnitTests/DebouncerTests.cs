@@ -28,28 +28,29 @@ public class DebouncerTests(TestContext testContext)
     public async Task Debounce_Works_As_Expected()
     {
         var observedNames = new List<string>();
-        var dispatcher = new DedicatedThreadDispatcher();
         var debouncer = new Debouncer();
+
+        var scope = new TaskScope(
+            parentCancellationToken: testContext.CancellationToken,
+            dispatcher: new DedicatedThreadDispatcher()
+        );
 
         debouncer.Debounce(
             action: () => observedNames.Add("One"),
             delay: TimeSpan.FromMilliseconds(100),
-            dispatcher: dispatcher,
-            cancellationToken: testContext.CancellationToken
+            scope: scope
         );
 
         debouncer.Debounce(
             action: () => observedNames.Add("Two"),
             delay: TimeSpan.FromMilliseconds(100),
-            dispatcher: dispatcher,
-            cancellationToken: testContext.CancellationToken
+            scope: scope
         );
 
         debouncer.Debounce(
             action: () => observedNames.Add("Three"),
             delay: TimeSpan.FromMilliseconds(100),
-            dispatcher: dispatcher,
-            cancellationToken: testContext.CancellationToken
+            scope: scope
         );
 
         Assert.IsEmpty(observedNames);
@@ -67,7 +68,6 @@ public class DebouncerTests(TestContext testContext)
     public async Task Debounce_With_Default_Dispatcher()
     {
         var observedNames = new List<string>();
-        var dispatcher = new DedicatedThreadDispatcher();
         var debouncer = new Debouncer();
 
         debouncer.Debounce(
@@ -100,14 +100,17 @@ public class DebouncerTests(TestContext testContext)
     public async Task Cancel_Ends_Debounce()
     {
         var observedNames = new List<string>();
-        var dispatcher = new DedicatedThreadDispatcher();
         var debouncer = new Debouncer();
+
+        var scope = new TaskScope(
+            parentCancellationToken: testContext.CancellationToken,
+            dispatcher: new DedicatedThreadDispatcher()
+        );
 
         debouncer.Debounce(
             action: () => observedNames.Add("One"),
             delay: TimeSpan.FromMilliseconds(100),
-            dispatcher: dispatcher,
-            cancellationToken: testContext.CancellationToken
+            scope: scope
         );
 
         Assert.IsEmpty(observedNames);
@@ -126,14 +129,17 @@ public class DebouncerTests(TestContext testContext)
     public async Task Dispose_Ends_Debounce()
     {
         var observedNames = new List<string>();
-        var dispatcher = new DedicatedThreadDispatcher();
         var debouncer = new Debouncer();
+
+        var scope = new TaskScope(
+            parentCancellationToken: testContext.CancellationToken,
+            dispatcher: new DedicatedThreadDispatcher()
+        );
 
         debouncer.Debounce(
             action: () => observedNames.Add("One"),
             delay: TimeSpan.FromMilliseconds(100),
-            dispatcher: dispatcher,
-            cancellationToken: testContext.CancellationToken
+            scope: scope
         );
 
         Assert.IsEmpty(observedNames);

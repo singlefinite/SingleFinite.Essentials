@@ -31,7 +31,7 @@ namespace SingleFinite.Essentials;
 /// logging, diagnostics, or implementing custom error handling strategies in
 /// applications that use dispatchers for task execution.
 /// </remarks>
-public static class Dispatcher
+public static class TaskDispatcher
 {
     #region Methods
 
@@ -43,7 +43,7 @@ public static class Dispatcher
     /// <param name="dispatcher">The dispatcher the task is running on.</param>
     internal static void EmitOnException(
         this Task task,
-        IDispatcher dispatcher
+        ITaskDispatcher dispatcher
     )
     {
         task.ContinueWith(

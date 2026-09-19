@@ -22,10 +22,10 @@
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// Implementation of <see cref="IDispatcher"/> that invokes functions using the
+/// Implementation of <see cref="ITaskDispatcher"/> that invokes functions using the
 /// current synchronization context from when this class is created.
 /// </summary>
-public sealed class ContinuationDispatcher : IDispatcher
+public sealed class ContinuationDispatcher : ITaskDispatcher
 {
     #region Fields
 
@@ -68,7 +68,7 @@ public sealed class ContinuationDispatcher : IDispatcher
     /// </exception>
     public Task<TResult> RunAsync<TResult>(
         Func<Task<TResult>> function,
-        CancellationToken cancellationToken = default
+        CancellationToken cancellationToken
     )
     {
         var taskCompletionSource = new TaskCompletionSource<TResult>();
@@ -78,6 +78,7 @@ public sealed class ContinuationDispatcher : IDispatcher
             {
                 try
                 {
+                    TaskScopeContext.CancellationToken = cancellationToken;
                     var result = await function();
                     taskCompletionSource.SetResult(result);
                 }

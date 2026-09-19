@@ -58,19 +58,6 @@ public sealed class AsyncEventObservableSource
     /// <returns>The running task.</returns>
     public Task EmitAsync() => Event.TryInvoke();
 
-    /// <summary>
-    /// Raise the event using the given dispatcher.
-    /// </summary>
-    /// <param name="dispatcher">The dispatcher to raise the event on.</param>
-    /// <param name="cancellationToken">Optional cancellation token.</param>
-    public void EmitEvent(
-        IDispatcher dispatcher,
-        CancellationToken cancellationToken
-    ) => dispatcher.Run(
-        function: EmitAsync,
-        cancellationToken: cancellationToken
-    );
-
     #endregion
 
     #region Events
@@ -123,21 +110,6 @@ public sealed class AsyncEventObservableSource<TArgs>
     /// <param name="args">The arguments to pass with the event.</param>
     /// <returns>The running task.</returns>
     public Task EmitAsync(TArgs args) => Event.TryInvoke(args);
-
-    /// <summary>
-    /// Raise the event using the given dispatcher.
-    /// </summary>
-    /// <param name="args">The arguments to pass with the event.</param>
-    /// <param name="dispatcher">The dispatcher to raise the event on.</param>
-    /// <param name="cancellationToken">Optional cancellation token.</param>
-    public void Emit(
-        TArgs args,
-        IDispatcher dispatcher,
-        CancellationToken cancellationToken
-    ) => dispatcher.Run(
-        function: () => EmitAsync(args),
-        cancellationToken: cancellationToken
-    );
 
     #endregion
 

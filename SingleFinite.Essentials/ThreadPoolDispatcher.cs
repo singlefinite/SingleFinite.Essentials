@@ -22,11 +22,11 @@
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// Implementation of <see cref="IDispatcher"/> that queues execution of 
+/// Implementation of <see cref="ITaskDispatcher"/> that queues execution of 
 /// functions and actions to the thread pool using 
 /// <see cref="Task.Run(Func{Task?})"/>.
 /// </summary>
-public sealed class ThreadPoolDispatcher : IDispatcher
+public sealed class ThreadPoolDispatcher : ITaskDispatcher
 {
     #region Methods
 
@@ -44,10 +44,17 @@ public sealed class ThreadPoolDispatcher : IDispatcher
     /// </exception>
     public Task<TResult> RunAsync<TResult>(
         Func<Task<TResult>> function,
-        CancellationToken cancellationToken = default
+        CancellationToken cancellationToken
     )
     {
-        return Task.Run(function, cancellationToken);
+        return Task.Run(
+            function: async () =>
+            {
+                TaskScopeContext.CancellationToken = cancellationToken;
+                return await function();
+            },
+            cancellationToken: cancellationToken
+        );
     }
 
     #endregion

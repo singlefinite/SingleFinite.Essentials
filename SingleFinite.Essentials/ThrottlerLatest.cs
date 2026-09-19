@@ -53,10 +53,11 @@ public sealed class ThrottlerLatest : IDisposable
     /// If the time since the last action invoked through this method is less
     /// than this timespan the action will not be invoked.
     /// </param>
+    /// <param name="scope">
+    /// The scope that will run the latest throttled action.
+    /// </param>
     /// <param name="dispatcher">
-    /// The dispatcher to use to potentially invoke the action in the future if
-    /// it was throttled.  If not set the action will be run under the
-    /// synchronization context of the thread this method was called on.
+    /// The dispatcher that will run the latest throttled action.
     /// </param>
     /// <returns>
     /// true if the action was not invoked.
@@ -65,7 +66,8 @@ public sealed class ThrottlerLatest : IDisposable
     public bool Throttle(
         Action action,
         TimeSpan limit,
-        IDispatcher? dispatcher = default
+        ITaskScope? scope = default,
+        ITaskDispatcher? dispatcher = default
     )
     {
         _debouncer.Cancel();
@@ -73,8 +75,9 @@ public sealed class ThrottlerLatest : IDisposable
         if (_throttler.Throttle(action, limit, out var elapsed))
         {
             _debouncer.Debounce(
-                action: () => Throttle(action, limit, dispatcher),
+                action: () => Throttle(action, limit, scope, dispatcher),
                 delay: limit - elapsed,
+                scope: scope,
                 dispatcher: dispatcher
             );
 

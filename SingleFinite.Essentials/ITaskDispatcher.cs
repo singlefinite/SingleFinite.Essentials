@@ -22,31 +22,23 @@
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// Arguments for an unhandled dispatcher exception event.
+/// Abstracts the behavior of executing code on a specific thread.  Different
+/// ITaskDispatcher implementations can be used to provide different behaviors
+/// for executing code.
 /// </summary>
-/// <remarks>
-/// Constructor.
-/// </remarks>
-/// <param name="dispatcher">
-/// The dispatcher that the unhandled exception occured in.
-/// </param>
-/// <param name="exception">The unhandled exception.</param>
-public class UnhandledDispatcherException(
-    ITaskDispatcher dispatcher,
-    Exception exception
-) : EventArgs
+public interface ITaskDispatcher
 {
-    #region Properties
-
     /// <summary>
-    /// The dispatcher that the unhandled exception occured in.
+    /// Execute the given async function.
     /// </summary>
-    public ITaskDispatcher Dispatcher { get; } = dispatcher;
-
-    /// <summary>
-    /// The unhandled exception.
-    /// </summary>
-    public Exception Exception { get; } = exception;
-
-    #endregion
+    /// <typeparam name="TResult">
+    /// The type of result returned by the function.
+    /// </typeparam>
+    /// <param name="function">The function to execute.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task that runs until the function has completed.</returns>
+    Task<TResult> RunAsync<TResult>(
+        Func<Task<TResult>> function,
+        CancellationToken cancellationToken
+    );
 }
