@@ -86,7 +86,7 @@ public class TaskScopeTests(TestContext testContext)
         var job = scope.Run(
             function: async () =>
             {
-                await Task.Delay(5000, TaskScopeContext.CancellationToken);
+                await Task.Delay(5000, ActiveTaskScopeContext.Current.CancellationToken);
                 testFlag = true;
             }
         );
@@ -121,7 +121,7 @@ public class TaskScopeTests(TestContext testContext)
     }
 
     [TestMethod]
-    public async Task Unhandled_Exceptions_Are_Reported()
+    public async Task TaskJob_Exceptions_Are_Reported()
     {
         var observedUnhandledExceptions = new List<Exception>();
 
@@ -134,14 +134,21 @@ public class TaskScopeTests(TestContext testContext)
             .OnEach(observedUnhandledExceptions.Add);
 
         var scope = new TaskScope(
-            dispatcher: dispatcher
+            dispatcher: dispatcher,
+            parentCancellationToken: testContext.CancellationToken
         );
 
-        scope.Run(
-            action: () => throw new InvalidOperationException("Test Exception")
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            scope.RunAsync(
+                function: async () =>
+                {
+                    throw new InvalidOperationException("Test Exception");
+#pragma warning disable CS0162 // Unreachable code detected
+                    return 0;
+#pragma warning restore CS0162 // Unreachable code detected
+                }
+            )
         );
-
-        await Task.Delay(50, testContext.CancellationToken);
 
         observer.Dispose();
 
@@ -153,40 +160,6 @@ public class TaskScopeTests(TestContext testContext)
             "Test Exception",
             observedUnhandledExceptions[0].Message
         );
-    }
-
-    [TestMethod]
-    public async Task Handled_Exceptions_Are_Not_Reported()
-    {
-        var observedUnhandledExceptions = new List<Exception>();
-
-        var dispatcher = new ThreadPoolDispatcher();
-
-        var observer = TaskDispatcher.UnhandledException
-            .Observe()
-            .Where(args => args.Dispatcher == dispatcher)
-            .Select(args => args.Exception)
-            .OnEach(observedUnhandledExceptions.Add);
-
-        var scope = new TaskScope(
-            dispatcher: dispatcher
-        );
-
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            scope.Run(
-                function: async () =>
-                {
-                    throw new InvalidOperationException("Test Exception");
-#pragma warning disable CS0162 // Unreachable code detected
-                    return 0;
-#pragma warning restore CS0162 // Unreachable code detected
-                }
-            ).Task
-        );
-
-        observer.Dispose();
-
-        Assert.IsEmpty(observedUnhandledExceptions);
     }
 
     [TestMethod]

@@ -29,23 +29,14 @@ public sealed class CurrentContextDispatcher : ITaskDispatcher
 {
     #region Methods
 
-    /// <summary>
-    /// Invoke the function on the synchronization context of the method that
-    /// called this method.
-    /// </summary>
-    /// <typeparam name="TResult">
-    /// The type of result returned by the function.
-    /// </typeparam>
-    /// <param name="function">The function to execute.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A task that runs until the function has completed.</returns>
+    /// <inheritdoc/>
     public async Task<TResult> RunAsync<TResult>(
         Func<Task<TResult>> function,
-        CancellationToken cancellationToken
+        ITaskScopeContext context
     )
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        TaskScopeContext.CancellationToken = cancellationToken;
+        context.CancellationToken.ThrowIfCancellationRequested();
+        ActiveTaskScopeContext.TaskScopeContextLocal.Value = context;
         return await function();
     }
 

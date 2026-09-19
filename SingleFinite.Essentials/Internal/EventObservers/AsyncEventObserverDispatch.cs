@@ -46,10 +46,10 @@ internal class AsyncEventObserverDispatch(
     /// <returns>Always return false.</returns>
     protected override async Task<bool> OnEventAsync()
     {
-        await scope.Run(
+        await scope.RunAsync(
             function: RaiseNextEventAsync,
             dispatcher: dispatcher
-        ).Task;
+        );
         return false;
     }
 
@@ -84,10 +84,10 @@ internal class AsyncEventObserverDispatch<TArgs>(
     /// <returns>Always return false.</returns>
     protected override async Task<bool> OnEventAsync(TArgs args)
     {
-        await scope.Run(
+        await scope.RunAsync(
             function: () => RaiseNextEventAsync(args),
             dispatcher: dispatcher
-        ).Task;
+        );
 
         return false;
     }

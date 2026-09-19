@@ -24,13 +24,13 @@ namespace SingleFinite.Essentials;
 /// <summary>
 /// Extensions for the TaskScope class.
 /// </summary>
-public static class ITaskScopeExtensions
+public static class ITaskScopeContextExtensions
 {
     /// <summary>
-    /// Extension members for <see cref="ITaskScope"/>.
+    /// Extension members for <see cref="ITaskScopeContext"/>.
     /// </summary>
     /// <param name="scope">The instance being extended.</param>
-    extension(ITaskScope scope)
+    extension(ITaskScopeContext scope)
     {
         /// <summary>
         /// Execute the given action.
@@ -57,9 +57,33 @@ public static class ITaskScopeExtensions
             );
 
         /// <summary>
-        /// Execute the given async Func.
-        /// This method will dispatch the Func to be executed and return right 
-        /// away without waiting for the Func to complete execution.
+        /// Execute the given action.
+        /// </summary>
+        /// <param name="action">The action to execute.</param>
+        /// <param name="dispatcher">
+        /// Optional dispatcher to use to execute the function.  If not
+        /// specified the default dispatcher for this scope will be used.
+        /// </param>
+        /// <returns>
+        /// The task that will complete when the action completes.
+        /// </returns>
+        public Task RunAsync(
+            Action action,
+            ITaskDispatcher? dispatcher = default
+        ) =>
+            scope.Run(
+                function: () =>
+                {
+                    action();
+                    return Task.FromResult(0);
+                },
+                dispatcher: dispatcher
+            ).Task;
+
+        /// <summary>
+        /// Execute the given async function.
+        /// This method will dispatch the function to be executed and return
+        /// right away without waiting for the function to complete execution.
         /// </summary>
         /// <param name="function">The Func to execute.</param>
         /// <param name="dispatcher">
@@ -79,5 +103,52 @@ public static class ITaskScopeExtensions
                 },
                 dispatcher: dispatcher
             );
+
+        /// <summary>
+        /// Execute the given async function.
+        /// </summary>
+        /// <param name="function">The Func to execute.</param>
+        /// <param name="dispatcher">
+        /// Optional dispatcher to use to execute the function.  If not
+        /// specified the default dispatcher for this scope will be used.
+        /// </param>
+        /// <returns>
+        /// The task that will complete when the function completes.
+        /// </returns>
+        public Task RunAsync(
+            Func<Task> function,
+            ITaskDispatcher? dispatcher = default
+        ) =>
+            scope.Run(
+                function: async () =>
+                {
+                    await function();
+                    return 0;
+                },
+                dispatcher: dispatcher
+            ).Task;
+
+        /// <summary>
+        /// Execute the given async function.
+        /// </summary>
+        /// <typeparam name="TResult">
+        /// The type of result returned by the function.
+        /// </typeparam>
+        /// <param name="function">The Func to execute.</param>
+        /// <param name="dispatcher">
+        /// Optional dispatcher to use to execute the function.  If not
+        /// specified the default dispatcher for this scope will be used.
+        /// </param>
+        /// <returns>
+        /// The task that will complete when the action completes.
+        /// </returns>
+        public Task<TResult> RunAsync<TResult>(
+            Func<Task<TResult>> function,
+            ITaskDispatcher? dispatcher = default
+        ) =>
+            scope.Run(
+                function: function,
+                dispatcher: dispatcher
+            ).Task;
     }
 }

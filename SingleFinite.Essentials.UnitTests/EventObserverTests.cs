@@ -396,9 +396,9 @@ public class EventObserverTests(TestContext testContext)
             parentCancellationToken: testContext.CancellationToken,
             dispatcher: new DedicatedThreadDispatcher()
         );
-        await scope.Run(
+        await scope.RunAsync(
             action: () => dispatcherThreadId = Environment.CurrentManagedThreadId
-        ).Task;
+        );
 
         var currentThreadId = Environment.CurrentManagedThreadId;
 

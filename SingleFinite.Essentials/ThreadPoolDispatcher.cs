@@ -30,30 +30,19 @@ public sealed class ThreadPoolDispatcher : ITaskDispatcher
 {
     #region Methods
 
-    /// <summary>
-    /// Queue the function to run on the thread pool.
-    /// </summary>
-    /// <typeparam name="TResult">
-    /// The type of result returned by the function.
-    /// </typeparam>
-    /// <param name="function">The function to execute.</param>
-    /// <param name="cancellationToken">Optional cancellation token.</param>
-    /// <returns>A task that runs until the function has completed.</returns>
-    /// <exception cref="ObjectDisposedException">
-    /// Thrown if this object has been disposed.
-    /// </exception>
+    /// <inheritdoc/>
     public Task<TResult> RunAsync<TResult>(
         Func<Task<TResult>> function,
-        CancellationToken cancellationToken
+        ITaskScopeContext context
     )
     {
         return Task.Run(
             function: async () =>
             {
-                TaskScopeContext.CancellationToken = cancellationToken;
+                ActiveTaskScopeContext.TaskScopeContextLocal.Value = context;
                 return await function();
             },
-            cancellationToken: cancellationToken
+            cancellationToken: context.CancellationToken
         );
     }
 

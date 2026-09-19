@@ -22,28 +22,30 @@
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// Context for the currently executing TaskScope.
+/// Class used to get the currently active TaskScope.
 /// </summary>
-public static class TaskScopeContext
+public static class ActiveTaskScopeContext
 {
     #region Fields
 
     /// <summary>
-    /// Holds the cancellation token of the executing TaskScope.
+    /// Holds the currently active TaskScope.
     /// </summary>
-    private static readonly AsyncLocal<CancellationToken> s_localCancellationToken = new();
+    internal static readonly AsyncLocal<ITaskScopeContext> TaskScopeContextLocal = new();
 
     #endregion
 
     #region Properties
 
     /// <summary>
-    /// The cancellation token of the executing TaskScope.
+    /// Gets the currently active task scope context or throws an exception if
+    /// there isn't one.
     /// </summary>
-    public static CancellationToken CancellationToken
+    public static ITaskScopeContext Current
     {
-        get => s_localCancellationToken.Value;
-        internal set => s_localCancellationToken.Value = value;
+        get => TaskScopeContextLocal.Value ?? throw new InvalidOperationException(
+            message: "The TaskScope has not been set."
+        );
     }
 
     #endregion

@@ -53,22 +53,10 @@ public sealed class ContinuationDispatcher : ITaskDispatcher
 
     #region Methods
 
-    /// <summary>
-    /// Invoke the function using the synchronization context from when this
-    /// class is created.
-    /// </summary>
-    /// <typeparam name="TResult">
-    /// The type of result returned by the function.
-    /// </typeparam>
-    /// <param name="function">The function to execute.</param>
-    /// <param name="cancellationToken">Optional cancellation token.</param>
-    /// <returns>A task that runs until the function has completed.</returns>
-    /// <exception cref="ObjectDisposedException">
-    /// Thrown if this object has been disposed.
-    /// </exception>
+    /// <inheritdoc/>
     public Task<TResult> RunAsync<TResult>(
         Func<Task<TResult>> function,
-        CancellationToken cancellationToken
+        ITaskScopeContext context
     )
     {
         var taskCompletionSource = new TaskCompletionSource<TResult>();
@@ -78,7 +66,7 @@ public sealed class ContinuationDispatcher : ITaskDispatcher
             {
                 try
                 {
-                    TaskScopeContext.CancellationToken = cancellationToken;
+                    ActiveTaskScopeContext.TaskScopeContextLocal.Value = context;
                     var result = await function();
                     taskCompletionSource.SetResult(result);
                 }
@@ -87,7 +75,7 @@ public sealed class ContinuationDispatcher : ITaskDispatcher
                     taskCompletionSource.SetException(ex);
                 }
             },
-            cancellationToken: cancellationToken,
+            cancellationToken: context.CancellationToken,
             creationOptions: TaskCreationOptions.None,
             scheduler: _taskScheduler
         );

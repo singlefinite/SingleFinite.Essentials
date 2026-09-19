@@ -89,11 +89,11 @@ internal class TaskJob<TResult> : ITaskJob<TResult>
     /// </summary>
     /// <param name="function">The function to start the task.</param>
     /// <returns>The running task.</returns>
-    private async Task RunAsync(Func<CancellationToken, Task<TResult>> function)
+    private async Task RunAsync(Func<Task<TResult>> function)
     {
         try
         {
-            var result = await function(CancellationToken);
+            var result = await function();
             _taskCompletionSource.TrySetResult(result);
         }
         catch (OperationCanceledException)
@@ -110,7 +110,7 @@ internal class TaskJob<TResult> : ITaskJob<TResult>
     /// Run the task returned by the function.
     /// </summary>
     /// <param name="function">The function to start the task.</param>
-    public void Run(Func<CancellationToken, Task<TResult>> function)
+    public void Run(Func<Task<TResult>> function)
     {
         if (_isRun)
             throw new InvalidOperationException("The job has already been run.");

@@ -116,11 +116,11 @@ public sealed class TaskScope : ITaskScope, IDisposable
             cancellationToken: CancellationToken
         );
 
-        job.Run(cancellationToken =>
+        job.Run(() =>
         {
             return (dispatcher ?? Dispatcher).RunAsync(
                 function: () => function(),
-                cancellationToken: cancellationToken
+                context: this
             );
         });
 

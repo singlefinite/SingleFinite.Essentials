@@ -100,31 +100,17 @@ public sealed class DedicatedThreadDispatcher :
         }
     }
 
-    /// <summary>
-    /// Implements <see cref="ITaskDispatcher"/> by dispatching the function 
-    /// execution to the dedicated thread.  If this method is called from the 
-    /// dedicated thread the function will be executed right away instead of 
-    /// being queued.
-    /// </summary>
-    /// <typeparam name="TResult">
-    /// The type of result returned by the function.
-    /// </typeparam>
-    /// <param name="function">The function to execute.</param>
-    /// <param name="cancellationToken">Optional cancellation token.</param>
-    /// <returns>A task that runs until the function has completed.</returns>
-    /// <exception cref="ObjectDisposedException">
-    /// Thrown if this object has been disposed.
-    /// </exception>
+    /// <inheritdoc/>
     public Task<TResult> RunAsync<TResult>(
         Func<Task<TResult>> function,
-        CancellationToken cancellationToken
+        ITaskScopeContext context
     )
     {
         _disposeState.ThrowIfDisposed();
 
         if (Thread.CurrentThread == _thread)
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            context.CancellationToken.ThrowIfCancellationRequested();
             return function();
         }
 
@@ -137,7 +123,7 @@ public sealed class DedicatedThreadDispatcher :
             {
                 try
                 {
-                    TaskScopeContext.CancellationToken = cancellationToken;
+                    ActiveTaskScopeContext.TaskScopeContextLocal.Value = context;
                     var result = await function().ConfigureAwait(false);
                     taskCompletionSource.SetResult(result);
                 }
@@ -150,7 +136,7 @@ public sealed class DedicatedThreadDispatcher :
                     taskCompletionSource.SetException(ex);
                 }
             },
-            cancellationToken: cancellationToken
+            cancellationToken: context.CancellationToken
         );
 
         return taskCompletionSource.Task;

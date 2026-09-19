@@ -32,6 +32,9 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
         var runPerLoopCount = 10;
         var handles = new List<List<EventWaitHandle>>();
         var nameSet = new HashSet<string?>();
+        var scope = new TaskScope(
+            parentCancellationToken: testContext.CancellationToken
+        );
 
         // Create handles
         //
@@ -62,7 +65,7 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
                                 nameSet.Add(Thread.CurrentThread.Name);
                                 return Task.FromResult(0);
                             },
-                            cancellationToken: testContext.CancellationToken
+                            context: scope
                         );
                         handle.Set();
                     },
@@ -89,11 +92,13 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
     [TestMethod]
     public async Task Run_Method_Propogates_Exceptions_Correctly_When_Thrown()
     {
-        var dispatcher = new DedicatedThreadDispatcher();
+        var scope = new TaskScope(
+            parentCancellationToken: testContext.CancellationToken
+        );
 
         // Make sure an uncaught exception doesn't bring down the app.
         //
-        _ = dispatcher.RunAsync(
+        _ = scope.Dispatcher.RunAsync(
             function: () =>
             {
                 throw new InvalidOperationException();
@@ -101,13 +106,13 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
                 return Task.FromResult(0);
 #pragma warning restore CS0162 // Unreachable code detected
             },
-            cancellationToken: testContext.CancellationToken
+            context: scope
         );
 
         await Assert.ThrowsAsync<InvalidOperationException>(
             async () =>
             {
-                await dispatcher.RunAsync(
+                await scope.Dispatcher.RunAsync(
                     function: () =>
                     {
                         throw new InvalidOperationException();
@@ -115,7 +120,7 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
                         return Task.FromResult(0);
 #pragma warning restore CS0162 // Unreachable code detected
                     },
-                    cancellationToken: testContext.CancellationToken
+                    context: scope
                 );
             }
         );
@@ -125,6 +130,9 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
     public async Task Run_Method_Throws_If_Disposed()
     {
         var count = 0;
+        var scope = new TaskScope(
+            parentCancellationToken: testContext.CancellationToken
+        );
         using var dispatcher = new DedicatedThreadDispatcher();
 
         dispatcher.Dispose();
@@ -136,7 +144,7 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
                     count++;
                     return Task.FromResult(0);
                 },
-                cancellationToken: testContext.CancellationToken
+                context: scope
             )
         );
         Assert.AreEqual(0, count);
@@ -150,6 +158,9 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
     public async Task Run_Method_Supports_Nested_Invokation()
     {
         var count = 0;
+        var scope = new TaskScope(
+            parentCancellationToken: testContext.CancellationToken
+        );
         using var dispatcher = new DedicatedThreadDispatcher();
 
         await dispatcher.RunAsync(
@@ -164,11 +175,11 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
                         count++;
                         return 0;
                     },
-                    cancellationToken: testContext.CancellationToken
+                    context: scope
                 ),
-                cancellationToken: testContext.CancellationToken
+                context: scope
             ),
-            cancellationToken: testContext.CancellationToken
+            context: scope
         );
 
         Assert.AreEqual(1, count);
