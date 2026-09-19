@@ -120,7 +120,7 @@ public sealed class TaskScope : ITaskScope, IDisposable
         {
             return (dispatcher ?? Dispatcher).RunAsync(
                 function: () => function(),
-                context: this
+                scope: this
             );
         });
 

@@ -56,7 +56,7 @@ public sealed class ContinuationDispatcher : ITaskDispatcher
     /// <inheritdoc/>
     public Task<TResult> RunAsync<TResult>(
         Func<Task<TResult>> function,
-        ITaskScopeContext context
+        ITaskScope scope
     )
     {
         var taskCompletionSource = new TaskCompletionSource<TResult>();
@@ -66,7 +66,7 @@ public sealed class ContinuationDispatcher : ITaskDispatcher
             {
                 try
                 {
-                    ActiveTaskScopeContext.TaskScopeContextLocal.Value = context;
+                    ActiveTaskScope.TaskScopeLocal.Value = scope;
                     var result = await function();
                     taskCompletionSource.SetResult(result);
                 }
@@ -75,7 +75,7 @@ public sealed class ContinuationDispatcher : ITaskDispatcher
                     taskCompletionSource.SetException(ex);
                 }
             },
-            cancellationToken: context.CancellationToken,
+            cancellationToken: scope.CancellationToken,
             creationOptions: TaskCreationOptions.None,
             scheduler: _taskScheduler
         );

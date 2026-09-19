@@ -65,7 +65,7 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
                                 nameSet.Add(Thread.CurrentThread.Name);
                                 return Task.FromResult(0);
                             },
-                            context: scope
+                            scope: scope
                         );
                         handle.Set();
                     },
@@ -106,7 +106,7 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
                 return Task.FromResult(0);
 #pragma warning restore CS0162 // Unreachable code detected
             },
-            context: scope
+            scope: scope
         );
 
         await Assert.ThrowsAsync<InvalidOperationException>(
@@ -120,7 +120,7 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
                         return Task.FromResult(0);
 #pragma warning restore CS0162 // Unreachable code detected
                     },
-                    context: scope
+                    scope: scope
                 );
             }
         );
@@ -144,7 +144,7 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
                     count++;
                     return Task.FromResult(0);
                 },
-                context: scope
+                scope: scope
             )
         );
         Assert.AreEqual(0, count);
@@ -175,11 +175,11 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
                         count++;
                         return 0;
                     },
-                    context: scope
+                    scope: scope
                 ),
-                context: scope
+                scope: scope
             ),
-            context: scope
+            scope: scope
         );
 
         Assert.AreEqual(1, count);

@@ -27,10 +27,10 @@ namespace SingleFinite.Essentials;
 public static class ITaskScopeContextExtensions
 {
     /// <summary>
-    /// Extension members for <see cref="ITaskScopeContext"/>.
+    /// Extension members for <see cref="ITaskScope"/>.
     /// </summary>
     /// <param name="scope">The instance being extended.</param>
-    extension(ITaskScopeContext scope)
+    extension(ITaskScope scope)
     {
         /// <summary>
         /// Execute the given action.

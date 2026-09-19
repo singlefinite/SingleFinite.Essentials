@@ -24,26 +24,26 @@ namespace SingleFinite.Essentials;
 /// <summary>
 /// Class used to get the currently active TaskScope.
 /// </summary>
-public static class ActiveTaskScopeContext
+public static class ActiveTaskScope
 {
     #region Fields
 
     /// <summary>
     /// Holds the currently active TaskScope.
     /// </summary>
-    internal static readonly AsyncLocal<ITaskScopeContext> TaskScopeContextLocal = new();
+    internal static readonly AsyncLocal<ITaskScope> TaskScopeLocal = new();
 
     #endregion
 
     #region Properties
 
     /// <summary>
-    /// Gets the currently active task scope context or throws an exception if
+    /// Gets the currently active task scope or throws an exception if
     /// there isn't one.
     /// </summary>
-    public static ITaskScopeContext Current
+    public static ITaskScope Current
     {
-        get => TaskScopeContextLocal.Value ?? throw new InvalidOperationException(
+        get => TaskScopeLocal.Value ?? throw new InvalidOperationException(
             message: "The TaskScope has not been set."
         );
     }

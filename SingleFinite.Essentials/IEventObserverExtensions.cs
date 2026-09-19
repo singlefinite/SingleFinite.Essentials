@@ -178,7 +178,7 @@ public static class IEventObserverExtensions
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IEventObserver Dispatch(
-            ITaskScopeContext scope,
+            ITaskScope scope,
             ITaskDispatcher? dispatcher = default
         ) =>
             new EventObserverDispatch(
@@ -202,7 +202,7 @@ public static class IEventObserverExtensions
         /// </returns>
         public IEventObserver Debounce(
             TimeSpan delay,
-            ITaskScopeContext? scope = default,
+            ITaskScope? scope = default,
             ITaskDispatcher? dispatcher = default
         ) =>
             new EventObserverDebounce(
@@ -240,7 +240,7 @@ public static class IEventObserverExtensions
         /// </returns>
         public IEventObserver ThrottleLatest(
             TimeSpan limit,
-            ITaskScopeContext? scope = default,
+            ITaskScope? scope = default,
             ITaskDispatcher? dispatcher = default
         ) =>
             new EventObserverThrottleLatest(
@@ -425,7 +425,7 @@ public static class IEventObserverExtensions
         /// A new observer that has been added to the chain of observers.
         /// </returns>
         public IEventObserver<TArgs> Dispatch(
-            ITaskScopeContext scope,
+            ITaskScope scope,
             ITaskDispatcher? dispatcher = default
         ) =>
             new EventObserverDispatch<TArgs>(
@@ -449,7 +449,7 @@ public static class IEventObserverExtensions
         /// </returns>
         public IEventObserver<TArgs> Debounce(
             TimeSpan delay,
-            ITaskScopeContext? scope = default,
+            ITaskScope? scope = default,
             ITaskDispatcher? dispatcher = default
         ) =>
             new EventObserverDebounce<TArgs>(
@@ -487,7 +487,7 @@ public static class IEventObserverExtensions
         /// </returns>
         public IEventObserver<TArgs> ThrottleLatest(
             TimeSpan limit,
-            ITaskScopeContext? scope = default,
+            ITaskScope? scope = default,
             ITaskDispatcher? dispatcher = default
         ) =>
             new EventObserverThrottleLatest<TArgs>(

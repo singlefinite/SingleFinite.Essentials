@@ -103,14 +103,14 @@ public sealed class DedicatedThreadDispatcher :
     /// <inheritdoc/>
     public Task<TResult> RunAsync<TResult>(
         Func<Task<TResult>> function,
-        ITaskScopeContext context
+        ITaskScope scope
     )
     {
         _disposeState.ThrowIfDisposed();
 
         if (Thread.CurrentThread == _thread)
         {
-            context.CancellationToken.ThrowIfCancellationRequested();
+            scope.CancellationToken.ThrowIfCancellationRequested();
             return function();
         }
 
@@ -123,7 +123,7 @@ public sealed class DedicatedThreadDispatcher :
             {
                 try
                 {
-                    ActiveTaskScopeContext.TaskScopeContextLocal.Value = context;
+                    ActiveTaskScope.TaskScopeLocal.Value = scope;
                     var result = await function().ConfigureAwait(false);
                     taskCompletionSource.SetResult(result);
                 }
@@ -136,7 +136,7 @@ public sealed class DedicatedThreadDispatcher :
                     taskCompletionSource.SetException(ex);
                 }
             },
-            cancellationToken: context.CancellationToken
+            cancellationToken: scope.CancellationToken
         );
 
         return taskCompletionSource.Task;

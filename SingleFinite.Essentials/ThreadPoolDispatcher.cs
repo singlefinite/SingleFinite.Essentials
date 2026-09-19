@@ -33,16 +33,16 @@ public sealed class ThreadPoolDispatcher : ITaskDispatcher
     /// <inheritdoc/>
     public Task<TResult> RunAsync<TResult>(
         Func<Task<TResult>> function,
-        ITaskScopeContext context
+        ITaskScope scope
     )
     {
         return Task.Run(
             function: async () =>
             {
-                ActiveTaskScopeContext.TaskScopeContextLocal.Value = context;
+                ActiveTaskScope.TaskScopeLocal.Value = scope;
                 return await function();
             },
-            cancellationToken: context.CancellationToken
+            cancellationToken: scope.CancellationToken
         );
     }
 

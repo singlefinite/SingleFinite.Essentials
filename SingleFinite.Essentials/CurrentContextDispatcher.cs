@@ -32,11 +32,11 @@ public sealed class CurrentContextDispatcher : ITaskDispatcher
     /// <inheritdoc/>
     public async Task<TResult> RunAsync<TResult>(
         Func<Task<TResult>> function,
-        ITaskScopeContext context
+        ITaskScope scope
     )
     {
-        context.CancellationToken.ThrowIfCancellationRequested();
-        ActiveTaskScopeContext.TaskScopeContextLocal.Value = context;
+        scope.CancellationToken.ThrowIfCancellationRequested();
+        ActiveTaskScope.TaskScopeLocal.Value = scope;
         return await function();
     }
 

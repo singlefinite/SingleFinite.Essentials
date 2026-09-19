@@ -35,7 +35,7 @@ namespace SingleFinite.Essentials.Internal.EventObservers;
 internal class AsyncEventObserverDebounce(
     IAsyncEventObserver parent,
     TimeSpan delay,
-    ITaskScopeContext? scope,
+    ITaskScope? scope,
     ITaskDispatcher? dispatcher
 ) : AsyncEventObserverBase(parent), IAsyncEventObserver
 {
@@ -105,7 +105,7 @@ internal class AsyncEventObserverDebounce(
 internal class AsyncEventObserverDebounce<TArgs>(
     IAsyncEventObserver<TArgs> parent,
     TimeSpan delay,
-    ITaskScopeContext? scope,
+    ITaskScope? scope,
     ITaskDispatcher? dispatcher
 ) : AsyncEventObserverBase<TArgs>(parent), IAsyncEventObserver<TArgs>
 {

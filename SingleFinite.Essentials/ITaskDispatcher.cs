@@ -35,12 +35,12 @@ public interface ITaskDispatcher
     /// The type of result returned by the function.
     /// </typeparam>
     /// <param name="function">The function to execute.</param>
-    /// <param name="context">
-    /// The task scope context the function will execute under.
+    /// <param name="scope">
+    /// The task scope the function will execute under.
     /// </param>
     /// <returns>A task that runs until the function has completed.</returns>
     Task<TResult> RunAsync<TResult>(
         Func<Task<TResult>> function,
-        ITaskScopeContext context
+        ITaskScope scope
     );
 }

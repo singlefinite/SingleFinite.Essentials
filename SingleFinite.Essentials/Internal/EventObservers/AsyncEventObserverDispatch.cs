@@ -34,7 +34,7 @@ namespace SingleFinite.Essentials.Internal.EventObservers;
 /// </param>
 internal class AsyncEventObserverDispatch(
     IAsyncEventObserver parent,
-    ITaskScopeContext scope,
+    ITaskScope scope,
     ITaskDispatcher? dispatcher
 ) : AsyncEventObserverBase(parent)
 {
@@ -71,7 +71,7 @@ internal class AsyncEventObserverDispatch(
 /// </param>
 internal class AsyncEventObserverDispatch<TArgs>(
     IAsyncEventObserver<TArgs> parent,
-    ITaskScopeContext scope,
+    ITaskScope scope,
     ITaskDispatcher? dispatcher
 ) : AsyncEventObserverBase<TArgs>(parent)
 {

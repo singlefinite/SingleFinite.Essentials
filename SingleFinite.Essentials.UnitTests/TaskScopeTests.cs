@@ -86,7 +86,7 @@ public class TaskScopeTests(TestContext testContext)
         var job = scope.Run(
             function: async () =>
             {
-                await Task.Delay(5000, ActiveTaskScopeContext.Current.CancellationToken);
+                await Task.Delay(5000, ActiveTaskScope.Current.CancellationToken);
                 testFlag = true;
             }
         );
@@ -123,7 +123,7 @@ public class TaskScopeTests(TestContext testContext)
                         secondChildJob = secondChildScope.Run(
                             function: async () =>
                             {
-                                await Task.Delay(5000, ActiveTaskScopeContext.Current.CancellationToken);
+                                await Task.Delay(5000, ActiveTaskScope.Current.CancellationToken);
                                 flag = true;
                             }
                         );
@@ -173,7 +173,7 @@ public class TaskScopeTests(TestContext testContext)
                         secondChildJob = secondChildScope.Run(
                             function: async () =>
                             {
-                                await Task.Delay(5000, ActiveTaskScopeContext.Current.CancellationToken);
+                                await Task.Delay(5000, ActiveTaskScope.Current.CancellationToken);
                                 flag = true;
                             }
                         );

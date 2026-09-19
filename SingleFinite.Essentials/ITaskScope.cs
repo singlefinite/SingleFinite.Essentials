@@ -22,13 +22,45 @@
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// Defines a scope for managing and executing asynchronous tasks with support
-/// for cancellation.
+/// Used to manage a hierarchy of asynchronous tasks that can be cancelled.
 /// </summary>
-public interface ITaskScope : ITaskScopeContext
+public interface ITaskScope
 {
     /// <summary>
-    /// Cancel this scope and all scopes that are a child to this scope.
+    /// The default dispatcher for this scope.
     /// </summary>
-    void Cancel();
+    ITaskDispatcher Dispatcher { get; }
+
+    /// <summary>
+    /// Token that is cancelled when this scope is disposed.
+    /// </summary>
+    CancellationToken CancellationToken { get; }
+
+    /// <summary>
+    /// Create a new TaskScope that is a child of this scope.  If this scope is
+    /// cancelled any descendants of this scope will be cancelled as well.
+    /// </summary>
+    /// <param name="dispatcher">
+    /// The dispatcher for the newly created child scope.  If none is specified
+    /// the dispatcher of this scope will be used.
+    /// </param>
+    /// <returns>A new child scope.</returns>
+    TaskScope CreateChildScope(ITaskDispatcher? dispatcher = default);
+
+    /// <summary>
+    /// Execute the given cancellable async function.
+    /// </summary>
+    /// <typeparam name="TResult">
+    /// The type of result returned by the function.
+    /// </typeparam>
+    /// <param name="function">The function to execute.</param>
+    /// <param name="dispatcher">
+    /// Optional dispatcher to use to execute the function.  If not specified
+    /// the default dispatcher for this scope will be used.
+    /// </param>
+    /// <returns>A job that runs until the function has completed.</returns>
+    ITaskJob<TResult> Run<TResult>(
+        Func<Task<TResult>> function,
+        ITaskDispatcher? dispatcher = default
+    );
 }

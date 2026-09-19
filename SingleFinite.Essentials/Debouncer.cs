@@ -81,7 +81,7 @@ public sealed class Debouncer : IDisposable
     public void Debounce(
         Action action,
         TimeSpan delay,
-        ITaskScopeContext? scope = default,
+        ITaskScope? scope = default,
         ITaskDispatcher? dispatcher = default
     )
     {
