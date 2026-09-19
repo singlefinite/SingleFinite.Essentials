@@ -29,6 +29,7 @@ public class CurrentContextDispatcherTests(TestContext testContext)
     {
         var flag = false;
         var scope = new TaskScope(
+            parentCancellationToken: testContext.CancellationToken,
             dispatcher: new CurrentContextDispatcher()
         );
 

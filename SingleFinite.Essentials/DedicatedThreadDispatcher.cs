@@ -123,7 +123,10 @@ public sealed class DedicatedThreadDispatcher :
         _disposeState.ThrowIfDisposed();
 
         if (Thread.CurrentThread == _thread)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
             return function();
+        }
 
         var taskCompletionSource = new TaskCompletionSource<TResult>(
             TaskCreationOptions.RunContinuationsAsynchronously

@@ -59,7 +59,7 @@ public sealed class TaskScope : ITaskScope, IDisposable
         CancellationToken parentCancellationToken = default
     )
     {
-        Dispatcher = dispatcher ?? new ContinuationDispatcher();
+        Dispatcher = dispatcher ?? new CurrentContextDispatcher();
 
         _disposeState = new(owner: this);
 

@@ -44,6 +44,7 @@ public sealed class CurrentContextDispatcher : ITaskDispatcher
         CancellationToken cancellationToken
     )
     {
+        cancellationToken.ThrowIfCancellationRequested();
         TaskScopeContext.CancellationToken = cancellationToken;
         return await function();
     }
