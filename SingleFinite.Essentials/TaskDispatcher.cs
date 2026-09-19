@@ -112,7 +112,7 @@ public static class TaskDispatcher
 
     /// <summary>
     /// Observable that emits when an unhandled exception occurs in a
-    /// dispatcher.
+    /// dispatcher.  This observable will emit on thread pool threads.
     /// </summary>
     public static IEventObservable<UnhandledDispatcherException>
         UnhandledException => s_unhandledExceptionSource.Observable;

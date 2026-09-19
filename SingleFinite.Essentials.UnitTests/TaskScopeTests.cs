@@ -150,6 +150,10 @@ public class TaskScopeTests(TestContext testContext)
             )
         );
 
+        // Wait for exception to be reported.
+        //
+        await Task.Delay(50, testContext.CancellationToken);
+
         observer.Dispose();
 
         Assert.ContainsSingle(observedUnhandledExceptions);
@@ -185,6 +189,8 @@ public class TaskScopeTests(TestContext testContext)
 
         scope.Dispose();
 
+        // Wait to see if exception is reported.
+        //
         await Task.Delay(50, testContext.CancellationToken);
 
         observer.Dispose();
