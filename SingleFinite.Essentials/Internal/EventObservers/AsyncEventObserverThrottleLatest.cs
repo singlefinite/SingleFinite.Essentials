@@ -35,7 +35,7 @@ namespace SingleFinite.Essentials.Internal.EventObservers;
 internal class AsyncEventObserverThrottleLatest(
     IAsyncEventObserver parent,
     TimeSpan limit,
-    ITaskScope? scope,
+    ITaskScopeContext? scope,
     ITaskDispatcher? dispatcher
 ) : AsyncEventObserverBase(parent)
 {
@@ -91,7 +91,7 @@ internal class AsyncEventObserverThrottleLatest(
 internal class AsyncEventObserverThrottleLatest<TArgs>(
     IAsyncEventObserver<TArgs> parent,
     TimeSpan limit,
-    ITaskScope? scope,
+    ITaskScopeContext? scope,
     ITaskDispatcher? dispatcher
 ) : AsyncEventObserverBase<TArgs>(parent)
 {

@@ -35,7 +35,7 @@ namespace SingleFinite.Essentials.Internal.EventObservers;
 internal class AsyncEventObserverDebounce(
     IAsyncEventObserver parent,
     TimeSpan delay,
-    ITaskScope? scope,
+    ITaskScopeContext? scope,
     ITaskDispatcher? dispatcher
 ) : AsyncEventObserverBase(parent), IAsyncEventObserver
 {
@@ -62,7 +62,7 @@ internal class AsyncEventObserverDebounce(
     protected override Task<bool> OnEventAsync()
     {
         _debouncer.Debounce(
-            function: BranchNext.TryInvoke,
+            action: async () => await BranchNext.TryInvoke(),
             delay: delay,
             scope: scope,
             dispatcher: dispatcher
@@ -105,7 +105,7 @@ internal class AsyncEventObserverDebounce(
 internal class AsyncEventObserverDebounce<TArgs>(
     IAsyncEventObserver<TArgs> parent,
     TimeSpan delay,
-    ITaskScope? scope,
+    ITaskScopeContext? scope,
     ITaskDispatcher? dispatcher
 ) : AsyncEventObserverBase<TArgs>(parent), IAsyncEventObserver<TArgs>
 {
@@ -133,7 +133,7 @@ internal class AsyncEventObserverDebounce<TArgs>(
     protected override Task<bool> OnEventAsync(TArgs args)
     {
         _debouncer.Debounce(
-            function: async () =>
+            action: async () =>
             {
                 await BranchNextWithArgs.TryInvoke(args);
                 await BranchNext.TryInvoke();

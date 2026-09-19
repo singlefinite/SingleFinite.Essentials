@@ -81,7 +81,7 @@ public sealed class Debouncer : IDisposable
     public void Debounce(
         Action action,
         TimeSpan delay,
-        ITaskScope? scope = default,
+        ITaskScopeContext? scope = default,
         ITaskDispatcher? dispatcher = default
     )
     {
@@ -98,51 +98,6 @@ public sealed class Debouncer : IDisposable
                 {
                     resolvedScope.Run(
                         action: action,
-                        dispatcher: dispatcher
-                    );
-                },
-                dueTime: delay,
-                period: Timeout.InfiniteTimeSpan
-            );
-        }
-    }
-
-    /// <summary>
-    /// Debounce the given function.
-    /// </summary>
-    /// <param name="function">
-    /// The Func to invoke if a debounce method has not been called before the
-    /// given delay has elapsed.
-    /// </param>
-    /// <param name="delay">
-    /// The amount of time to wait before invoking the given Func.
-    /// </param>
-    /// <param name="scope">
-    /// The scope that will run the function after the delay has elapsed.
-    /// </param>
-    /// <param name="dispatcher">
-    /// The dispatcher that will run the function after the delay has elapsed.
-    /// </param>
-    public void Debounce(
-        Func<Task> function,
-        TimeSpan delay,
-        ITaskScope? scope = default,
-        ITaskDispatcher? dispatcher = default
-    )
-    {
-        _disposeState.ThrowIfDisposed();
-
-        var resolvedScope = scope ?? new TaskScope();
-
-        lock (_timerLock)
-        {
-            _timer?.Dispose();
-            _timer = new(
-                callback: OnTimeout,
-                state: () =>
-                {
-                    resolvedScope.Run(
-                        function: function,
                         dispatcher: dispatcher
                     );
                 },

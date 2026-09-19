@@ -66,7 +66,7 @@ public sealed class ThrottlerLatest : IDisposable
     public bool Throttle(
         Action action,
         TimeSpan limit,
-        ITaskScope? scope = default,
+        ITaskScopeContext? scope = default,
         ITaskDispatcher? dispatcher = default
     )
     {

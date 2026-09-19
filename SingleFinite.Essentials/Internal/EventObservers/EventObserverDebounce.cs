@@ -35,7 +35,7 @@ namespace SingleFinite.Essentials.Internal.EventObservers;
 internal class EventObserverDebounce(
     IEventObserver parent,
     TimeSpan delay,
-    ITaskScope? scope,
+    ITaskScopeContext? scope,
     ITaskDispatcher? dispatcher
 ) : EventObserverBase(parent), IEventObserver
 {
@@ -103,7 +103,7 @@ internal class EventObserverDebounce(
 internal class EventObserverDebounce<TArgs>(
     IEventObserver<TArgs> parent,
     TimeSpan delay,
-    ITaskScope? scope,
+    ITaskScopeContext? scope,
     ITaskDispatcher? dispatcher
 ) : EventObserverBase<TArgs>(parent), IEventObserver<TArgs>
 {
