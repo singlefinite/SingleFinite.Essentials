@@ -101,6 +101,104 @@ public class TaskScopeTests(TestContext testContext)
     }
 
     [TestMethod]
+    public async Task TaskJob_Child_Cancel_Will_Not_Cancel_Parents()
+    {
+        var flag = false;
+        var parentScope = new TaskScope(
+            parentCancellationToken: testContext.CancellationToken
+        );
+        var firstChildScope = null as TaskScope;
+        var firstChildJob = null as ITaskJob;
+        var secondChildScope = null as TaskScope;
+        var secondChildJob = null as ITaskJob;
+
+        var parentJob = parentScope.Run(
+            function: async () =>
+            {
+                firstChildScope = parentScope.CreateChildScope();
+                firstChildJob = firstChildScope.Run(
+                    function: async () =>
+                    {
+                        secondChildScope = firstChildScope.CreateChildScope();
+                        secondChildJob = secondChildScope.Run(
+                            function: async () =>
+                            {
+                                await Task.Delay(5000, ActiveTaskScopeContext.Current.CancellationToken);
+                                flag = true;
+                            }
+                        );
+
+                        await Task.Delay(50, testContext.CancellationToken);
+                        secondChildScope.Cancel();
+                    }
+                );
+            }
+        );
+
+        await Task.Delay(100, testContext.CancellationToken);
+
+        Assert.IsNotNull(firstChildScope);
+        Assert.IsNotNull(firstChildJob);
+        Assert.IsNotNull(secondChildScope);
+        Assert.IsNotNull(secondChildJob);
+
+        Assert.IsFalse(flag);
+        Assert.IsFalse(parentScope.CancellationToken.IsCancellationRequested);
+        Assert.IsFalse(firstChildScope.CancellationToken.IsCancellationRequested);
+        Assert.IsFalse(firstChildJob.CancellationToken.IsCancellationRequested);
+        Assert.IsTrue(secondChildScope.CancellationToken.IsCancellationRequested);
+        Assert.IsTrue(secondChildJob.CancellationToken.IsCancellationRequested);
+    }
+
+    [TestMethod]
+    public async Task TaskJob_Parent_Cancel_Will_Cancel_Children()
+    {
+        var flag = false;
+        var parentScope = new TaskScope(
+            parentCancellationToken: testContext.CancellationToken
+        );
+        var firstChildScope = null as TaskScope;
+        var firstChildJob = null as ITaskJob;
+        var secondChildScope = null as TaskScope;
+        var secondChildJob = null as ITaskJob;
+
+        var parentJob = parentScope.Run(
+            function: async () =>
+            {
+                firstChildScope = parentScope.CreateChildScope();
+                firstChildJob = firstChildScope.Run(
+                    function: async () =>
+                    {
+                        secondChildScope = firstChildScope.CreateChildScope();
+                        secondChildJob = secondChildScope.Run(
+                            function: async () =>
+                            {
+                                await Task.Delay(5000, ActiveTaskScopeContext.Current.CancellationToken);
+                                flag = true;
+                            }
+                        );
+                    }
+                );
+            }
+        );
+
+        await Task.Delay(50, testContext.CancellationToken);
+        parentScope.Cancel();
+
+        Assert.IsNotNull(firstChildScope);
+        Assert.IsNotNull(firstChildJob);
+        Assert.IsNotNull(secondChildScope);
+        Assert.IsNotNull(secondChildJob);
+
+        Assert.IsFalse(flag);
+        Assert.IsTrue(parentScope.CancellationToken.IsCancellationRequested);
+        Assert.IsTrue(firstChildScope.CancellationToken.IsCancellationRequested);
+        Assert.IsTrue(firstChildJob.CancellationToken.IsCancellationRequested);
+        Assert.IsTrue(secondChildScope.CancellationToken.IsCancellationRequested);
+        Assert.IsTrue(secondChildJob.CancellationToken.IsCancellationRequested);
+    }
+
+    [TestMethod]
     public async Task TaskJob_HasResult_WhenCompleted()
     {
         var scope = new TaskScope(
