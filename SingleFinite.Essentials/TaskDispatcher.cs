@@ -53,17 +53,4 @@ public abstract class TaskDispatcher : ITaskDispatcher
     );
 
     #endregion
-
-    #region Events
-
-    /// <summary>
-    /// Observable that emits when an unhandled exception occurs in a
-    /// dispatcher.  This observable will emit on thread pool threads.
-    /// </summary>
-    public static IEventObservable<UnhandledDispatcherException>
-        UnhandledException => UnhandledExceptionSource.Observable;
-    internal static readonly EventObservableSource<UnhandledDispatcherException>
-        UnhandledExceptionSource = new();
-
-    #endregion
 }

@@ -127,8 +127,6 @@ public sealed class TaskScope : ITaskScope, IDisposable
             );
         });
 
-        job.Task.EmitOnException(dispatcher ?? Dispatcher);
-
         return job;
     }
 
