@@ -22,16 +22,21 @@
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// Class used to get the current task scope context.
+/// Class used to get the current task context.
 /// </summary>
-public static class TaskScopeContext
+public static class TaskContext
 {
     #region Fields
 
     /// <summary>
-    /// Holds the TaskScope.
+    /// Holds the task scope.
     /// </summary>
     internal static readonly AsyncLocal<ITaskScope> ScopeLocal = new();
+
+    /// <summary>
+    /// Holds the task dispatcher.
+    /// </summary>
+    internal static readonly AsyncLocal<ITaskDispatcher> DispatcherLocal = new();
 
     /// <summary>
     /// Holds the CancellationToken.
@@ -48,7 +53,16 @@ public static class TaskScopeContext
     /// </summary>
     public static ITaskScope Scope => ScopeLocal.Value ??
         throw new InvalidOperationException(
-            message: "The TaskScope has not been set."
+            message: "Scope has not been set."
+        );
+
+    /// <summary>
+    /// The task dispatcher for the current context or throws an exception if
+    /// there isn't one.
+    /// </summary>
+    public static ITaskDispatcher Dispatcher => DispatcherLocal.Value ??
+        throw new InvalidOperationException(
+            message: "Dispatcher has not been set."
         );
 
     /// <summary>

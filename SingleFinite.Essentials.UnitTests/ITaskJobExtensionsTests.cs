@@ -37,7 +37,7 @@ public class ITaskJobExtensionsTests(TestContext testContext)
             {
                 await Task.Delay(
                     millisecondsDelay: 5000,
-                    cancellationToken: TaskScopeContext.CancellationToken
+                    cancellationToken: TaskContext.CancellationToken
                 );
                 flag = true;
             }

@@ -37,7 +37,11 @@ public sealed class CurrentContextDispatcher : TaskDispatcher
     )
     {
         cancellationToken.ThrowIfCancellationRequested();
-        SetTaskScopeContext(scope, cancellationToken);
+        SetTaskContext(
+            scope: scope,
+            dispatcher: this,
+            cancellationToken: cancellationToken
+        );
         return await function();
     }
 

@@ -40,7 +40,11 @@ public sealed class ThreadPoolDispatcher : TaskDispatcher
         return Task.Run(
             function: async () =>
             {
-                SetTaskScopeContext(scope, cancellationToken);
+                SetTaskContext(
+                    scope: scope,
+                    dispatcher: this,
+                    cancellationToken: cancellationToken
+                );
                 return await function();
             },
             cancellationToken: scope.CancellationToken

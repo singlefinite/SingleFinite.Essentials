@@ -124,7 +124,11 @@ public sealed class DedicatedThreadDispatcher :
             {
                 try
                 {
-                    SetTaskScopeContext(scope, cancellationToken);
+                    SetTaskContext(
+                        scope: scope,
+                        dispatcher: this,
+                        cancellationToken: cancellationToken
+                    );
                     var result = await function().ConfigureAwait(false);
                     taskCompletionSource.SetResult(result);
                 }

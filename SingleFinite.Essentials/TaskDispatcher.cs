@@ -32,14 +32,17 @@ public abstract class TaskDispatcher : ITaskDispatcher
     /// Set the task scope context for the current async local.
     /// </summary>
     /// <param name="scope">The scope to set.</param>
+    /// <param name="dispatcher">The dispatcher to set.</param>
     /// <param name="cancellationToken">The cancellation token to set.</param>
-    protected static void SetTaskScopeContext(
+    protected static void SetTaskContext(
         ITaskScope scope,
+        ITaskDispatcher dispatcher,
         CancellationToken cancellationToken
     )
     {
-        TaskScopeContext.ScopeLocal.Value = scope;
-        TaskScopeContext.CancellationTokenLocal.Value = cancellationToken;
+        TaskContext.ScopeLocal.Value = scope;
+        TaskContext.DispatcherLocal.Value = dispatcher;
+        TaskContext.CancellationTokenLocal.Value = cancellationToken;
     }
 
     /// <inheritdoc/>

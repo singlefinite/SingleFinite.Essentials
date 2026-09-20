@@ -67,7 +67,11 @@ public sealed class ContinuationDispatcher : TaskDispatcher
             {
                 try
                 {
-                    SetTaskScopeContext(scope, cancellationToken);
+                    SetTaskContext(
+                        scope: scope,
+                        dispatcher: this,
+                        cancellationToken: cancellationToken
+                    );
                     var result = await function();
                     taskCompletionSource.SetResult(result);
                 }
