@@ -25,7 +25,7 @@ namespace SingleFinite.Essentials;
 /// Implementation of <see cref="ITaskDispatcher"/> that invokes functions using the
 /// current synchronization context from when this class is created.
 /// </summary>
-public sealed class ContinuationDispatcher : ITaskDispatcher
+public sealed class ContinuationDispatcher : TaskDispatcher
 {
     #region Fields
 
@@ -54,7 +54,7 @@ public sealed class ContinuationDispatcher : ITaskDispatcher
     #region Methods
 
     /// <inheritdoc/>
-    public Task<TResult> RunAsync<TResult>(
+    public override Task<TResult> RunAsync<TResult>(
         Func<Task<TResult>> function,
         ITaskScope scope
     )
@@ -66,7 +66,7 @@ public sealed class ContinuationDispatcher : ITaskDispatcher
             {
                 try
                 {
-                    ActiveTaskScope.TaskScopeLocal.Value = scope;
+                    SetActiveTaskScope(scope);
                     var result = await function();
                     taskCompletionSource.SetResult(result);
                 }

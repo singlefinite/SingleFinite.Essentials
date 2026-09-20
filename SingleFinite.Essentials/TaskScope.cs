@@ -89,7 +89,9 @@ public sealed class TaskScope : ITaskScope, IDisposable
 
     #region Methods
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Cancel this scope.  This is the same as disposing of the scope.
+    /// </summary>
     public void Cancel() => _disposeState.Dispose();
 
     /// <inheritdoc/>

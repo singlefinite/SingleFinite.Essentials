@@ -26,12 +26,12 @@ namespace SingleFinite.Essentials;
 /// functions and actions to the thread pool using 
 /// <see cref="Task.Run(Func{Task?})"/>.
 /// </summary>
-public sealed class ThreadPoolDispatcher : ITaskDispatcher
+public sealed class ThreadPoolDispatcher : TaskDispatcher
 {
     #region Methods
 
     /// <inheritdoc/>
-    public Task<TResult> RunAsync<TResult>(
+    public override Task<TResult> RunAsync<TResult>(
         Func<Task<TResult>> function,
         ITaskScope scope
     )
@@ -39,7 +39,7 @@ public sealed class ThreadPoolDispatcher : ITaskDispatcher
         return Task.Run(
             function: async () =>
             {
-                ActiveTaskScope.TaskScopeLocal.Value = scope;
+                SetActiveTaskScope(scope);
                 return await function();
             },
             cancellationToken: scope.CancellationToken

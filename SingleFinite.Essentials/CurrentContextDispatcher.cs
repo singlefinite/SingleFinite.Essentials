@@ -25,18 +25,18 @@ namespace SingleFinite.Essentials;
 /// Implementation of <see cref="ITaskDispatcher"/> that invokes functions on the
 /// same thread that calls the RunAsync method.
 /// </summary>
-public sealed class CurrentContextDispatcher : ITaskDispatcher
+public sealed class CurrentContextDispatcher : TaskDispatcher
 {
     #region Methods
 
     /// <inheritdoc/>
-    public async Task<TResult> RunAsync<TResult>(
+    public override async Task<TResult> RunAsync<TResult>(
         Func<Task<TResult>> function,
         ITaskScope scope
     )
     {
         scope.CancellationToken.ThrowIfCancellationRequested();
-        ActiveTaskScope.TaskScopeLocal.Value = scope;
+        SetActiveTaskScope(scope);
         return await function();
     }
 

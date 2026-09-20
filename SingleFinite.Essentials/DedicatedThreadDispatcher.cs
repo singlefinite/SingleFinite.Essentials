@@ -31,7 +31,7 @@ namespace SingleFinite.Essentials;
 /// testing framework.
 /// </summary>
 public sealed class DedicatedThreadDispatcher :
-    ITaskDispatcher,
+    TaskDispatcher,
     IDisposable
 {
     #region Fields
@@ -101,7 +101,7 @@ public sealed class DedicatedThreadDispatcher :
     }
 
     /// <inheritdoc/>
-    public Task<TResult> RunAsync<TResult>(
+    public override Task<TResult> RunAsync<TResult>(
         Func<Task<TResult>> function,
         ITaskScope scope
     )
@@ -123,7 +123,7 @@ public sealed class DedicatedThreadDispatcher :
             {
                 try
                 {
-                    ActiveTaskScope.TaskScopeLocal.Value = scope;
+                    SetActiveTaskScope(scope);
                     var result = await function().ConfigureAwait(false);
                     taskCompletionSource.SetResult(result);
                 }

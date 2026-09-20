@@ -24,7 +24,7 @@ namespace SingleFinite.Essentials;
 /// <summary>
 /// Extensions for the TaskScope class.
 /// </summary>
-public static class ITaskScopeContextExtensions
+public static class ITaskScopeExtensions
 {
     /// <summary>
     /// Extension members for <see cref="ITaskScope"/>.

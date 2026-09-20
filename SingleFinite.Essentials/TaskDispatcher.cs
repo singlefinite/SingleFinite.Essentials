@@ -22,89 +22,26 @@
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// Provides static members for reporting and observing unhandled exceptions
-/// that occur within dispatchers.
+/// Base class for task dispatchers.
 /// </summary>
-/// <remarks>
-/// The Dispatcher class enables applications to monitor unhandled exceptions
-/// that arise from tasks associated with a dispatcher. This can be useful for
-/// logging, diagnostics, or implementing custom error handling strategies in
-/// applications that use dispatchers for task execution.
-/// </remarks>
-public static class TaskDispatcher
+public abstract class TaskDispatcher : ITaskDispatcher
 {
     #region Methods
 
     /// <summary>
-    /// Emit on the UnhandledDispatcherException observable if the given task
-    /// results in an exception.
+    /// Set the async local active task scope.
     /// </summary>
-    /// <param name="task">The task to check for an exception.</param>
-    /// <param name="dispatcher">The dispatcher the task is running on.</param>
-    internal static void EmitOnException(
-        this Task task,
-        ITaskDispatcher dispatcher
-    )
+    /// <param name="scope">The scope to set.</param>
+    protected static void SetActiveTaskScope(ITaskScope scope)
     {
-        task.ContinueWith(
-            continuationAction: result =>
-            {
-                var normalizedException = NormalizeUnhandledException(
-                    result.Exception
-                );
-
-                if (
-                    normalizedException is null ||
-                    ShouldIgnoreUnhandledException(normalizedException)
-                )
-                {
-                    return;
-                }
-
-                s_unhandledExceptionSource.Emit(
-                    new(
-                        dispatcher: dispatcher,
-                        exception: normalizedException
-                    )
-                );
-            },
-            continuationOptions: TaskContinuationOptions.OnlyOnFaulted
-        );
+        ActiveTaskScope.TaskScopeLocal.Value = scope;
     }
 
-    /// <summary>
-    /// Normalize the given unhandled exception.
-    /// </summary>
-    /// <param name="exception">The exception to normalize.</param>
-    /// <returns>The normalized exception.</returns>
-    private static Exception? NormalizeUnhandledException(Exception? exception)
-    {
-        if (
-            exception is AggregateException aggregate &&
-            aggregate.InnerException is Exception inner
-        )
-            return inner;
-
-        if (exception is Exception ex)
-            return ex;
-
-        return null;
-    }
-
-    /// <summary>
-    /// Check if the given exception should be ignored.
-    /// </summary>
-    /// <param name="exception">The exception to check.</param>
-    /// <returns>
-    /// true if the exception should be ignored, false otherwise.
-    /// </returns>
-    private static bool ShouldIgnoreUnhandledException(Exception exception) =>
-        exception switch
-        {
-            TaskCanceledException => true,
-            OperationCanceledException => true,
-            _ => false
-        };
+    /// <inheritdoc/>
+    public abstract Task<TResult> RunAsync<TResult>(
+        Func<Task<TResult>> function,
+        ITaskScope scope
+    );
 
     #endregion
 
@@ -115,9 +52,9 @@ public static class TaskDispatcher
     /// dispatcher.  This observable will emit on thread pool threads.
     /// </summary>
     public static IEventObservable<UnhandledDispatcherException>
-        UnhandledException => s_unhandledExceptionSource.Observable;
-    private static readonly EventObservableSource<UnhandledDispatcherException>
-        s_unhandledExceptionSource = new();
+        UnhandledException => UnhandledExceptionSource.Observable;
+    internal static readonly EventObservableSource<UnhandledDispatcherException>
+        UnhandledExceptionSource = new();
 
     #endregion
 }
