@@ -36,14 +36,15 @@ public class CurrentContextDispatcherTests(TestContext testContext)
         var job = scope.Run(
             function: async () =>
             {
-                await Task.Delay(5000, ActiveTaskScope.Current.CancellationToken);
+                await Task.Delay(5000, TaskScopeContext.CancellationToken);
                 flag = true;
                 return 0;
             }
         );
 
-        job.Cancel();
+        await job.CancelAndJoin();
 
         Assert.IsFalse(flag);
+        Assert.IsFalse(scope.CancellationToken.IsCancellationRequested);
     }
 }

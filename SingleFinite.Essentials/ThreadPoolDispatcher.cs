@@ -33,13 +33,14 @@ public sealed class ThreadPoolDispatcher : TaskDispatcher
     /// <inheritdoc/>
     public override Task<TResult> RunAsync<TResult>(
         Func<Task<TResult>> function,
-        ITaskScope scope
+        ITaskScope scope,
+        CancellationToken cancellationToken
     )
     {
         return Task.Run(
             function: async () =>
             {
-                SetActiveTaskScope(scope);
+                SetTaskScopeContext(scope, cancellationToken);
                 return await function();
             },
             cancellationToken: scope.CancellationToken

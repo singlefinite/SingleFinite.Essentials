@@ -38,9 +38,13 @@ public interface ITaskDispatcher
     /// <param name="scope">
     /// The task scope the function will execute under.
     /// </param>
+    /// <param name="cancellationToken">
+    /// The cancellation token for the function.
+    /// </param>
     /// <returns>A task that runs until the function has completed.</returns>
     Task<TResult> RunAsync<TResult>(
         Func<Task<TResult>> function,
-        ITaskScope scope
+        ITaskScope scope,
+        CancellationToken cancellationToken
     );
 }

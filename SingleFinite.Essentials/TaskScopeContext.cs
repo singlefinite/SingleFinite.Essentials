@@ -22,45 +22,41 @@
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// Base class for task dispatchers.
+/// Class used to get the current task scope context.
 /// </summary>
-public abstract class TaskDispatcher : ITaskDispatcher
+public static class TaskScopeContext
 {
-    #region Methods
+    #region Fields
 
     /// <summary>
-    /// Set the task scope context for the current async local.
+    /// Holds the TaskScope.
     /// </summary>
-    /// <param name="scope">The scope to set.</param>
-    /// <param name="cancellationToken">The cancellation token to set.</param>
-    protected static void SetTaskScopeContext(
-        ITaskScope scope,
-        CancellationToken cancellationToken
-    )
-    {
-        TaskScopeContext.ScopeLocal.Value = scope;
-        TaskScopeContext.CancellationTokenLocal.Value = cancellationToken;
-    }
+    internal static readonly AsyncLocal<ITaskScope> ScopeLocal = new();
 
-    /// <inheritdoc/>
-    public abstract Task<TResult> RunAsync<TResult>(
-        Func<Task<TResult>> function,
-        ITaskScope scope,
-        CancellationToken cancellation
-    );
+    /// <summary>
+    /// Holds the CancellationToken.
+    /// </summary>
+    internal static readonly AsyncLocal<CancellationToken> CancellationTokenLocal = new();
 
     #endregion
 
-    #region Events
+    #region Properties
 
     /// <summary>
-    /// Observable that emits when an unhandled exception occurs in a
-    /// dispatcher.  This observable will emit on thread pool threads.
+    /// The task scope for the current context or throws an exception if there
+    /// isn't one.
     /// </summary>
-    public static IEventObservable<UnhandledDispatcherException>
-        UnhandledException => UnhandledExceptionSource.Observable;
-    internal static readonly EventObservableSource<UnhandledDispatcherException>
-        UnhandledExceptionSource = new();
+    public static ITaskScope Scope => ScopeLocal.Value ??
+        throw new InvalidOperationException(
+            message: "The TaskScope has not been set."
+        );
+
+    /// <summary>
+    /// The cancellation token for the current context or None if there isn't
+    /// one.
+    /// </summary>
+    public static CancellationToken CancellationToken =>
+        CancellationTokenLocal.Value;
 
     #endregion
 }

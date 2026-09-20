@@ -103,14 +103,15 @@ public sealed class DedicatedThreadDispatcher :
     /// <inheritdoc/>
     public override Task<TResult> RunAsync<TResult>(
         Func<Task<TResult>> function,
-        ITaskScope scope
+        ITaskScope scope,
+        CancellationToken cancellationToken
     )
     {
         _disposeState.ThrowIfDisposed();
 
         if (Thread.CurrentThread == _thread)
         {
-            scope.CancellationToken.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
             return function();
         }
 
@@ -123,7 +124,7 @@ public sealed class DedicatedThreadDispatcher :
             {
                 try
                 {
-                    SetActiveTaskScope(scope);
+                    SetTaskScopeContext(scope, cancellationToken);
                     var result = await function().ConfigureAwait(false);
                     taskCompletionSource.SetResult(result);
                 }

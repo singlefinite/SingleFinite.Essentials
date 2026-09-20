@@ -65,7 +65,8 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
                                 nameSet.Add(Thread.CurrentThread.Name);
                                 return Task.FromResult(0);
                             },
-                            scope: scope
+                            scope: scope,
+                            cancellationToken: testContext.CancellationToken
                         );
                         handle.Set();
                     },
@@ -106,7 +107,8 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
                 return Task.FromResult(0);
 #pragma warning restore CS0162 // Unreachable code detected
             },
-            scope: scope
+            scope: scope,
+            cancellationToken: testContext.CancellationToken
         );
 
         await Assert.ThrowsAsync<InvalidOperationException>(
@@ -120,7 +122,8 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
                         return Task.FromResult(0);
 #pragma warning restore CS0162 // Unreachable code detected
                     },
-                    scope: scope
+                    scope: scope,
+                    cancellationToken: testContext.CancellationToken
                 );
             }
         );
@@ -144,7 +147,8 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
                     count++;
                     return Task.FromResult(0);
                 },
-                scope: scope
+                scope: scope,
+                cancellationToken: testContext.CancellationToken
             )
         );
         Assert.AreEqual(0, count);
@@ -175,11 +179,14 @@ public class DedicatedThreadDispatcherTests(TestContext testContext)
                         count++;
                         return 0;
                     },
-                    scope: scope
+                    scope: scope,
+                    cancellationToken: testContext.CancellationToken
                 ),
-                scope: scope
+                scope: scope,
+                cancellationToken: testContext.CancellationToken
             ),
-            scope: scope
+            scope: scope,
+            cancellationToken: testContext.CancellationToken
         );
 
         Assert.AreEqual(1, count);

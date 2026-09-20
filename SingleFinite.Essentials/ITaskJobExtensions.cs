@@ -22,31 +22,23 @@
 namespace SingleFinite.Essentials;
 
 /// <summary>
-/// Class used to get the currently active TaskScope.
+/// Extension members for <see cref="ITaskJob"/>
 /// </summary>
-public static class ActiveTaskScope
+public static class ITaskJobExtensions
 {
-    #region Fields
-
-    /// <summary>
-    /// Holds the currently active TaskScope.
-    /// </summary>
-    internal static readonly AsyncLocal<ITaskScope> TaskScopeLocal = new();
-
-    #endregion
-
-    #region Properties
-
-    /// <summary>
-    /// Gets the currently active task scope or throws an exception if
-    /// there isn't one.
-    /// </summary>
-    public static ITaskScope Current
+    extension(ITaskJob job)
     {
-        get => TaskScopeLocal.Value ?? throw new InvalidOperationException(
-            message: "The TaskScope has not been set."
-        );
+        /// <summary>
+        /// Cancel the job and wait for the task to complete.
+        /// </summary>
+        /// <returns>
+        /// A task that completes when the job task completes but without
+        /// throwing an exception if the job task completes with an error.
+        /// </returns>
+        public Task CancelAndJoin()
+        {
+            job.Cancel();
+            return Task.WhenAny(job.Task);
+        }
     }
-
-    #endregion
 }

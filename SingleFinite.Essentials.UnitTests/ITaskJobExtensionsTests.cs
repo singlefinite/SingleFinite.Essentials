@@ -19,27 +19,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-namespace SingleFinite.Essentials;
+namespace SingleFinite.Essentials.UnitTests;
 
-/// <summary>
-/// Implementation of <see cref="ITaskDispatcher"/> that invokes functions on the
-/// same thread that calls the RunAsync method.
-/// </summary>
-public sealed class CurrentContextDispatcher : TaskDispatcher
+[TestClass]
+public class ITaskJobExtensionsTests(TestContext testContext)
 {
-    #region Methods
-
-    /// <inheritdoc/>
-    public override async Task<TResult> RunAsync<TResult>(
-        Func<Task<TResult>> function,
-        ITaskScope scope,
-        CancellationToken cancellationToken
-    )
+    [TestMethod]
+    public async Task CancelAndJoin_DoesNot_ThrowException()
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        SetTaskScopeContext(scope, cancellationToken);
-        return await function();
-    }
+        var flag = false;
+        var scope = new TaskScope(
+            parentCancellationToken: testContext.CancellationToken
+        );
 
-    #endregion
+        var job = scope.Run(
+            async () =>
+            {
+                await Task.Delay(
+                    millisecondsDelay: 5000,
+                    cancellationToken: TaskScopeContext.CancellationToken
+                );
+                flag = true;
+            }
+        );
+
+        await job.CancelAndJoin();
+
+        Assert.IsFalse(flag);
+
+        await Assert.ThrowsAsync<TaskCanceledException>(
+            async () => await job.Task
+        );
+    }
 }

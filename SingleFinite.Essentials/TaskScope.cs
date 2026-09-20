@@ -122,7 +122,8 @@ public sealed class TaskScope : ITaskScope, IDisposable
         {
             return (dispatcher ?? Dispatcher).RunAsync(
                 function: () => function(),
-                scope: this
+                scope: this,
+                cancellationToken: job.CancellationToken
             );
         });
 

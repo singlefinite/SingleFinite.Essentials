@@ -56,7 +56,8 @@ public sealed class ContinuationDispatcher : TaskDispatcher
     /// <inheritdoc/>
     public override Task<TResult> RunAsync<TResult>(
         Func<Task<TResult>> function,
-        ITaskScope scope
+        ITaskScope scope,
+        CancellationToken cancellationToken
     )
     {
         var taskCompletionSource = new TaskCompletionSource<TResult>();
@@ -66,7 +67,7 @@ public sealed class ContinuationDispatcher : TaskDispatcher
             {
                 try
                 {
-                    SetActiveTaskScope(scope);
+                    SetTaskScopeContext(scope, cancellationToken);
                     var result = await function();
                     taskCompletionSource.SetResult(result);
                 }
