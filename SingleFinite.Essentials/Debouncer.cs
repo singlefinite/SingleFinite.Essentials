@@ -88,6 +88,9 @@ public sealed class Debouncer : IDisposable
         _disposeState.ThrowIfDisposed();
 
         var resolvedScope = scope ?? new TaskScope();
+        var resolvedDispatcher = dispatcher;
+        if (scope is null && dispatcher is null)
+            resolvedDispatcher = new ContinuationDispatcher();
 
         lock (_timerLock)
         {
