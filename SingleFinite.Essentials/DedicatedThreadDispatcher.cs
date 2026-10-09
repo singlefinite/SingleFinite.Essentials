@@ -141,7 +141,7 @@ public sealed class DedicatedThreadDispatcher :
                     taskCompletionSource.SetException(ex);
                 }
             },
-            cancellationToken: scope.CancellationToken
+            cancellationToken: cancellationToken
         );
 
         return taskCompletionSource.Task;

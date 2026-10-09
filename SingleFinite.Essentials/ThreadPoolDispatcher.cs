@@ -47,7 +47,7 @@ public sealed class ThreadPoolDispatcher : TaskDispatcher
                 );
                 return await function();
             },
-            cancellationToken: scope.CancellationToken
+            cancellationToken: cancellationToken
         );
     }
 

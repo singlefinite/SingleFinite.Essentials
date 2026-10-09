@@ -80,7 +80,7 @@ public sealed class ContinuationDispatcher : TaskDispatcher
                     taskCompletionSource.SetException(ex);
                 }
             },
-            cancellationToken: scope.CancellationToken,
+            cancellationToken: cancellationToken,
             creationOptions: TaskCreationOptions.None,
             scheduler: _taskScheduler
         );
