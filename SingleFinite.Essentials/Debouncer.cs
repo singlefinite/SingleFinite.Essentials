@@ -101,7 +101,7 @@ public sealed class Debouncer : IDisposable
                 {
                     resolvedScope.Run(
                         action: action,
-                        dispatcher: dispatcher
+                        dispatcher: resolvedDispatcher
                     );
                 },
                 dueTime: delay,
