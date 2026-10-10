@@ -48,22 +48,14 @@ public static class TaskContext
     #region Properties
 
     /// <summary>
-    /// The task scope for the current context or throws an exception if there
-    /// isn't one.
+    /// The task scope for the current context if there is one.
     /// </summary>
-    public static ITaskScope Scope => ScopeLocal.Value ??
-        throw new InvalidOperationException(
-            message: "Scope has not been set."
-        );
+    public static ITaskScope? Scope => ScopeLocal.Value;
 
     /// <summary>
-    /// The task dispatcher for the current context or throws an exception if
-    /// there isn't one.
+    /// The task dispatcher for the current context if there is one.
     /// </summary>
-    public static ITaskDispatcher Dispatcher => DispatcherLocal.Value ??
-        throw new InvalidOperationException(
-            message: "Dispatcher has not been set."
-        );
+    public static ITaskDispatcher? Dispatcher => DispatcherLocal.Value;
 
     /// <summary>
     /// The cancellation token for the current context or None if there isn't

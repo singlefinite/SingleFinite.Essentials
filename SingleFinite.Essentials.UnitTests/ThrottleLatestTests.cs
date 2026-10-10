@@ -19,6 +19,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using System.Runtime.InteropServices;
+
 namespace SingleFinite.Essentials.UnitTests;
 
 [TestClass]
@@ -96,5 +98,44 @@ public class ThrottleLatestTests(TestContext testContext)
         Assert.HasCount(2, observedItems);
         Assert.AreEqual("one", observedItems[0]);
         Assert.AreEqual("three", observedItems[1]);
+    }
+
+    [TestMethod]
+    public async Task Cancel_Scope_Cancels_Throttle()
+    {
+        var observedItems = new List<string>();
+        var throttleLatest = new ThrottlerLatest();
+        var limit = TimeSpan.FromMilliseconds(100);
+        var scope = new TaskScope(
+            parentCancellationToken: testContext.CancellationToken
+        );
+
+        throttleLatest.Throttle(
+            action: () => observedItems.Add("one"),
+            limit: limit
+        );
+
+        scope.Run(() =>
+        {
+            throttleLatest.Throttle(
+                action: () => observedItems.Add("two"),
+                limit: limit
+            );
+        });
+
+        await Task.Delay(
+            millisecondsDelay: 10,
+            cancellationToken: testContext.CancellationToken
+        );
+
+        scope.Cancel();
+
+        await Task.Delay(
+            millisecondsDelay: 100,
+            cancellationToken: testContext.CancellationToken
+        );
+
+        Assert.HasCount(1, observedItems);
+        Assert.AreEqual("one", observedItems[0]);
     }
 }

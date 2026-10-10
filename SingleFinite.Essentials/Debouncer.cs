@@ -43,6 +43,11 @@ public sealed class Debouncer : IDisposable
     /// </summary>
     private Timer? _timer = null;
 
+    /// <summary>
+    /// Registration for scope cancellation listener.
+    /// </summary>
+    private CancellationTokenRegistration? _cancelRegistration = null;
+
     #endregion
 
     #region Constructors
@@ -87,7 +92,7 @@ public sealed class Debouncer : IDisposable
     {
         _disposeState.ThrowIfDisposed();
 
-        var resolvedScope = scope ?? new TaskScope();
+        var resolvedScope = scope ?? TaskContext.Scope ?? new TaskScope();
         var resolvedDispatcher = dispatcher;
         if (scope is null && dispatcher is null)
             resolvedDispatcher = new ContinuationDispatcher();
@@ -95,6 +100,8 @@ public sealed class Debouncer : IDisposable
         lock (_timerLock)
         {
             _timer?.Dispose();
+            _cancelRegistration?.Dispose();
+
             _timer = new(
                 callback: OnTimeout,
                 state: () =>
@@ -107,6 +114,8 @@ public sealed class Debouncer : IDisposable
                 dueTime: delay,
                 period: Timeout.InfiniteTimeSpan
             );
+
+            _cancelRegistration = resolvedScope.CancellationToken.Register(Cancel);
         }
     }
 
@@ -119,6 +128,8 @@ public sealed class Debouncer : IDisposable
         {
             _timer?.Dispose();
             _timer = null;
+            _cancelRegistration?.Dispose();
+            _cancelRegistration = null;
         }
     }
 
