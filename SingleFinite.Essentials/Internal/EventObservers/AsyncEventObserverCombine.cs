@@ -51,14 +51,16 @@ internal class AsyncEventObserverCombine : IAsyncEventObserver
     /// Constructor.
     /// </summary>
     /// <param name="observers">The observers to combine.</param>
-    public AsyncEventObserverCombine(params IAsyncEventObserver[] observers)
+    public AsyncEventObserverCombine(
+        params IEnumerable<IAsyncEventObserver> observers
+    )
     {
         _disposeState = new(
             owner: this,
             onDispose: OnDispose
         );
 
-        _observers = observers;
+        _observers = [.. observers];
         _combinedObservers = [.. observers.Select(observer =>
             observer.OnEach(() => Next.TryInvoke())
         )];
@@ -132,14 +134,16 @@ internal class AsyncEventObserverCombine<TArgs> : IAsyncEventObserver<TArgs>
     /// Constructor.
     /// </summary>
     /// <param name="observers">The observers to combine.</param>
-    public AsyncEventObserverCombine(params IAsyncEventObserver<TArgs>[] observers)
+    public AsyncEventObserverCombine(
+        params IEnumerable<IAsyncEventObserver<TArgs>> observers
+    )
     {
         _disposeState = new(
             owner: this,
             onDispose: OnDispose
         );
 
-        _observers = observers;
+        _observers = [.. observers];
         _combinedObservers = [.. observers.Select(observer =>
             observer.OnEach(async args =>
             {

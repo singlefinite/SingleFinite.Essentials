@@ -113,7 +113,7 @@ public sealed class EventObservable : IEventObservable
     /// A new observer that emits when any of the observers emit.
     /// </returns>
     public static IEventObserver Combine(
-        params IEventObservable[] observables
+        params IEnumerable<IEventObservable> observables
     ) =>
         new EventObserverCombine(
             [.. observables.Select(observable => observable.Observe())]
@@ -128,7 +128,7 @@ public sealed class EventObservable : IEventObservable
     /// A new observer that emits when any of the observers emit.
     /// </returns>
     public static IEventObserver<TArgs> Combine<TArgs>(
-        params IEventObservable<TArgs>[] observables
+        params IEnumerable<IEventObservable<TArgs>> observables
     ) =>
         new EventObserverCombine<TArgs>(
             [.. observables.Select(observable => observable.Observe())]

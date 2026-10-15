@@ -51,14 +51,14 @@ internal class EventObserverCombine : IEventObserver
     /// Constructor.
     /// </summary>
     /// <param name="observers">The observers to combine.</param>
-    public EventObserverCombine(params IEventObserver[] observers)
+    public EventObserverCombine(params IEnumerable<IEventObserver> observers)
     {
         _disposeState = new(
             owner: this,
             onDispose: OnDispose
         );
 
-        _observers = observers;
+        _observers = [.. observers];
         _combinedObservers = [.. observers.Select(observer =>
             observer.OnEach(() => Next?.Invoke())
         )];
@@ -132,14 +132,16 @@ internal class EventObserverCombine<TArgs> : IEventObserver<TArgs>
     /// Constructor.
     /// </summary>
     /// <param name="observers">The observers to combine.</param>
-    public EventObserverCombine(params IEventObserver<TArgs>[] observers)
+    public EventObserverCombine(
+        params IEnumerable<IEventObserver<TArgs>> observers
+    )
     {
         _disposeState = new(
             owner: this,
             onDispose: OnDispose
         );
 
-        _observers = observers;
+        _observers = [.. observers];
         _combinedObservers = [.. observers.Select(observer =>
             observer.OnEach(args =>
             {

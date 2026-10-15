@@ -44,8 +44,15 @@ public interface ITaskScope
     /// The dispatcher for the newly created child scope.  If none is specified
     /// the dispatcher of this scope will be used.
     /// </param>
+    /// <param name="exceptionHandler">
+    /// Optional exception handler that will be used to handle any uncaught
+    /// exceptions thrown within the scope.
+    /// </param>
     /// <returns>A new child scope.</returns>
-    TaskScope CreateChildScope(ITaskDispatcher? dispatcher = default);
+    TaskScope CreateChildScope(
+        ITaskDispatcher? dispatcher = default,
+        IExceptionHandler? exceptionHandler = default
+    );
 
     /// <summary>
     /// Execute the given cancellable async function.

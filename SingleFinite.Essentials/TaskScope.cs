@@ -40,6 +40,11 @@ public sealed class TaskScope : ITaskScope, IDisposable
     /// </summary>
     private readonly CancellationTokenRegistration? _parentDisposeRegistration;
 
+    /// <summary>
+    /// Holds the exception handler for this scope.
+    /// </summary>
+    private readonly IExceptionHandler? _exceptionHandler;
+
     #endregion
 
     #region Constructors
@@ -54,9 +59,13 @@ public sealed class TaskScope : ITaskScope, IDisposable
     /// <param name="parentCancellationToken">
     /// Optional CancellationToken for the parent of this scope if there is one.
     /// </param>
+    /// <param name="exceptionHandler">
+    /// Optional exception handler used to handle uncaught exceptions.
+    /// </param>
     public TaskScope(
         ITaskDispatcher? dispatcher = default,
-        CancellationToken parentCancellationToken = default
+        CancellationToken parentCancellationToken = default,
+        IExceptionHandler? exceptionHandler = default
     )
     {
         Dispatcher = dispatcher ?? new CurrentContextDispatcher();
@@ -73,6 +82,8 @@ public sealed class TaskScope : ITaskScope, IDisposable
             _parentDisposeRegistration =
                 parentCancellationToken.Register(Dispose);
         }
+
+        _exceptionHandler = exceptionHandler;
     }
 
     #endregion
@@ -102,10 +113,14 @@ public sealed class TaskScope : ITaskScope, IDisposable
     }
 
     /// <inheritdoc/>
-    public TaskScope CreateChildScope(ITaskDispatcher? dispatcher = default) => new
+    public TaskScope CreateChildScope(
+        ITaskDispatcher? dispatcher = default,
+        IExceptionHandler? exceptionHandler = default
+    ) => new
     (
         dispatcher: dispatcher ?? Dispatcher,
-        parentCancellationToken: CancellationToken
+        parentCancellationToken: CancellationToken,
+        exceptionHandler: exceptionHandler.Combine(_exceptionHandler)
     );
 
     /// <inheritdoc/>
@@ -118,13 +133,21 @@ public sealed class TaskScope : ITaskScope, IDisposable
             cancellationToken: CancellationToken
         );
 
-        job.Run(() =>
+        job.Run(async () =>
         {
-            return (dispatcher ?? Dispatcher).RunAsync(
-                function: () => function(),
-                scope: this,
-                cancellationToken: job.CancellationToken
-            );
+            try
+            {
+                return await (dispatcher ?? Dispatcher).RunAsync(
+                    function: () => function(),
+                    scope: this,
+                    cancellationToken: job.CancellationToken
+                );
+            }
+            catch (Exception ex)
+            {
+                HandleTaskJobException(ex);
+                throw;
+            }
         });
 
         return job;
@@ -153,10 +176,24 @@ public sealed class TaskScope : ITaskScope, IDisposable
         {
             0 => CancellationToken.None,
             1 => filteredTokens[0],
-            _ => CancellationTokenSource.CreateLinkedTokenSource(
-                    tokens: [.. filteredTokens]
-                ).Token
+            _ => CancellationTokenSource.CreateLinkedTokenSource([.. filteredTokens]).Token
         };
+    }
+
+    /// <summary>
+    /// Handles the given exception.
+    /// </summary>
+    /// <param name="exception">The exception to handle.</param>
+    private void HandleTaskJobException(Exception exception)
+    {
+        var unwrappedException = exception;
+        if (exception is AggregateException aggregate && aggregate.InnerExceptions.Count == 1)
+            unwrappedException = aggregate.InnerExceptions[0];
+
+        _exceptionHandler?.Handle(
+            exception: unwrappedException,
+            message: "An uncaught exception was thrown within a task job."
+        );
     }
 
     #endregion

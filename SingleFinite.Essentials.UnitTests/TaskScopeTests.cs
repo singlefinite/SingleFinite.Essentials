@@ -217,4 +217,77 @@ public class TaskScopeTests(TestContext testContext)
 
         Assert.AreEqual(99, result);
     }
+
+    [TestMethod]
+    public async Task TaskScope_UnhandledException_Bubbles_Up()
+    {
+        var handler = new ExceptionHandlerObserver(handleReturn: true);
+
+        var parentScope = new TaskScope(
+            parentCancellationToken: testContext.CancellationToken,
+            exceptionHandler: handler
+        );
+        var childScope = parentScope.CreateChildScope();
+        var grandChildScope = childScope.CreateChildScope();
+
+        var job = grandChildScope.Run(() =>
+        {
+            throw new InvalidOperationException("Example");
+        });
+
+        await Task.WhenAny(job.Task);
+
+        Assert.HasCount(1, handler.Entries);
+        Assert.IsInstanceOfType<InvalidOperationException>(handler.Entries[0].Exception);
+        Assert.AreEqual("Example", handler.Entries[0].Exception?.Message);
+    }
+
+    [TestMethod]
+    public async Task TaskScope_UnhandledException_Is_Intercepted()
+    {
+        var parentHandler = new ExceptionHandlerObserver(handleReturn: true);
+        var childHandler = new ExceptionHandlerObserver(handleReturn: true);
+        var grandChildHandler = new ExceptionHandlerObserver(handleReturn: false);
+
+        var parentScope = new TaskScope(
+            parentCancellationToken: testContext.CancellationToken,
+            exceptionHandler: parentHandler
+        );
+        var childScope = parentScope.CreateChildScope(
+            exceptionHandler: childHandler
+        );
+        var grandChildScope = childScope.CreateChildScope(
+            exceptionHandler: grandChildHandler
+        );
+
+        var job = grandChildScope.Run(() =>
+        {
+            throw new InvalidOperationException("Example");
+        });
+
+        await Task.WhenAny(job.Task);
+
+        Assert.IsEmpty(parentHandler.Entries);
+
+        Assert.HasCount(1, childHandler.Entries);
+        Assert.IsInstanceOfType<InvalidOperationException>(childHandler.Entries[0].Exception);
+        Assert.AreEqual("Example", childHandler.Entries[0].Exception?.Message);
+
+        Assert.HasCount(1, grandChildHandler.Entries);
+        Assert.IsInstanceOfType<InvalidOperationException>(grandChildHandler.Entries[0].Exception);
+        Assert.AreEqual("Example", grandChildHandler.Entries[0].Exception?.Message);
+    }
+
+    private class ExceptionHandlerObserver(bool handleReturn) : IExceptionHandler
+    {
+        public List<Entry> Entries { get; } = [];
+
+        public bool Handle(Exception? exception, string? message = null)
+        {
+            Entries.Add(new(exception, message));
+            return handleReturn;
+        }
+
+        public record Entry(Exception? Exception, string? Message);
+    }
 }

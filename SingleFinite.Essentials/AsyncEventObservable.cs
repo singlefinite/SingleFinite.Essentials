@@ -115,7 +115,7 @@ public sealed class AsyncEventObservable : IAsyncEventObservable
     /// A new observer that emits when any of the observers emit.
     /// </returns>
     public static IAsyncEventObserver Combine(
-        params IAsyncEventObservable[] observables
+        params IEnumerable<IAsyncEventObservable> observables
     ) =>
         new AsyncEventObserverCombine(
             [.. observables.Select(observable => observable.Observe())]
@@ -130,7 +130,7 @@ public sealed class AsyncEventObservable : IAsyncEventObservable
     /// A new observer that emits when any of the observers emit.
     /// </returns>
     public static IAsyncEventObserver<TArgs> Combine<TArgs>(
-        params IAsyncEventObservable<TArgs>[] observables
+        params IEnumerable<IAsyncEventObservable<TArgs>> observables
     ) =>
         new AsyncEventObserverCombine<TArgs>(
             [.. observables.Select(observable => observable.Observe())]
