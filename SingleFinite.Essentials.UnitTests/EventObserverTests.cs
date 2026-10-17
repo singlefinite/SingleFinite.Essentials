@@ -675,6 +675,38 @@ public class EventObserverTests(TestContext testContext)
         Assert.AreEqual(1, observedCount);
     }
 
+    [TestMethod]
+    public async Task ToSignal_Is_Set_When_Event_Emits()
+    {
+        var observableSource = new EventObservableSource<ExampleArgs>();
+        var observable = observableSource.Observable;
+
+        var signal = observable
+            .Observe()
+            .Where(args => args.Age == 99)
+            .Until(testContext.CancellationToken)
+            .ToSignal();
+
+        var testFlag = false;
+
+        _ = Task.Run(
+            action: async () =>
+            {
+                await Task.Delay(
+                    millisecondsDelay: 100,
+                    cancellationToken: testContext.CancellationToken
+                );
+                testFlag = true;
+                signal.Set();
+            },
+            cancellationToken: testContext.CancellationToken
+        );
+
+        await signal.WatchAsync();
+
+        Assert.IsTrue(testFlag);
+    }
+
     #region Types
 
     private record ExampleArgs(

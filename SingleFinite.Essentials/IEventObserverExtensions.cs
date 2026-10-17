@@ -269,6 +269,18 @@ public static class IEventObserverExtensions
                 parent: observer,
                 callback: callback
             );
+
+        /// <summary>
+        /// Create a signal object that will signal whenever an event is
+        /// observed.
+        /// </summary>
+        /// <returns>A new signal object.</returns>
+        public Signal ToSignal()
+        {
+            var signal = new Signal();
+            observer.OnEach(signal.Set);
+            return signal;
+        }
     }
 
     /// <summary>
