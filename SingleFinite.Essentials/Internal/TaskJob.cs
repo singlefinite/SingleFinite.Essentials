@@ -32,7 +32,7 @@ internal class TaskJob<TResult> : ITaskJob<TResult>
     /// <summary>
     /// The cancellation token source that provides the token for this job.
     /// </summary>
-    private readonly CancellationTokenSource _cancellationTokenSource = new();
+    private readonly CancellationTokenSource _cancellationTokenSource;
 
     /// <summary>
     /// Holds the task completion source.
@@ -51,16 +51,16 @@ internal class TaskJob<TResult> : ITaskJob<TResult>
     /// <summary>
     /// Constructor.
     /// </summary>
-    /// <param name="cancellationToken">
+    /// <param name="parentCancellationToken">
     /// Optional cancellation token to link with the cancellation token for this
     /// job.
     /// </param>
-    public TaskJob(CancellationToken cancellationToken = default)
+    public TaskJob(CancellationToken parentCancellationToken = default)
     {
-        CancellationToken = TaskScope.CreateLinkedToken(
-            cancellationToken,
-            _cancellationTokenSource.Token
-        );
+        _cancellationTokenSource =
+            CancellationTokenSource.CreateLinkedTokenSource(parentCancellationToken);
+
+        CancellationToken = _cancellationTokenSource.Token;
     }
 
     #endregion
@@ -103,6 +103,10 @@ internal class TaskJob<TResult> : ITaskJob<TResult>
         catch (Exception ex)
         {
             _taskCompletionSource.SetException(ex);
+        }
+        finally
+        {
+            _cancellationTokenSource.Dispose();
         }
     }
 

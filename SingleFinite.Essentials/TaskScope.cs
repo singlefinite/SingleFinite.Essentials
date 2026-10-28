@@ -38,7 +38,12 @@ public sealed class TaskScope : ITaskScope, IDisposable
     /// <summary>
     /// Holds the registration for the parent cancellation token.
     /// </summary>
-    private readonly CancellationTokenRegistration? _parentDisposeRegistration;
+    private readonly CancellationTokenRegistration _parentDisposeRegistration;
+
+    /// <summary>
+    /// The cancellation token source that provides the token for this scope.
+    /// </summary>
+    private readonly CancellationTokenSource _cancellationTokenSource;
 
     /// <summary>
     /// Holds the exception handler for this scope.
@@ -56,32 +61,31 @@ public sealed class TaskScope : ITaskScope, IDisposable
     /// The default dispatcher to use for tasks created in this scope.
     /// If not provided, a <see cref="ContinuationDispatcher"/> will be used.
     /// </param>
-    /// <param name="parentCancellationToken">
-    /// Optional CancellationToken for the parent of this scope if there is one.
-    /// </param>
     /// <param name="exceptionHandler">
     /// Optional exception handler used to handle uncaught exceptions.
     /// </param>
+    /// <param name = "parentCancellationToken" >
+    /// Optional CancellationToken for the parent of this scope if there is one.
+    /// </param>
     public TaskScope(
         ITaskDispatcher? dispatcher = default,
-        CancellationToken parentCancellationToken = default,
-        IExceptionHandler? exceptionHandler = default
+        IExceptionHandler? exceptionHandler = default,
+        CancellationToken parentCancellationToken = default
     )
     {
         Dispatcher = dispatcher ?? new CurrentContextDispatcher();
 
-        _disposeState = new(owner: this);
-
-        CancellationToken = CreateLinkedToken(
-            parentCancellationToken,
-            _disposeState.CancellationToken
+        _disposeState = new(
+            owner: this,
+            onDispose: OnDispose
         );
 
-        if (parentCancellationToken != CancellationToken.None)
-        {
-            _parentDisposeRegistration =
-                parentCancellationToken.Register(Dispose);
-        }
+        _cancellationTokenSource =
+            CancellationTokenSource.CreateLinkedTokenSource(parentCancellationToken);
+
+        CancellationToken = _cancellationTokenSource.Token;
+
+        _parentDisposeRegistration = parentCancellationToken.Register(Dispose);
 
         _exceptionHandler = exceptionHandler;
     }
@@ -106,11 +110,7 @@ public sealed class TaskScope : ITaskScope, IDisposable
     public void Cancel() => _disposeState.Dispose();
 
     /// <inheritdoc/>
-    public void Dispose()
-    {
-        _parentDisposeRegistration?.Unregister();
-        _disposeState.Dispose();
-    }
+    public void Dispose() => _disposeState.Dispose();
 
     /// <inheritdoc/>
     public TaskScope CreateChildScope(
@@ -119,8 +119,8 @@ public sealed class TaskScope : ITaskScope, IDisposable
     ) => new
     (
         dispatcher: dispatcher ?? Dispatcher,
-        parentCancellationToken: CancellationToken,
-        exceptionHandler: exceptionHandler.Combine(_exceptionHandler)
+        exceptionHandler: exceptionHandler.Combine(_exceptionHandler),
+        parentCancellationToken: CancellationToken
     );
 
     /// <inheritdoc/>
@@ -130,7 +130,7 @@ public sealed class TaskScope : ITaskScope, IDisposable
     )
     {
         var job = new TaskJob<TResult>(
-            cancellationToken: CancellationToken
+            parentCancellationToken: CancellationToken
         );
 
         job.Run(async () =>
@@ -154,33 +154,6 @@ public sealed class TaskScope : ITaskScope, IDisposable
     }
 
     /// <summary>
-    /// Create a single CancellationToken from the given tokens.  The
-    /// resulting CancellationToken will be cancelled when any of the given
-    /// tokens are cancelled.
-    /// </summary>
-    /// <param name="cancellationTokens">
-    /// The CancellationTokens to link.
-    /// </param>
-    /// <returns>
-    /// The single CancellationToken linked to the given tokens.
-    /// </returns>
-    public static CancellationToken CreateLinkedToken(
-        params IEnumerable<CancellationToken> cancellationTokens
-    )
-    {
-        var filteredTokens = cancellationTokens
-            .Where(token => token != CancellationToken.None)
-            .ToList();
-
-        return filteredTokens.Count switch
-        {
-            0 => CancellationToken.None,
-            1 => filteredTokens[0],
-            _ => CancellationTokenSource.CreateLinkedTokenSource([.. filteredTokens]).Token
-        };
-    }
-
-    /// <summary>
     /// Handles the given exception.
     /// </summary>
     /// <param name="exception">The exception to handle.</param>
@@ -194,6 +167,16 @@ public sealed class TaskScope : ITaskScope, IDisposable
             exception: unwrappedException,
             message: "An uncaught exception was thrown within a task job."
         );
+    }
+
+    /// <summary>
+    /// Clean up this object.
+    /// </summary>
+    private void OnDispose()
+    {
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
+        _parentDisposeRegistration.Unregister();
     }
 
     #endregion

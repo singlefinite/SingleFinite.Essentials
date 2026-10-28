@@ -193,7 +193,7 @@ public class TaskScopeTests(TestContext testContext)
         Assert.IsFalse(flag);
         Assert.IsTrue(parentScope.CancellationToken.IsCancellationRequested);
         Assert.IsTrue(firstChildScope.CancellationToken.IsCancellationRequested);
-        Assert.IsTrue(firstChildJob.CancellationToken.IsCancellationRequested);
+        Assert.IsFalse(firstChildJob.CancellationToken.IsCancellationRequested);
         Assert.IsTrue(secondChildScope.CancellationToken.IsCancellationRequested);
         Assert.IsTrue(secondChildJob.CancellationToken.IsCancellationRequested);
     }
