@@ -49,7 +49,7 @@ public interface ITaskScope
     /// exceptions thrown within the scope.
     /// </param>
     /// <returns>A new child scope.</returns>
-    TaskScope CreateChildScope(
+    ICancelableTaskScope CreateChildScope(
         ITaskDispatcher? dispatcher = default,
         IExceptionHandler? exceptionHandler = default
     );

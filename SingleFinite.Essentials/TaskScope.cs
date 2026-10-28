@@ -26,7 +26,7 @@ namespace SingleFinite.Essentials;
 /// <summary>
 /// Implementation of <see cref="ITaskScope"/>.
 /// </summary>
-public sealed class TaskScope : ITaskScope, IDisposable
+public sealed class TaskScope : ICancelableTaskScope, IDisposable
 {
     #region Fields
 
@@ -113,11 +113,10 @@ public sealed class TaskScope : ITaskScope, IDisposable
     public void Dispose() => _disposeState.Dispose();
 
     /// <inheritdoc/>
-    public TaskScope CreateChildScope(
+    public ICancelableTaskScope CreateChildScope(
         ITaskDispatcher? dispatcher = default,
         IExceptionHandler? exceptionHandler = default
-    ) => new
-    (
+    ) => new TaskScope(
         dispatcher: dispatcher ?? Dispatcher,
         exceptionHandler: exceptionHandler.Combine(_exceptionHandler),
         parentCancellationToken: CancellationToken

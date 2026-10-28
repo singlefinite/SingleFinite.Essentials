@@ -52,7 +52,7 @@ public class TaskScopeTests(TestContext testContext)
         Assert.IsFalse(parentScope.CancellationToken.IsCancellationRequested);
         Assert.IsFalse(childScope.CancellationToken.IsCancellationRequested);
 
-        childScope.Dispose();
+        ((IDisposable)childScope).Dispose();
 
         Assert.IsFalse(parentScope.CancellationToken.IsCancellationRequested);
         Assert.IsTrue(childScope.CancellationToken.IsCancellationRequested);
@@ -107,9 +107,9 @@ public class TaskScopeTests(TestContext testContext)
         var parentScope = new TaskScope(
             parentCancellationToken: testContext.CancellationToken
         );
-        var firstChildScope = null as TaskScope;
+        var firstChildScope = null as ICancelableTaskScope;
         var firstChildJob = null as ITaskJob;
-        var secondChildScope = null as TaskScope;
+        var secondChildScope = null as ICancelableTaskScope;
         var secondChildJob = null as ITaskJob;
 
         var parentJob = parentScope.Run(
@@ -157,9 +157,9 @@ public class TaskScopeTests(TestContext testContext)
         var parentScope = new TaskScope(
             parentCancellationToken: testContext.CancellationToken
         );
-        var firstChildScope = null as TaskScope;
+        var firstChildScope = null as ICancelableTaskScope;
         var firstChildJob = null as ITaskJob;
-        var secondChildScope = null as TaskScope;
+        var secondChildScope = null as ICancelableTaskScope;
         var secondChildJob = null as ITaskJob;
 
         var parentJob = parentScope.Run(
