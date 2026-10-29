@@ -330,6 +330,22 @@ public class TaskScopeTests(TestContext testContext)
         Assert.IsTrue(job.Task.IsCanceled);
     }
 
+    [TestMethod]
+    public async Task TaskScope_Job_Cancel_Called_Multiple_Times()
+    {
+        var scope = new TaskScope(
+            parentCancellationToken: testContext.CancellationToken
+        );
+
+        var job = scope.Run(() => { });
+
+        job.Cancel();
+        job.Cancel();
+        job.Cancel();
+
+        Assert.IsFalse(job.CancellationToken.IsCancellationRequested);
+    }
+
     private class ExceptionHandlerObserver(bool handleReturn) : IExceptionHandler
     {
         public List<Entry> Entries { get; } = [];

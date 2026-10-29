@@ -40,9 +40,14 @@ internal class TaskJob<TResult> : ITaskJob<TResult>
     private readonly TaskCompletionSource<TResult> _taskCompletionSource = new();
 
     /// <summary>
-    /// Set to true once the Run method has been called.
+    /// Used to control access to the state.
     /// </summary>
-    private bool _isRun = false;
+    private readonly Lock _stateLock = new();
+
+    /// <summary>
+    /// Set to true when this job has completed.
+    /// </summary>
+    private bool _isComplete = false;
 
     #endregion
 
@@ -83,15 +88,7 @@ internal class TaskJob<TResult> : ITaskJob<TResult>
     /// <inheritdoc/>
     public void Cancel()
     {
-        if (!_isRun)
-        {
-            _taskCompletionSource.SetCanceled();
-            _cancellationTokenSource.Dispose();
-        }
-        else
-        {
-            _cancellationTokenSource.Cancel();
-        }
+        Complete(isCancel: true);
     }
 
     /// <summary>
@@ -117,7 +114,7 @@ internal class TaskJob<TResult> : ITaskJob<TResult>
         }
         finally
         {
-            _cancellationTokenSource.Dispose();
+            Complete(isCancel: false);
         }
     }
 
@@ -127,11 +124,33 @@ internal class TaskJob<TResult> : ITaskJob<TResult>
     /// <param name="function">The function to start the task.</param>
     public void Run(Func<Task<TResult>> function)
     {
-        if (_isRun)
+        if (Task.Status != TaskStatus.WaitingForActivation)
             throw new InvalidOperationException("The job has already been run.");
-        _isRun = true;
 
         _ = RunAsync(function);
+    }
+
+    /// <summary>
+    /// Update the state when the job has finished.
+    /// </summary>
+    /// <param name="isCancel">Indicates if a cancel was requested.</param>
+    private void Complete(bool isCancel)
+    {
+        lock (_stateLock)
+        {
+            if (_isComplete)
+                return;
+
+            if (isCancel && Task.Status == TaskStatus.WaitingForActivation)
+                _taskCompletionSource.SetCanceled();
+
+            if (isCancel && !Task.IsCompleted)
+                _cancellationTokenSource.Cancel();
+
+            _cancellationTokenSource.Dispose();
+
+            _isComplete = true;
+        }
     }
 
     #endregion
