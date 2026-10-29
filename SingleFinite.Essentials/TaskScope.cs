@@ -50,6 +50,11 @@ public sealed class TaskScope : ICancelableTaskScope, IDisposable
     /// </summary>
     private readonly IExceptionHandler? _exceptionHandler;
 
+    /// <summary>
+    /// Used to track tasks created by this object.
+    /// </summary>
+    private readonly TaskRegistry _taskRegistry = new();
+
     #endregion
 
     #region Constructors
@@ -100,6 +105,9 @@ public sealed class TaskScope : ICancelableTaskScope, IDisposable
     /// <inheritdoc/>
     public CancellationToken CancellationToken { get; }
 
+    /// <inheritdoc/>
+    public Task Task => _taskRegistry.Task;
+
     #endregion
 
     #region Methods
@@ -116,11 +124,19 @@ public sealed class TaskScope : ICancelableTaskScope, IDisposable
     public ICancelableTaskScope CreateChildScope(
         ITaskDispatcher? dispatcher = default,
         IExceptionHandler? exceptionHandler = default
-    ) => new TaskScope(
-        dispatcher: dispatcher ?? Dispatcher,
-        exceptionHandler: exceptionHandler.Combine(_exceptionHandler),
-        parentCancellationToken: CancellationToken
-    );
+    )
+    {
+        var childScope = new TaskScope(
+            dispatcher: dispatcher ?? Dispatcher,
+            exceptionHandler: exceptionHandler.Combine(_exceptionHandler),
+            parentCancellationToken: CancellationToken
+        );
+
+        if (!_taskRegistry.Register(childScope.Task))
+            childScope.Cancel();
+
+        return childScope;
+    }
 
     /// <inheritdoc/>
     public ITaskJob<TResult> Run<TResult>(
@@ -131,6 +147,12 @@ public sealed class TaskScope : ICancelableTaskScope, IDisposable
         var job = new TaskJob<TResult>(
             parentCancellationToken: CancellationToken
         );
+
+        if (!_taskRegistry.Register(job.Task))
+        {
+            job.Cancel();
+            return job;
+        }
 
         job.Run(async () =>
         {
@@ -176,6 +198,7 @@ public sealed class TaskScope : ICancelableTaskScope, IDisposable
         _cancellationTokenSource.Cancel();
         _cancellationTokenSource.Dispose();
         _parentDisposeRegistration.Unregister();
+        _taskRegistry.Close();
     }
 
     #endregion

@@ -43,7 +43,7 @@ public class ITaskJobExtensionsTests(TestContext testContext)
             }
         );
 
-        await job.CancelAndJoin();
+        await job.CancelAndJoinAsync();
 
         Assert.IsFalse(flag);
 

@@ -81,7 +81,18 @@ internal class TaskJob<TResult> : ITaskJob<TResult>
     #region Methods
 
     /// <inheritdoc/>
-    public void Cancel() => _cancellationTokenSource.Cancel();
+    public void Cancel()
+    {
+        if (!_isRun)
+        {
+            _taskCompletionSource.SetCanceled();
+            _cancellationTokenSource.Dispose();
+        }
+        else
+        {
+            _cancellationTokenSource.Cancel();
+        }
+    }
 
     /// <summary>
     /// Call the function to start the task and assign the task results to the

@@ -35,7 +35,7 @@ public static class ITaskJobExtensions
         /// A task that completes when the job task completes but without
         /// throwing an exception if the job task completes with an error.
         /// </returns>
-        public Task CancelAndJoin()
+        public Task CancelAndJoinAsync()
         {
             job.Cancel();
             return Task.WhenAny(job.Task);

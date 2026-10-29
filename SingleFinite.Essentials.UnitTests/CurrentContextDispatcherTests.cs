@@ -42,7 +42,7 @@ public class CurrentContextDispatcherTests(TestContext testContext)
             }
         );
 
-        await job.CancelAndJoin();
+        await job.CancelAndJoinAsync();
 
         Assert.IsFalse(flag);
         Assert.IsFalse(scope.CancellationToken.IsCancellationRequested);

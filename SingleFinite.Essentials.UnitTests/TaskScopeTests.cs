@@ -278,6 +278,58 @@ public class TaskScopeTests(TestContext testContext)
         Assert.AreEqual("Example", grandChildHandler.Entries[0].Exception?.Message);
     }
 
+    [TestMethod]
+    public async Task TaskScope_Cancel_Waits_For_Child_Tasks()
+    {
+        var signalA = new Signal();
+        var signalB = new Signal();
+        var parentScope = new TaskScope(
+            parentCancellationToken: testContext.CancellationToken
+        );
+        var childScope = parentScope.CreateChildScope();
+
+        var job1 = parentScope.Run(signalA.WatchAsync);
+        var job2 = childScope.Run(signalA.WatchAsync);
+        var job3 = childScope.Run(signalB.WatchAsync);
+
+        await Task.Delay(10, testContext.CancellationToken);
+        Assert.IsFalse(parentScope.Task.IsCompleted);
+        Assert.IsFalse(childScope.Task.IsCompleted);
+
+        parentScope.Cancel();
+
+        await Task.Delay(10, testContext.CancellationToken);
+        Assert.IsFalse(parentScope.Task.IsCompleted);
+        Assert.IsFalse(childScope.Task.IsCompleted);
+
+        signalA.Set();
+
+        await Task.Delay(10, testContext.CancellationToken);
+        Assert.IsFalse(parentScope.Task.IsCompleted);
+        Assert.IsFalse(childScope.Task.IsCompleted);
+
+        signalB.Set();
+
+        await parentScope.Task;
+
+        Assert.IsTrue(parentScope.Task.IsCompleted);
+        Assert.IsTrue(childScope.Task.IsCompleted);
+    }
+
+    [TestMethod]
+    public async Task TaskScope_Run_After_Cancel()
+    {
+        var scope = new TaskScope(
+            parentCancellationToken: testContext.CancellationToken
+        );
+
+        scope.Cancel();
+
+        var job = scope.Run(async () => await Task.Delay(5000, testContext.CancellationToken));
+
+        Assert.IsTrue(job.Task.IsCanceled);
+    }
+
     private class ExceptionHandlerObserver(bool handleReturn) : IExceptionHandler
     {
         public List<Entry> Entries { get; } = [];

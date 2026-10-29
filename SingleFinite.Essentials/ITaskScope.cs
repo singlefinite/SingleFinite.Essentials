@@ -37,6 +37,12 @@ public interface ITaskScope
     CancellationToken CancellationToken { get; }
 
     /// <summary>
+    /// A task that will complete when this scope has been cancelled and all
+    /// jobs for this scope and its descendants have completed.
+    /// </summary>
+    Task Task { get; }
+
+    /// <summary>
     /// Create a new TaskScope that is a child of this scope.  If this scope is
     /// cancelled any descendants of this scope will be cancelled as well.
     /// </summary>

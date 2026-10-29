@@ -21,6 +21,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="SingleFinite.Essentials.UnitTests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="..\ICON.png" Link="Properties\ICON.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
