@@ -104,9 +104,9 @@ internal class TaskJob<TResult> : ITaskJob<TResult>
             var result = await function();
             _taskCompletionSource.TrySetResult(result);
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException ex)
         {
-            _taskCompletionSource.SetCanceled();
+            _taskCompletionSource.SetCanceled(ex.CancellationToken);
         }
         catch (Exception ex)
         {
