@@ -46,11 +46,15 @@ internal class EventObserverThrottle(
     /// Throttle the event if needed.
     /// </summary>
     /// <returns>Returns true if the event wasn't throttled.</returns>
-    protected override bool OnEvent() =>
-        !_throttler.Throttle(
-            action: () => { },
+    protected override bool OnEvent()
+    {
+        _throttler.Throttle(
+            action: RaiseNextEvent,
             limit: limit
         );
+
+        return false;
+    }
 
     #endregion
 }
@@ -83,12 +87,16 @@ internal class EventObserverThrottle<TArgs>(
     /// Throttle the event if needed.
     /// </summary>
     /// <param name="args">Arguments to pass with the event.</param>
-    /// <returns>Returns true if the event wasn't throttled.</returns>
-    protected override bool OnEvent(TArgs args) =>
-        !_throttler.Throttle(
-            action: () => { },
+    /// <returns>Always returns false.</returns>
+    protected override bool OnEvent(TArgs args)
+    {
+        _throttler.Throttle(
+            action: () => RaiseNextEvent(args),
             limit: limit
         );
+
+        return false;
+    }
 
     #endregion
 }

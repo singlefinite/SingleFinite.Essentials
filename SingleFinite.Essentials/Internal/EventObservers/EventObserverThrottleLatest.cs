@@ -53,22 +53,17 @@ internal class EventObserverThrottleLatest(
     /// <summary>
     /// Throttle the event if needed.
     /// </summary>
-    /// <returns>Returns true if the event wasn't throttled.</returns>
+    /// <returns>Always returns false.</returns>
     protected override bool OnEvent()
     {
-        var isThrottled = false;
-        isThrottled = _throttleLatest.Throttle(
-            action: () =>
-            {
-                if (isThrottled)
-                    RaiseNextEvent();
-            },
+        _throttleLatest.Throttle(
+            action: RaiseNextEvent,
             limit: limit,
             scope: scope,
             dispatcher: dispatcher
         );
 
-        return !isThrottled;
+        return false;
     }
 
     #endregion
@@ -110,22 +105,17 @@ internal class EventObserverThrottleLatest<TArgs>(
     /// Throttle the event if needed.
     /// </summary>
     /// <param name="args">Arguments to pass with the event.</param>
-    /// <returns>Returns true if the event wasn't throttled.</returns>
+    /// <returns>Always returns false.</returns>
     protected override bool OnEvent(TArgs args)
     {
-        var isThrottled = false;
-        isThrottled = _throttleLatest.Throttle(
-            action: () =>
-            {
-                if (isThrottled)
-                    RaiseNextEvent(args);
-            },
+        _throttleLatest.Throttle(
+            action: () => RaiseNextEvent(args),
             limit: limit,
             scope: scope,
             dispatcher: dispatcher
         );
 
-        return !isThrottled;
+        return false;
     }
 
     #endregion

@@ -53,22 +53,17 @@ internal class AsyncEventObserverThrottleLatest(
     /// <summary>
     /// Throttle the event if needed.
     /// </summary>
-    /// <returns>Returns true if the event wasn't throttled.</returns>
+    /// <returns>Always returns false.</returns>
     protected override Task<bool> OnEventAsync()
     {
-        var isThrottled = false;
-        isThrottled = _throttleLatest.Throttle(
-            action: async () =>
-            {
-                if (isThrottled)
-                    await RaiseNextEventAsync();
-            },
+        _throttleLatest.Throttle(
+            action: async () => await RaiseNextEventAsync(),
             limit: limit,
             scope: scope,
             dispatcher: dispatcher
         );
 
-        return Task.FromResult(!isThrottled);
+        return Task.FromResult(false);
     }
 
     #endregion
@@ -110,22 +105,17 @@ internal class AsyncEventObserverThrottleLatest<TArgs>(
     /// Throttle the event if needed.
     /// </summary>
     /// <param name="args">Arguments to pass with the event.</param>
-    /// <returns>Returns true if the event wasn't throttled.</returns>
+    /// <returns>Always returns false.</returns>
     protected override Task<bool> OnEventAsync(TArgs args)
     {
-        var isThrottled = false;
-        isThrottled = _throttleLatest.Throttle(
-            action: async () =>
-            {
-                if (isThrottled)
-                    await RaiseNextEventAsync(args);
-            },
+        _throttleLatest.Throttle(
+            action: async () => await RaiseNextEventAsync(args),
             limit: limit,
             scope: scope,
             dispatcher: dispatcher
         );
 
-        return Task.FromResult(!isThrottled);
+        return Task.FromResult(false);
     }
 
     #endregion
