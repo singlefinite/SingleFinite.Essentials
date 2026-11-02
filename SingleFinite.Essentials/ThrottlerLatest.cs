@@ -50,8 +50,9 @@ public sealed class ThrottlerLatest : IDisposable
     /// </summary>
     /// <param name="action">The action to invoke.</param>
     /// <param name="limit">
-    /// If the time since the last action invoked through this method is less
-    /// than this timespan the action will not be invoked.
+    /// If the time since the last throttle call is less than this timespan the
+    /// action will not be invoked until after the time has elapsed if there are
+    /// no new calls within that time.
     /// </param>
     /// <param name="scope">
     /// The scope that will run the latest throttled action.
@@ -72,11 +73,56 @@ public sealed class ThrottlerLatest : IDisposable
     {
         _debouncer.Cancel();
 
-        if (_throttler.Throttle(action, limit, out var elapsed))
+        var result = _throttler.Throttle(action, limit);
+        if (result.IsThrottled)
         {
             _debouncer.Debounce(
                 action: () => Throttle(action, limit, scope, dispatcher),
-                delay: limit - elapsed,
+                delay: limit - result.Elapsed,
+                scope: scope,
+                dispatcher: dispatcher
+            );
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Throttle the given func.
+    /// </summary>
+    /// <param name="func">The func to invoke.</param>
+    /// <param name="limit">
+    /// If the time since the last throttle call is less than this timespan the
+    /// action will not be invoked until after the time has elapsed if there are
+    /// no new calls within that time.
+    /// </param>
+    /// <param name="scope">
+    /// The scope that will run the latest throttled func.
+    /// </param>
+    /// <param name="dispatcher">
+    /// The dispatcher that will run the latest throttled func.
+    /// </param>
+    /// <returns>
+    /// true if the func was not invoked.
+    /// false if the func was invoked.
+    /// </returns>
+    public async Task<bool> ThrottleAsync(
+        Func<Task> func,
+        TimeSpan limit,
+        ITaskScope? scope = default,
+        ITaskDispatcher? dispatcher = default
+    )
+    {
+        _debouncer.Cancel();
+
+        var result = await _throttler.ThrottleAsync(func, limit);
+        if (result.IsThrottled)
+        {
+            _debouncer.Debounce(
+                action: async () => await ThrottleAsync(func, limit, scope, dispatcher),
+                delay: limit - result.Elapsed,
                 scope: scope,
                 dispatcher: dispatcher
             );

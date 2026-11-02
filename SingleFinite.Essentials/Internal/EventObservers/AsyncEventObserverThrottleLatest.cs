@@ -54,16 +54,16 @@ internal class AsyncEventObserverThrottleLatest(
     /// Throttle the event if needed.
     /// </summary>
     /// <returns>Always returns false.</returns>
-    protected override Task<bool> OnEventAsync()
+    protected override async Task<bool> OnEventAsync()
     {
-        _throttleLatest.Throttle(
-            action: async () => await RaiseNextEventAsync(),
+        await _throttleLatest.ThrottleAsync(
+            func: RaiseNextEventAsync,
             limit: limit,
             scope: scope,
             dispatcher: dispatcher
         );
 
-        return Task.FromResult(false);
+        return false;
     }
 
     #endregion
@@ -106,16 +106,16 @@ internal class AsyncEventObserverThrottleLatest<TArgs>(
     /// </summary>
     /// <param name="args">Arguments to pass with the event.</param>
     /// <returns>Always returns false.</returns>
-    protected override Task<bool> OnEventAsync(TArgs args)
+    protected override async Task<bool> OnEventAsync(TArgs args)
     {
-        _throttleLatest.Throttle(
-            action: async () => await RaiseNextEventAsync(args),
+        await _throttleLatest.ThrottleAsync(
+            func: () => RaiseNextEventAsync(args),
             limit: limit,
             scope: scope,
             dispatcher: dispatcher
         );
 
-        return Task.FromResult(false);
+        return false;
     }
 
     #endregion

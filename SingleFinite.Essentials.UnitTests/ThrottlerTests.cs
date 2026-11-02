@@ -70,4 +70,75 @@ public class ThrottlerTests(TestContext testContext)
         Assert.AreEqual("one", observedItems[0]);
         Assert.AreEqual("four", observedItems[1]);
     }
+
+    [TestMethod]
+    public async Task ThrottleAsync_Limits_Calls_Made()
+    {
+        var observedItems = new List<string>();
+        var throttler = new Throttler();
+        var limit = TimeSpan.FromMilliseconds(500);
+
+        await throttler.ThrottleAsync(
+            func: async () =>
+            {
+                await Task.Delay(10, testContext.CancellationToken);
+                observedItems.Add("one");
+            },
+            limit: limit
+        );
+
+        await throttler.ThrottleAsync(
+            func: async () =>
+            {
+                await Task.Delay(10, testContext.CancellationToken);
+                observedItems.Add("two");
+            },
+            limit: limit
+        );
+
+        await throttler.ThrottleAsync(
+            func: async () =>
+            {
+                await Task.Delay(10, testContext.CancellationToken);
+                observedItems.Add("three");
+            },
+            limit: limit
+        );
+
+        await Task.Delay(
+            millisecondsDelay: 1000,
+            cancellationToken: testContext.CancellationToken
+        );
+
+        await throttler.ThrottleAsync(
+            func: async () =>
+            {
+                await Task.Delay(10, testContext.CancellationToken);
+                observedItems.Add("four");
+            },
+            limit: limit
+        );
+
+        await throttler.ThrottleAsync(
+            func: async () =>
+            {
+                await Task.Delay(10, testContext.CancellationToken);
+                observedItems.Add("five");
+            },
+            limit: limit
+        );
+
+        await throttler.ThrottleAsync(
+            func: async () =>
+            {
+                await Task.Delay(10, testContext.CancellationToken);
+                observedItems.Add("six");
+            },
+            limit: limit
+        );
+
+        Assert.HasCount(2, observedItems);
+        Assert.AreEqual("one", observedItems[0]);
+        Assert.AreEqual("four", observedItems[1]);
+    }
 }

@@ -43,50 +43,51 @@ public sealed class Throttler
     /// </summary>
     /// <param name="action">The action to invoke.</param>
     /// <param name="limit">
-    /// If the time since the last action invoked through this method is less
-    /// than this timespan the action will not be invoked.
+    /// If the time since the last throttle call is less than this timespan the
+    /// action will not be invoked.
     /// </param>
-    /// <returns>
-    /// true if the action was not invoked.
-    /// false if the action was invoked.
-    /// </returns>
-    public bool Throttle(
+    /// <returns>The throttle result.</returns>
+    public ThrottleResult Throttle(
         Action action,
         TimeSpan limit
-    ) => Throttle(action, limit, out var _);
-
-    /// <summary>
-    /// Throttle the given action.
-    /// </summary>
-    /// <param name="action">The action to invoke.</param>
-    /// <param name="limit">
-    /// If the time since the last action invoked through this method is less
-    /// than this timespan the action will not be invoked.
-    /// </param>
-    /// <param name="elapsed">
-    /// This will be set amount of time that has elapsed since the last time
-    /// throttle was called.
-    /// </param>
-    /// <returns>
-    /// true if the action was not invoked.
-    /// false if the action was invoked.
-    /// </returns>
-    public bool Throttle(
-        Action action,
-        TimeSpan limit,
-        out TimeSpan elapsed
     )
     {
         var now = DateTimeOffset.UtcNow;
-        elapsed = now - _lastAction;
+        var elapsed = now - _lastAction;
 
         if (elapsed < limit)
-            return true;
+            return new(IsThrottled: true, Elapsed: elapsed);
 
         _lastAction = now;
         action();
 
-        return false;
+        return new(IsThrottled: false, Elapsed: elapsed);
+    }
+
+    /// <summary>
+    /// Throttle the given func.
+    /// </summary>
+    /// <param name="func">The func to invoke.</param>
+    /// <param name="limit">
+    /// If the time since the last throttle call is less than this timespan the
+    /// action will not be invoked.
+    /// </param>
+    /// <returns>The throttle result.</returns>
+    public async Task<ThrottleResult> ThrottleAsync(
+        Func<Task> func,
+        TimeSpan limit
+    )
+    {
+        var now = DateTimeOffset.UtcNow;
+        var elapsed = now - _lastAction;
+
+        if (elapsed < limit)
+            return new(IsThrottled: true, Elapsed: elapsed);
+
+        _lastAction = now;
+        await func();
+
+        return new(IsThrottled: false, Elapsed: elapsed);
     }
 
     #endregion

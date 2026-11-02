@@ -19,8 +19,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using System.Runtime.InteropServices;
-
 namespace SingleFinite.Essentials.UnitTests;
 
 [TestClass]
@@ -48,6 +46,57 @@ public class ThrottleLatestTests(TestContext testContext)
 
         throttleLatest.Throttle(
             action: () => observedItems.Add("three"),
+            limit: limit,
+            dispatcher: dispatcher
+        );
+
+        Assert.HasCount(1, observedItems);
+        Assert.AreEqual("one", observedItems[0]);
+
+        await Task.Delay(
+            millisecondsDelay: 1000,
+            cancellationToken: testContext.CancellationToken
+        );
+
+        Assert.HasCount(2, observedItems);
+        Assert.AreEqual("one", observedItems[0]);
+        Assert.AreEqual("three", observedItems[1]);
+    }
+
+    [TestMethod]
+    public async Task ThrottleAsync_Invokes_Last_Action()
+    {
+        var observedItems = new List<string>();
+        var dispatcher = new DedicatedThreadDispatcher();
+        var throttleLatest = new ThrottlerLatest();
+        var limit = TimeSpan.FromMilliseconds(250);
+
+        await throttleLatest.ThrottleAsync(
+            func: async () =>
+            {
+                await Task.Delay(10, testContext.CancellationToken);
+                observedItems.Add("one");
+            },
+            limit: limit,
+            dispatcher: dispatcher
+        );
+
+        await throttleLatest.ThrottleAsync(
+            func: async () =>
+            {
+                await Task.Delay(10, testContext.CancellationToken);
+                observedItems.Add("two");
+            },
+            limit: limit,
+            dispatcher: dispatcher
+        );
+
+        await throttleLatest.ThrottleAsync(
+            func: async () =>
+            {
+                await Task.Delay(10, testContext.CancellationToken);
+                observedItems.Add("three");
+            },
             limit: limit,
             dispatcher: dispatcher
         );
