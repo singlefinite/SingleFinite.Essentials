@@ -71,6 +71,11 @@ internal class AsyncEventObserverDebounce(
         return Task.FromResult(false);
     }
 
+    /// <summary>
+    /// Dispose of the debouncer.
+    /// </summary>
+    protected override void OnDispose() => _debouncer.Dispose();
+
     #endregion
 
     #region Events
@@ -145,6 +150,11 @@ internal class AsyncEventObserverDebounce<TArgs>(
 
         return Task.FromResult(false);
     }
+
+    /// <summary>
+    /// Dispose of the debouncer.
+    /// </summary>
+    protected override void OnDispose() => _debouncer.Dispose();
 
     #endregion
 

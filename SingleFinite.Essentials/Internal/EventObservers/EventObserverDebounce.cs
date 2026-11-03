@@ -71,6 +71,11 @@ internal class EventObserverDebounce(
         return false;
     }
 
+    /// <summary>
+    /// Dispose of the debouncer.
+    /// </summary>
+    protected override void OnDispose() => _debouncer.Dispose();
+
     #endregion
 
     #region Events
@@ -143,6 +148,11 @@ internal class EventObserverDebounce<TArgs>(
 
         return false;
     }
+
+    /// <summary>
+    /// Dispose of the debouncer.
+    /// </summary>
+    protected override void OnDispose() => _debouncer.Dispose();
 
     #endregion
 

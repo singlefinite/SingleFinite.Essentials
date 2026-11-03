@@ -44,7 +44,7 @@ internal class AsyncEventObserverThrottleLatest(
     /// <summary>
     /// Used to throttle events.
     /// </summary>
-    private readonly ThrottlerLatest _throttleLatest = new();
+    private readonly ThrottlerLatest _throttlerLatest = new();
 
     #endregion
 
@@ -56,7 +56,7 @@ internal class AsyncEventObserverThrottleLatest(
     /// <returns>Always returns false.</returns>
     protected override async Task<bool> OnEventAsync()
     {
-        await _throttleLatest.ThrottleAsync(
+        await _throttlerLatest.ThrottleAsync(
             func: RaiseNextEventAsync,
             limit: limit,
             scope: scope,
@@ -65,6 +65,11 @@ internal class AsyncEventObserverThrottleLatest(
 
         return false;
     }
+
+    /// <summary>
+    /// Dispose of the throttler.
+    /// </summary>
+    protected override void OnDispose() => _throttlerLatest.Dispose();
 
     #endregion
 }
@@ -95,7 +100,7 @@ internal class AsyncEventObserverThrottleLatest<TArgs>(
     /// <summary>
     /// Used to throttle events.
     /// </summary>
-    private readonly ThrottlerLatest _throttleLatest = new();
+    private readonly ThrottlerLatest _throttlerLatest = new();
 
     #endregion
 
@@ -108,7 +113,7 @@ internal class AsyncEventObserverThrottleLatest<TArgs>(
     /// <returns>Always returns false.</returns>
     protected override async Task<bool> OnEventAsync(TArgs args)
     {
-        await _throttleLatest.ThrottleAsync(
+        await _throttlerLatest.ThrottleAsync(
             func: () => RaiseNextEventAsync(args),
             limit: limit,
             scope: scope,
@@ -117,6 +122,11 @@ internal class AsyncEventObserverThrottleLatest<TArgs>(
 
         return false;
     }
+
+    /// <summary>
+    /// Dispose of the throttler.
+    /// </summary>
+    protected override void OnDispose() => _throttlerLatest.Dispose();
 
     #endregion
 }

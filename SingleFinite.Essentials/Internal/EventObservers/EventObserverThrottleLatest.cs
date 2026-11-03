@@ -44,7 +44,7 @@ internal class EventObserverThrottleLatest(
     /// <summary>
     /// Used to throttle events.
     /// </summary>
-    private readonly ThrottlerLatest _throttleLatest = new();
+    private readonly ThrottlerLatest _throttlerLatest = new();
 
     #endregion
 
@@ -56,7 +56,7 @@ internal class EventObserverThrottleLatest(
     /// <returns>Always returns false.</returns>
     protected override bool OnEvent()
     {
-        _throttleLatest.Throttle(
+        _throttlerLatest.Throttle(
             action: RaiseNextEvent,
             limit: limit,
             scope: scope,
@@ -65,6 +65,11 @@ internal class EventObserverThrottleLatest(
 
         return false;
     }
+
+    /// <summary>
+    /// Dispose of the throttler.
+    /// </summary>
+    protected override void OnDispose() => _throttlerLatest.Dispose();
 
     #endregion
 }
@@ -95,7 +100,7 @@ internal class EventObserverThrottleLatest<TArgs>(
     /// <summary>
     /// Used to throttle events.
     /// </summary>
-    private readonly ThrottlerLatest _throttleLatest = new();
+    private readonly ThrottlerLatest _throttlerLatest = new();
 
     #endregion
 
@@ -108,7 +113,7 @@ internal class EventObserverThrottleLatest<TArgs>(
     /// <returns>Always returns false.</returns>
     protected override bool OnEvent(TArgs args)
     {
-        _throttleLatest.Throttle(
+        _throttlerLatest.Throttle(
             action: () => RaiseNextEvent(args),
             limit: limit,
             scope: scope,
@@ -117,6 +122,11 @@ internal class EventObserverThrottleLatest<TArgs>(
 
         return false;
     }
+
+    /// <summary>
+    /// Dispose of the throttler.
+    /// </summary>
+    protected override void OnDispose() => _throttlerLatest.Dispose();
 
     #endregion
 }

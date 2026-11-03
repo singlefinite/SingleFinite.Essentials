@@ -48,6 +48,11 @@ public sealed class Debouncer : IDisposable
     /// </summary>
     private CancellationTokenRegistration? _cancelRegistration = null;
 
+    /// <summary>
+    /// A default scope that can be used.
+    /// </summary>
+    private readonly TaskScope _defaultScope = new();
+
     #endregion
 
     #region Constructors
@@ -59,7 +64,7 @@ public sealed class Debouncer : IDisposable
     {
         _disposeState = new(
             owner: this,
-            onDispose: Cancel
+            onDispose: OnDispose
         );
     }
 
@@ -92,7 +97,7 @@ public sealed class Debouncer : IDisposable
     {
         _disposeState.ThrowIfDisposed();
 
-        var resolvedScope = scope ?? TaskContext.Scope ?? new TaskScope();
+        var resolvedScope = scope ?? TaskContext.Scope ?? _defaultScope;
         var resolvedDispatcher = dispatcher;
         if (scope is null && dispatcher is null)
             resolvedDispatcher = new ContinuationDispatcher();
@@ -134,6 +139,20 @@ public sealed class Debouncer : IDisposable
     }
 
     /// <summary>
+    /// Cancel any pending debounce and dispose of this object.
+    /// </summary>
+    public void Dispose() => _disposeState.Dispose();
+
+    /// <summary>
+    /// Cleanup.
+    /// </summary>
+    private void OnDispose()
+    {
+        Cancel();
+        _defaultScope.Dispose();
+    }
+
+    /// <summary>
     /// The method invoked when a debounce delay has elapsed.
     /// </summary>
     /// <param name="state">The debounce info to process.</param>
@@ -145,11 +164,6 @@ public sealed class Debouncer : IDisposable
         Cancel();
         action();
     }
-
-    /// <summary>
-    /// Cancel any pending debounce and dispose of this object.
-    /// </summary>
-    public void Dispose() => _disposeState.Dispose();
 
     #endregion
 }
