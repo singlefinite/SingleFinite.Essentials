@@ -46,6 +46,11 @@ internal class EventObserverDebounce(
     /// </summary>
     private readonly Debouncer _debouncer = new();
 
+    /// <summary>
+    /// A default scope to use.
+    /// </summary>
+    private readonly TaskScope _defaultScope = new();
+
     #endregion
 
     #region Methods
@@ -64,7 +69,7 @@ internal class EventObserverDebounce(
         _debouncer.Debounce(
             action: () => BranchNext?.Invoke(),
             delay: delay,
-            scope: scope,
+            scope: scope ?? _defaultScope,
             dispatcher: dispatcher
         );
 
@@ -72,9 +77,13 @@ internal class EventObserverDebounce(
     }
 
     /// <summary>
-    /// Dispose of the debouncer.
+    /// Cleanup.
     /// </summary>
-    protected override void OnDispose() => _debouncer.Dispose();
+    protected override void OnDispose()
+    {
+        _debouncer.Dispose();
+        _defaultScope.Dispose();
+    }
 
     #endregion
 
@@ -119,6 +128,11 @@ internal class EventObserverDebounce<TArgs>(
     /// </summary>
     private readonly Debouncer _debouncer = new();
 
+    /// <summary>
+    /// A default scope to use.
+    /// </summary>
+    private readonly TaskScope _defaultScope = new();
+
     #endregion
 
     #region Methods
@@ -142,7 +156,7 @@ internal class EventObserverDebounce<TArgs>(
                 BranchNext?.Invoke();
             },
             delay: delay,
-            scope: scope,
+            scope: scope ?? _defaultScope,
             dispatcher: dispatcher
         );
 
@@ -150,9 +164,13 @@ internal class EventObserverDebounce<TArgs>(
     }
 
     /// <summary>
-    /// Dispose of the debouncer.
+    /// Cleanup.
     /// </summary>
-    protected override void OnDispose() => _debouncer.Dispose();
+    protected override void OnDispose()
+    {
+        _debouncer.Dispose();
+        _defaultScope.Dispose();
+    }
 
     #endregion
 

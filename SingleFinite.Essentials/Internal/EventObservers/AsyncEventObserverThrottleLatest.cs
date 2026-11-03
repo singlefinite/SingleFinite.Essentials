@@ -46,6 +46,11 @@ internal class AsyncEventObserverThrottleLatest(
     /// </summary>
     private readonly ThrottlerLatest _throttlerLatest = new();
 
+    /// <summary>
+    /// A default scope to use.
+    /// </summary>
+    private readonly TaskScope _defaultScope = new();
+
     #endregion
 
     #region Methods
@@ -59,7 +64,7 @@ internal class AsyncEventObserverThrottleLatest(
         await _throttlerLatest.ThrottleAsync(
             func: RaiseNextEventAsync,
             limit: limit,
-            scope: scope,
+            scope: scope ?? _defaultScope,
             dispatcher: dispatcher
         );
 
@@ -67,9 +72,13 @@ internal class AsyncEventObserverThrottleLatest(
     }
 
     /// <summary>
-    /// Dispose of the throttler.
+    /// Cleanup.
     /// </summary>
-    protected override void OnDispose() => _throttlerLatest.Dispose();
+    protected override void OnDispose()
+    {
+        _throttlerLatest.Dispose();
+        _defaultScope.Dispose();
+    }
 
     #endregion
 }
@@ -102,6 +111,11 @@ internal class AsyncEventObserverThrottleLatest<TArgs>(
     /// </summary>
     private readonly ThrottlerLatest _throttlerLatest = new();
 
+    /// <summary>
+    /// A default scope to use.
+    /// </summary>
+    private readonly TaskScope _defaultScope = new();
+
     #endregion
 
     #region Methods
@@ -116,7 +130,7 @@ internal class AsyncEventObserverThrottleLatest<TArgs>(
         await _throttlerLatest.ThrottleAsync(
             func: () => RaiseNextEventAsync(args),
             limit: limit,
-            scope: scope,
+            scope: scope ?? _defaultScope,
             dispatcher: dispatcher
         );
 
@@ -124,9 +138,13 @@ internal class AsyncEventObserverThrottleLatest<TArgs>(
     }
 
     /// <summary>
-    /// Dispose of the throttler.
+    /// Cleanup.
     /// </summary>
-    protected override void OnDispose() => _throttlerLatest.Dispose();
+    protected override void OnDispose()
+    {
+        _throttlerLatest.Dispose();
+        _defaultScope.Dispose();
+    }
 
     #endregion
 }
