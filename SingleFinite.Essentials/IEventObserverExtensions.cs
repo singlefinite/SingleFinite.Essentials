@@ -209,7 +209,7 @@ public static class IEventObserverExtensions
                 parent: observer,
                 delay: delay,
                 scope: scope,
-                dispatcher: dispatcher
+                dispatcher: dispatcher ?? new ContinuationDispatcher()
             );
 
         /// <summary>
@@ -247,7 +247,7 @@ public static class IEventObserverExtensions
                 parent: observer,
                 limit: limit,
                 scope: scope,
-                dispatcher: dispatcher
+                dispatcher: dispatcher ?? new ContinuationDispatcher()
             );
 
         /// <summary>
@@ -468,7 +468,7 @@ public static class IEventObserverExtensions
                 parent: observer,
                 delay: delay,
                 scope: scope,
-                dispatcher: dispatcher
+                dispatcher: dispatcher ?? new ContinuationDispatcher()
             );
 
         /// <summary>
@@ -506,7 +506,7 @@ public static class IEventObserverExtensions
                 parent: observer,
                 limit: limit,
                 scope: scope,
-                dispatcher: dispatcher
+                dispatcher: dispatcher ?? new ContinuationDispatcher()
             );
 
         /// <summary>

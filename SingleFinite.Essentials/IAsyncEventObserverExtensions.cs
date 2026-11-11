@@ -318,7 +318,7 @@ public static class IAsyncEventObserverExtensions
                 parent: observer,
                 delay: delay,
                 scope: scope,
-                dispatcher: dispatcher
+                dispatcher: dispatcher ?? new ContinuationDispatcher()
             );
 
         /// <summary>
@@ -356,7 +356,7 @@ public static class IAsyncEventObserverExtensions
                 parent: observer,
                 limit: limit,
                 scope: scope,
-                dispatcher: dispatcher
+                dispatcher: dispatcher ?? new ContinuationDispatcher()
             );
 
         /// <summary>
@@ -736,7 +736,7 @@ public static class IAsyncEventObserverExtensions
                 parent: observer,
                 delay: delay,
                 scope: scope,
-                dispatcher: dispatcher
+                dispatcher: dispatcher ?? new ContinuationDispatcher()
             );
 
         /// <summary>
@@ -774,7 +774,7 @@ public static class IAsyncEventObserverExtensions
                 parent: observer,
                 limit: limit,
                 scope: scope,
-                dispatcher: dispatcher
+                dispatcher: dispatcher ?? new ContinuationDispatcher()
             );
 
         /// <summary>
